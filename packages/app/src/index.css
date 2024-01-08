@@ -1,0 +1,64 @@
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes glow-border {
+  0% {
+    --angle: 0deg;
+  }
+
+  100% {
+    --angle: 360deg;
+  }
+}
+
+::-webkit-scrollbar {
+  background: none;
+  width: 10px;
+  margin-left: -8px;
+}
+
+::-webkit-scrollbar-corner {
+  background: none;
+}
+
+::-webkit-scrollbar-track {
+  background: none;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--chakra-colors-whiteAlpha-300);
+  background-clip: padding-box;
+  border-radius: 0.75rem;
+  border: 2px solid transparent;
+}
+
+body :not(:hover, :focus, :focus-within)::-webkit-scrollbar-thumb {
+  visibility: hidden;
+}
+
+@keyframes spin1 {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin2 {
+  0% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bgmove {
+  0% {
+    background-position-x: 200%;
+  }
+  100% {
+    background-position-x: 0;
+  }
+}

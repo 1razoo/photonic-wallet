@@ -1,0 +1,32 @@
+diff --git a/utils.js b/utils.js
+index 73dfb5ff7fb6ca62383f01b319f263a8f5073ba6..eaf3114c69d8d3182180b3aeb2e9cbefc78800ba 100644
+--- a/utils.js
++++ b/utils.js
+@@ -1,9 +1,10 @@
+ // baseline estimates, used to improve performance
+-var TX_EMPTY_SIZE = (4 + 1 + 1 + 4) * 2 // Added buffer of 400 just in case
+-var TX_INPUT_BASE = (32 + 4 + 1 + 4) * 2 // Multiple by 2 to correctly account for bytes
+-var TX_INPUT_PUBKEYHASH = (107) * 2
+-var TX_OUTPUT_BASE = (8 + 1) * 2
+-var TX_OUTPUT_PUBKEYHASH = (25) * 2
++// FIXME input and output script length varints are hard coded to 5 bytes
++var TX_EMPTY_SIZE = 4 + 1 + 1 + 4
++var TX_INPUT_BASE = 32 + 4 + 5 + 4
++var TX_INPUT_PUBKEYHASH = 107
++var TX_OUTPUT_BASE = 8 + 5
++var TX_OUTPUT_PUBKEYHASH = 25
+ var TX_DUST_THRESHOLD = 546
+ 
+ /**
+@@ -12,9 +13,9 @@ var TX_DUST_THRESHOLD = 546
+ function inputBytes (input) {
+   var scriptLen = 0
+   if (input.script && input.script.toHex) {
+-    scriptLen = (input.script.toHex()).length
++    scriptLen = (input.script.toHex()).length / 2
+   } else if (input.script) {
+-    scriptLen = input.script.length
++    scriptLen = input.script.length / 2
+   } else {
+     scriptLen = TX_INPUT_PUBKEYHASH
+   }

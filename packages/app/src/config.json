@@ -1,0 +1,38 @@
+{
+  "networks": {
+    "mainnet": {
+      "name": "Radiant",
+      "ticker": "RXD",
+      "anchor": {
+        "height": 1421481,
+        "bits": 486604799,
+        "prevTime": 1605445400
+      },
+      "explorer": {
+        "tx": "https://explorer.radiantblockchain.org/tx/{txid}"
+      },
+      "enabled": false
+    },
+    "testnet": {
+      "name": "Radiant Testnet",
+      "ticker": "TRXD",
+      "anchor": {
+        "height": 18206,
+        "bits": 453224288,
+        "prevTime": 1657404650
+      },
+      "explorer": {
+        "tx": "https://explorer-testnet.radiantblockchain.org/tx/{txid}"
+      },
+      "enabled": true
+    }
+  },
+  "defaultConfig": {
+    "servers": {
+      "testnet": ["wss://electrumx-testnet.radiant4people.com:53002"],
+      "mainnet": ["wss://electrumx.radiant4people.com:50012"]
+    },
+    "ipfsMethod": "gateway",
+    "ipfsGatewayUrl": "https://{cid}.ipfs.nftstorage.link"
+  }
+}

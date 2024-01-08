@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Default",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "inlineSources": false,
+    "isolatedModules": true,
+    "moduleResolution": "node",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "preserveWatchOutput": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "paths": {
+      "@app/*": ["packages/app/src/*"],
+      "@ui/*": ["packages/ui/src/*"],
+      "@lib/*": ["packages/lib/src/*"]
+    },
+    "baseUrl": "../../",
+    "target": "ES2020"
+  },
+  "exclude": ["node_modules"]
+}

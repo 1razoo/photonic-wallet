@@ -1,0 +1,38 @@
+{
+  "name": "photonic-wallet",
+  "workspaces": [
+    "packages/*"
+  ],
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "turbo run clean",
+    "dev": "turbo run dev",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "@photonic/eslint-config": "workspace:*",
+    "@types/node": "^18.19.4",
+    "eslint": "^8.56.0",
+    "prettier": "^2.8.8",
+    "turbo": "^1.11.3",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "app": "^0.1.0",
+    "assert": "^2.1.0"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "ws-electrumx-client@1.0.1": "patches/ws-electrumx-client@1.0.1.patch",
+      "@radiantblockchain/radiantjs@1.9.4": "patches/@radiantblockchain__radiantjs@1.9.4.patch",
+      "bsv-coinselect@4.2.5": "patches/bsv-coinselect@4.2.5.patch"
+    }
+  }
+}

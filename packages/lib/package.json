@@ -1,0 +1,20 @@
+{
+  "name": "@photonic/lib",
+  "version": "0.0.0",
+  "license": "MIT",
+  "devDependencies": {
+    "@photonic/eslint-config": "workspace:*",
+    "@photonic/typescript-config": "workspace:*",
+    "@types/big.js": "^6.1.6"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.3.0",
+    "@radiantblockchain/radiantjs": "^1.9.4",
+    "@scure/base": "^1.1.2",
+    "big.js": "^6.2.1",
+    "bsv-coinselect": "^4.2.5",
+    "buffer": "^6.0.3",
+    "cbor-x": "^1.5.3",
+    "nft.storage": "^7.1.1"
+  }
+}
