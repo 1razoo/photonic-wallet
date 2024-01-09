@@ -6,8 +6,7 @@ import { decode, encode } from "cbor-x";
 import { Script } from "@radiantblockchain/radiantjs";
 import { AtomPayload } from "@app/types";
 
-//const atomHex = "73707235";
-const atomHex = "73737373";
+const atomHex = "73707235";
 export const atomBuffer = Buffer.from(atomHex, "hex");
 
 const toObject = (obj: unknown) =>
