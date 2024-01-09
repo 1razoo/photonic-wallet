@@ -22,6 +22,9 @@ export default defineConfig({
   /*worker: {
     plugins: [comlink()],
   },*/
+  define: {
+    APP_VERSION: JSON.stringify(process.env.npm_package_version),
+  },
   resolve: {
     alias: {
       "@app": path.resolve(__dirname, "./src"),

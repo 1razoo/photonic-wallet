@@ -1,17 +1,11 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2024-01-09 12:03+0000\n"
+"POT-Creation-Date: 2024-01-09 15:54+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Plural-Forms: \n"
 
 #: src/components/ViewAsset.tsx:369
 msgid "\"Height"
@@ -280,14 +274,6 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:87
-msgid "Failed to create wallet"
-msgstr ""
-
-#: src/wallet/wallet.ts:22
-msgid "Failed to unlock"
-msgstr ""
-
 #: src/pages/Mint.tsx:853
 msgid "Fee"
 msgstr ""
@@ -349,10 +335,6 @@ msgstr ""
 msgid "Invalid amount"
 msgstr ""
 
-#: src/wallet/wallet.ts:32
-msgid "Invalid mnemonic phrase"
-msgstr ""
-
 #: src/pages/RecoverWallet.tsx:80
 msgid "Invalid recovery phrase"
 msgstr ""
@@ -379,7 +361,7 @@ msgstr ""
 msgid "Language"
 msgstr ""
 
-#: src/pages/About.tsx:8
+#: src/pages/About.tsx:12
 msgid "License"
 msgstr ""
 
@@ -519,10 +501,6 @@ msgstr ""
 #: src/pages/CreateWallet.tsx:137
 #: src/pages/CreateWallet.tsx:145
 msgid "Password"
-msgstr ""
-
-#: src/wallet/encrypt.ts:75
-msgid "Password incorrect"
 msgstr ""
 
 #: src/pages/CreateWallet.tsx:67
@@ -720,6 +698,10 @@ msgstr ""
 #: src/pages/Coins.tsx:52
 #: src/pages/Mint.tsx:789
 msgid "Value"
+msgstr ""
+
+#: src/pages/About.tsx:10
+msgid "Version:"
 msgstr ""
 
 #: src/components/MintSuccessModal.tsx:52
