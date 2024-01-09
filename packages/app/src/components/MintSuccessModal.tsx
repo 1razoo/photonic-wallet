@@ -12,6 +12,7 @@ import {
   ModalProps,
   Link,
 } from "@chakra-ui/react";
+import { t } from "@lingui/macro";
 import Identifier from "./Identifier";
 import { Link as RouterLink } from "react-router-dom";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
@@ -34,10 +35,10 @@ export default function MintSuccessModal({
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Mint successful</ModalHeader>
+        <ModalHeader>{t`Mint successful`}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Text mb={2}>Transaction ID:</Text>
+          <Text mb={2}>{t`Transaction ID:`}</Text>
           <div>
             <Identifier showCopy>{txid}</Identifier>
           </div>
@@ -48,15 +49,15 @@ export default function MintSuccessModal({
             isExternal
             my={4}
           >
-            View on block explorer
+            {t`View on block explorer`}
             <ExternalLinkIcon mx="2px" />
           </Link>
         </ModalBody>
 
         <ModalFooter as={Flex} gap={4}>
-          <Button onClick={onClose}>Mint another</Button>
+          <Button onClick={onClose}>{t`Mint another`}</Button>
           <Button as={RouterLink} to="/create">
-            Back to dashboard
+            {t`Back to dashboard`}
           </Button>
         </ModalFooter>
       </ModalContent>

@@ -1,5 +1,6 @@
 import { Grid } from "@chakra-ui/react";
 import { useLocation, useParams } from "react-router-dom";
+import { t } from "@lingui/macro";
 import NoContent from "@app/components/NoContent";
 import useRestoreScroll from "@app/hooks/useRestoreScroll";
 import TokenCard from "@app/components/TokenCard";
@@ -33,7 +34,7 @@ function TokenGrid({ open }: { open: boolean }) {
   useRestoreScroll();
 
   if (nft.length === 0) {
-    return <NoContent>No assets</NoContent>;
+    return <NoContent>{t`No assets`}</NoContent>;
   }
 
   return (
@@ -52,7 +53,7 @@ function TokenGrid({ open }: { open: boolean }) {
           />
         }
       >
-        Digital Objects
+        {t`Digital Objects`}
       </PageHeader>
 
       <Grid

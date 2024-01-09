@@ -13,6 +13,7 @@ import {
   Select,
   Textarea,
 } from "@chakra-ui/react";
+import { t } from "@lingui/macro";
 import Wallet from "@app/wallet/wallet";
 import Card from "@app/components/Card";
 import { NetworkKey } from "../types";
@@ -38,12 +39,12 @@ export default function RecoverWallet() {
     const passwordValue = password.current?.value || "";
     const confirmValue = confirm.current?.value || "";
     if (confirmValue !== passwordValue) {
-      setError("Passwords do not match");
+      setError(t`Passwords do not match`);
       return false;
     }
 
     if (!networkKeys.includes(network.current?.value || "")) {
-      setError("Select a valid network");
+      setError(t`Select a valid network`);
       return false;
     }
 
@@ -76,12 +77,12 @@ export default function RecoverWallet() {
         console.log(error);
         if (error instanceof Error) {
           if (error.message === "Invalid mnemonic") {
-            setError("Invalid recovery phrase");
+            setError(t`Invalid recovery phrase`);
           } else {
             setError(error.message);
           }
         } else {
-          setError("Unknown error");
+          setError(t`Unknown error`);
         }
       }
       setLoading(false);
@@ -92,7 +93,7 @@ export default function RecoverWallet() {
   return (
     <Card mb={4} p={4} width="2xl" maxW="100%" mx="auto" mt="120px">
       <Heading size="md" mb={4}>
-        Recover your wallet
+        {t`Recover your wallet`}
       </Heading>
       {error && (
         <Alert status="error" mb={4}>
@@ -102,25 +103,25 @@ export default function RecoverWallet() {
       )}
       <form onSubmit={submit}>
         <FormControl mb={4}>
-          <FormLabel>Enter your 12 word recovery phrase</FormLabel>
+          <FormLabel>{t`Enter your 12 word recovery phrase`}</FormLabel>
           <Textarea
             ref={phrase}
-            placeholder="Recovery phrase"
+            placeholder={t`Recovery phrase`}
             size="sm"
             resize="none"
             autoFocus
           />
         </FormControl>
         <FormControl mb={4}>
-          <FormLabel>New password</FormLabel>
+          <FormLabel>{t`New password`}</FormLabel>
           <Input ref={password} type="password" placeholder="Password" />
         </FormControl>
         <FormControl mb={4}>
-          <FormLabel>Confirm password</FormLabel>
+          <FormLabel>{t`Confirm password`}</FormLabel>
           <Input ref={confirm} type="password" placeholder="Password" />
         </FormControl>
         <FormControl mb={4}>
-          <FormLabel>Network</FormLabel>
+          <FormLabel>{t`Network`}</FormLabel>
           <Select ref={network}>
             {networkKeys.map((k) => (
               <option value={k}>{k}</option>
@@ -131,14 +132,16 @@ export default function RecoverWallet() {
           width="full"
           type="submit"
           isLoading={loading}
-          loadingText="Recovering"
+          loadingText={t`Recovering`}
         >
-          Submit
+          {t`Submit`}
         </Button>
         <Center mt={4}>
-          <Button variant="ghost" as={Link} to="/create-wallet">
-            Create a new wallet
-          </Button>
+          <Button
+            variant="ghost"
+            as={Link}
+            to="/create-wallet"
+          >{t`Create a new wallet`}</Button>
         </Center>
       </form>
     </Card>

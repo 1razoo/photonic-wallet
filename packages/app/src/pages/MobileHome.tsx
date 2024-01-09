@@ -8,6 +8,7 @@ import {
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
+import { t, Trans } from "@lingui/macro";
 import { photonsToRXD } from "@lib/format";
 import PageHeader from "@app/components/PageHeader";
 import Card from "@app/components/Card";
@@ -30,7 +31,7 @@ export default function MobileHome() {
         <Card mx="auto">
           <Flex flexDirection="column" alignItems="center">
             <Text fontSize="xl" fontWeight="medium" mb={2}>
-              {network.value.ticker} BALANCE
+              <Trans>{network.value.ticker} BALANCE</Trans>
             </Text>
             <Tag
               size="lg"
@@ -57,14 +58,14 @@ export default function MobileHome() {
                 openModal.value = { modal: "send" };
               }}
             >
-              Send
+              {t`Send`}
             </Button>
             <Button
               onClick={() => {
                 openModal.value = { modal: "receive" };
               }}
             >
-              Receive
+              {t`Receive`}
             </Button>
           </SimpleGrid>
         </Card>

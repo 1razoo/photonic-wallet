@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { t } from "@lingui/macro";
 import {
   Modal,
   ModalOverlay,
@@ -72,7 +73,7 @@ export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
     );
     // FIXME errors here sometimes
     if (!selected.inputs?.length) {
-      setErrorMessage("Insufficient funds");
+      setErrorMessage(t`Insufficient funds`);
       setSuccess(false);
       setLoading(false);
       return;
@@ -95,9 +96,9 @@ export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
         rawTx
       )) as string;
       onSuccess && onSuccess(txid);
-      toast({ status: "success", title: "Token melted" });
+      toast({ status: "success", title: t`Token melted` });
     } catch (error) {
-      setErrorMessage("Transaction rejected");
+      setErrorMessage(t`Transaction rejected`);
       setSuccess(false);
       setLoading(false);
     }
@@ -108,7 +109,7 @@ export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
       <form onSubmit={submit}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Melt token</ModalHeader>
+          <ModalHeader>{t`Melt token`}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6} gap={4} as={Flex} flexDirection="row">
             {success || (
@@ -118,7 +119,7 @@ export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
               </Alert>
             )}
             <WarningIcon fontSize="2xl" />
-            This will destroy your token! Are you sure?
+            {t`This will destroy your token! Are you sure?`}
           </ModalBody>
           <ModalFooter>
             <Button
@@ -128,9 +129,9 @@ export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
               isLoading={loading}
               mr={4}
             >
-              Melt
+              {t`Melt`}
             </Button>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose}>{t`Cancel`}</Button>
           </ModalFooter>
         </ModalContent>
       </form>

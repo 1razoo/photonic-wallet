@@ -1,4 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
+import { t } from "@lingui/macro";
 import db from "@app/db";
 import ElectrumContext from "./ElectrumContext";
 import ElectrumManager from "./ElectrumManager";
@@ -49,7 +50,7 @@ export default function ElectrumProvider({ children }: PropsWithChildren) {
       onConnected();
       electrumStatus.value = ElectrumStatus.CONNECTED;
       toast({
-        title: "Connected",
+        title: t`Connected`,
         status: "success",
       });
     });
@@ -57,7 +58,7 @@ export default function ElectrumProvider({ children }: PropsWithChildren) {
       const { reason } = event as { reason: string };
       electrumStatus.value = ElectrumStatus.DISCONNECTED;
       toast({
-        title: "Disconnected",
+        title: t`Disconnected`,
         status: reason === "user" ? "success" : "error",
       });
     });

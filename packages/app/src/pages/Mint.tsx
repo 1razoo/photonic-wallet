@@ -1,4 +1,5 @@
 import React, { useCallback, useReducer, useRef, useState } from "react";
+import { t, Trans } from "@lingui/macro";
 import { Link } from "react-router-dom";
 import { PromiseExtended } from "dexie";
 import {
@@ -99,7 +100,7 @@ function TargetBox({
               color="green.300"
             />
             <Text color="whiteAlpha.800" fontSize="2xl" mb={2}>
-              Drop file
+              {t`Drop file`}
             </Text>
           </>
         ) : (
@@ -112,10 +113,10 @@ function TargetBox({
               color="gray.600"
             />
             <Text color="gray.300" fontSize="xl" mb={1}>
-              Upload file
+              {t`Upload file`}
             </Text>
             <Text color="gray.300" fontSize="md">
-              Files over 1KB will be stored in IPFS
+              {t`Files over 1KB will be stored in IPFS`}
             </Text>
           </>
         )}
@@ -267,7 +268,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     if (fileState.ipfs && !apiKey) {
       toast({
         status: "error",
-        title: "No NFT.Storage API key provided",
+        title: t`No NFT.Storage API key provided`,
       });
       return;
     }
@@ -313,7 +314,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       setLoading(false);
       toast({
         title: "Error",
-        description: "Couldn't find user",
+        description: t`Couldn't find user`,
         status: "error",
       });
       return;
@@ -333,7 +334,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       setLoading(false);
       toast({
         title: "Error",
-        description: "Couldn't find container",
+        description: t`Couldn't find container`,
         status: "error",
       });
       return;
@@ -396,14 +397,14 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       } else {
         onSuccessModalOpen();
         toast({
-          title: `Minted. Fee ${photonsToRXD(fee)} ${network.value.ticker}`,
+          title: t`Minted. Fee ${photonsToRXD(fee)} ${network.value.ticker}`,
           status: "success",
         });
       }
     } catch (error) {
       console.log(error);
       toast({
-        title: "Error",
+        title: t`Error`,
         description: cleanError((error as Error).message || "") || undefined,
         status: "error",
       });
@@ -418,13 +419,13 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       const newState: FileState = { ...noFile };
 
       if (files[0].size > MAX_BYTES) {
-        toast({ title: "File is too large", status: "error" });
+        toast({ title: t`File is too large`, status: "error" });
         setFileState(newState);
         return;
       }
       const { name, size, type } = files[0];
       if (!type) {
-        toast({ title: "Unrecognized file type", status: "error" });
+        toast({ title: t`Unrecognized file type`, status: "error" });
         setFileState(newState);
         return;
       }
@@ -509,7 +510,9 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     <>
       <ContentContainer>
         <PageHeader back to="/create">
-          Mint <AtomType type={tokenType} lower />
+          <Trans>
+            Mint <AtomType type={tokenType} lower />
+          </Trans>
         </PageHeader>
 
         <Container
@@ -525,21 +528,27 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
             <Alert status="info">
               <AlertIcon />
               <span>
-                No NFT.Storage API key has been provided. To upload large files,
-                please go to{" "}
-                <Text as={Link} to="/settings/ipfs" textDecoration="underline">
-                  IPFS Settings
-                </Text>{" "}
-                and enter your key.
+                <Trans>
+                  No NFT.Storage API key has been provided. To upload large
+                  files, please go to{" "}
+                  <Text
+                    as={Link}
+                    to="/settings/ipfs"
+                    textDecoration="underline"
+                  >
+                    IPFS Settings
+                  </Text>{" "}
+                  and enter your key.
+                </Trans>
               </span>
             </Alert>
           )}
           {tokenType !== "user" && (
             <FormSection>
               <FormControl>
-                <FormLabel>Author</FormLabel>
+                <FormLabel>{t`Author`}</FormLabel>
                 <Select name="author" onChange={onFormChange}>
-                  <option value="">None</option>
+                  <option value="">{t`None`}</option>
                   {users.map((u, index) => (
                     <option key={u.lastTxoId} value={index}>
                       {u.name} [{Outpoint.fromString(u.ref).shortAtom()}]
@@ -547,8 +556,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                   ))}
                 </Select>
                 <FormHelperText>
-                  Assigning an author is recommended for authentication of
-                  tokens.
+                  {t`Assigning an author is recommended for authentication of tokens.`}
                 </FormHelperText>
               </FormControl>
             </FormSection>
@@ -556,7 +564,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
           {tokenType === "object" && (
             <FormSection>
               <FormControl>
-                <FormLabel>Container</FormLabel>
+                <FormLabel>{t`Container`}</FormLabel>
                 <Select name="container" onChange={onFormChange}>
                   <option value="">None</option>
                   {containers.map((c, index) => (
@@ -566,19 +574,19 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                   ))}
                 </Select>
                 <FormHelperText>
-                  Containers can be used to create token collections
+                  {t`Containers can be used to create token collections`}
                 </FormHelperText>
               </FormControl>
             </FormSection>
           )}
           <FormSection>
             <FormControl>
-              <FormLabel>What data do you want to store?</FormLabel>
+              <FormLabel>{t`What data do you want to store?`}</FormLabel>
               <RadioGroup defaultValue="file" onChange={changeMode}>
                 <Stack spacing={5} direction="row">
-                  <Radio value="file">File</Radio>
-                  <Radio value="url">URL</Radio>
-                  <Radio value="text">Text</Radio>
+                  <Radio value="file">{t`File`}</Radio>
+                  <Radio value="url">{t`URL`}</Radio>
+                  <Radio value="text">{t`Text`}</Radio>
                 </Stack>
               </RadioGroup>
             </FormControl>
@@ -588,9 +596,9 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
               <>
                 {/* Not sure why z-index fixes glow box */}
                 <FormControl zIndex={0}>
-                  <FormLabel>File</FormLabel>
+                  <FormLabel>{t`File`}</FormLabel>
                   <FormHelperText mb={4}>
-                    Upload an image, text file or other content
+                    {t`Upload an image, text file or other content`}
                   </FormHelperText>
                   {fileState.file?.data ? (
                     <Flex
@@ -649,15 +657,15 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
             )}
             {mode === "file" && fileState.file?.data && !fileState.ipfs && (
               <Alert status="info">
-                <AlertIcon /> Your file will be stored on-chain.
+                <AlertIcon /> {t`Your file will be stored on-chain.`}
               </Alert>
             )}
             {mode === "file" && fileState.file?.data && fileState.ipfs && (
               <Alert status="info">
                 <AlertIcon />
-                Your file will be stored in IPFS.
+                {t`Your file will be stored in IPFS.`}{" "}
                 {fileState.stampSupported &&
-                  " A HashStamp image may be stored on-chain."}
+                  t`A HashStamp image may be stored on-chain.`}
               </Alert>
             )}
             {mode === "file" && fileState.file?.data && fileState.ipfs && (
@@ -665,31 +673,33 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                 <Divider />
                 {fileState.cid && (
                   <FormControl>
-                    <FormLabel>IPFS</FormLabel>
-                    <FormHelperText mb={4}>
-                      Your uploaded file will have the following URL
-                    </FormHelperText>
-                    <Identifier overflowWrap="anywhere">
-                      ipfs://{fileState.cid}
-                    </Identifier>
+                    <FormLabel>{t`IPFS`}</FormLabel>
+                    <Trans>
+                      <FormHelperText mb={4}>
+                        Your uploaded file will have the following URL
+                      </FormHelperText>
+                      <Identifier overflowWrap="anywhere">
+                        ipfs://{fileState.cid}
+                      </Identifier>
+                    </Trans>
                   </FormControl>
                 )}
                 {fileState.stampSupported && (
                   <>
                     <Divider />
                     <FormControl>
-                      <FormLabel>HashStamp</FormLabel>
+                      <FormLabel>{t`HashStamp`}</FormLabel>
                       <RadioGroup
                         defaultValue="1"
                         onChange={(value) => setEnableHashstamp(!!value)}
                       >
                         <Stack spacing={5} direction="row">
-                          <Radio value="1">Store HashStamp on-chain</Radio>
-                          <Radio value="">No HashStamp</Radio>
+                          <Radio value="1">{t`Store HashStamp on-chain`}</Radio>
+                          <Radio value="">{t`No HashStamp`}</Radio>
                         </Stack>
                       </RadioGroup>
                       <FormHelperText mb={4}>
-                        A compressed copy of the token image stored on-chain
+                        {t`A compressed copy of the token image stored on-chain`}
                       </FormHelperText>
                       {enableHashstamp && (
                         <>
@@ -749,15 +759,19 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         */}
           <FormSection>
             <FormControl>
-              <FormLabel>Name</FormLabel>
-              <Input placeholder="Name" name="name" onChange={onFormChange} />
+              <FormLabel>{t`Name`}</FormLabel>
+              <Input
+                placeholder={t`Name`}
+                name="name"
+                onChange={onFormChange}
+              />
             </FormControl>
           </FormSection>
           <FormSection>
             <FormControl>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t`Description`}</FormLabel>
               <Input
-                placeholder="Description"
+                placeholder={t`Description`}
                 name="desc"
                 onChange={onFormChange}
               />
@@ -765,20 +779,20 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
           </FormSection>
           <FormSection>
             <FormControl>
-              <FormLabel>Attributes</FormLabel>
+              <FormLabel>{t`Attributes`}</FormLabel>
               <Box>
                 <form onSubmit={addAttr}>
                   <Flex gap={4}>
-                    <Input placeholder="Name" ref={attrName} />
+                    <Input placeholder={t`Name`} ref={attrName} />
                     <Input
                       onBlur={addAttr}
-                      placeholder="Value"
+                      placeholder={t`Value`}
                       ref={attrValue}
                     />
                   </Flex>
                 </form>
                 <FormHelperText>
-                  Properties that describe your asset
+                  {t`Properties that describe your asset`}
                 </FormHelperText>
                 {attrs.length > 0 && (
                   <Flex gap={4} flexWrap="wrap" mt={4}>
@@ -797,23 +811,23 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
           </FormSection>
           <FormSection>
             <FormControl>
-              <FormLabel>Immutable</FormLabel>
+              <FormLabel>{t`Immutable`}</FormLabel>
               <RadioGroup
                 name="immutable"
                 defaultValue={tokenType === "object" ? "1" : "0"}
               >
                 <Stack spacing={5} direction="row">
                   <Radio value="1" onChange={onFormChange}>
-                    Yes
+                    {t`Yes`}
                   </Radio>
                   <Radio value="0" onChange={onFormChange}>
-                    No, allow token owner to modify
+                    {t`No, allow token owner to modify`}
                   </Radio>
                 </Stack>
               </RadioGroup>
               {["user", "container"].includes(tokenType) && (
                 <FormHelperText mb={4}>
-                  Mutable tokens are recommended for user and container tokens
+                  {t`Mutable tokens are recommended for user and container tokens`}
                 </FormHelperText>
               )}
             </FormControl>
@@ -821,23 +835,22 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
           {formData.immutable !== "1" && (
             <Alert status="info">
               <AlertIcon />
-              Mutable tokens are not yet fully supported by Photonic Wallet,
-              however a mutable contract containing 1 photon will be created.
+              {t`Mutable tokens are not yet fully supported by Photonic Wallet, however a mutable contract containing 1 photon will be created.`}
             </Alert>
           )}
           {clean && (
             <FormSection>
               <FormControl>
-                <FormLabel>Summary</FormLabel>
+                <FormLabel>{t`Summary`}</FormLabel>
                 <SimpleGrid
                   templateColumns="max-content max-content"
                   columnGap={8}
                   rowGap={2}
                   py={2}
                 >
-                  <Box>Transaction size</Box>
+                  <Box>{t`Transaction size`}</Box>
                   <Box>{filesize(stats.size) as string}</Box>
-                  <Box>Fee</Box>
+                  <Box>{t`Fee`}</Box>
                   <Box>
                     {photonsToRXD(stats.fee)} {network.value.ticker}
                   </Box>
@@ -851,13 +864,12 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
               {isConnected ? (
                 <Alert status="success">
                   <AlertIcon />
-                  Your token is ready to mint. Please review all data and the
-                  transaction fee before proceeding.
+                  {t`Your token is ready to mint. Please review all data and the transaction fee before proceeding.`}
                 </Alert>
               ) : (
                 <Alert status="warning">
                   <AlertIcon />
-                  Please reconnect to mint your token
+                  {t`Please reconnect to mint your token`}
                 </Alert>
               )}
               <Flex justifyContent="center" py={8} mb={16}>
@@ -872,7 +884,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                   shadow="dark-md"
                   isDisabled={!isConnected}
                 >
-                  Mint
+                  {t`Mint`}
                 </Button>
               </Flex>
             </>
@@ -887,7 +899,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                 loadingText="Calculating"
                 shadow="dark-md"
               >
-                Calculate Fee
+                {t`Calculate Fee`}
               </Button>
             </Flex>
           )}

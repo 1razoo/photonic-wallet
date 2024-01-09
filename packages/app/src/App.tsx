@@ -1,15 +1,18 @@
+import { useEffect } from "react";
 import { Outlet /*, ScrollRestoration*/ } from "react-router-dom";
+import { batch } from "@preact/signals-react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { I18nProvider } from "@lingui/react";
+import { i18n } from "@lingui/core";
 import Unlock from "./components/Unlock";
 import ElectrumProvider from "./electrum/ElectrumProvider";
 import SendReceive from "./components/SendReceive";
 import db from "./db";
 import { NetworkKey, SavedWallet } from "./types";
-import { useLiveQuery } from "dexie-react-hooks";
 import { balance, network, wallet } from "./signals";
 import { nftScriptHash, p2pkhScriptHash } from "@lib/script";
-import { useEffect } from "react";
 import config from "./config.json";
-import { batch } from "@preact/signals-react";
+import useLanguageDetect from "./hooks/useLanguageDetect";
 
 // Sync wallet balance signals with database
 // TODO move this somewhere else
@@ -49,7 +52,7 @@ function Main() {
   const { exists } = wallet.value;
 
   return (
-    <>
+    <I18nProvider i18n={i18n}>
       <WalletSync />
       {/* <ScrollRestoration /> Disabled for now, causing issues with some buttons  */}
       <ElectrumProvider>
@@ -61,7 +64,7 @@ function Main() {
           </>
         )}
       </ElectrumProvider>
-    </>
+    </I18nProvider>
   );
 }
 
@@ -71,6 +74,8 @@ export default function App() {
     [],
     null
   );
+
+  useLanguageDetect();
 
   useEffect(() => {
     if (saved !== null) {

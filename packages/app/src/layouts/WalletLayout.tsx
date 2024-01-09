@@ -9,6 +9,7 @@ import {
   TbTriangleSquareCircle,
 } from "react-icons/tb";
 import { RepeatClockIcon } from "@chakra-ui/icons";
+import { t } from "@lingui/macro";
 import SideBar from "@app/components/SideBar";
 import MenuButton from "@app/components/MenuButton";
 import { openMenu, wallet } from "@app/signals";
@@ -64,26 +65,26 @@ export default function WalletLayout() {
             to="/home"
             leftIcon={<Icon as={MdHome} boxSize={4} />}
           >
-            Home
+            {t`Home`}
           </MenuButton>
           <MenuButton
             to="/objects"
             match="/objects"
             leftIcon={<Icon as={TbTriangleSquareCircle} boxSize={4} />}
           >
-            Digital Objects
+            {t`Digital Objects`}
           </MenuButton>
           <MenuButton
             to="/fungible"
             leftIcon={<Icon as={TbCircles} boxSize={4} />}
           >
-            Fungible Tokens
+            {t`Fungible Tokens`}
           </MenuButton>
           <MenuButton to="/coins" leftIcon={<Icon as={TbCoins} boxSize={4} />}>
-            Coins
+            {t`Coins`}
           </MenuButton>
           <MenuButton to="/history" leftIcon={<RepeatClockIcon boxSize={4} />}>
-            History
+            {t`History`}
           </MenuButton>
           <MenuButton
             display={{ base: "none", md: "inline-flex" }}
@@ -91,7 +92,7 @@ export default function WalletLayout() {
             match={["/create", "/mint"]}
             leftIcon={<Icon as={TbTools} boxSize={4} />}
           >
-            Create
+            {t`Create`}
           </MenuButton>
         </SideBar>
       </DeviceSelect>

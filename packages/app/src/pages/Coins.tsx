@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom";
+import { t } from "@lingui/macro";
 import dayjs from "dayjs";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
@@ -39,16 +40,16 @@ export default function Coins() {
           />
         }
       >
-        Coins
+        {t`Coins`}
       </PageHeader>
       <Table size={{ base: "sm", xl: "md" }}>
         <Thead>
           <Tr>
             <Th display={{ base: "none", lg: "table-cell" }} />
-            <Th>TX ID</Th>
-            <Th display={{ base: "none", md: "table-cell" }}>Date</Th>
-            <Th>Block</Th>
-            <Th textAlign="right">Value</Th>
+            <Th>{t`TX ID`}</Th>
+            <Th display={{ base: "none", md: "table-cell" }}>{t`Date`}</Th>
+            <Th>{t`Block`}</Th>
+            <Th textAlign="right">{t`Value`}</Th>
             <Th width="50px" />
             <Th display={{ base: "none", lg: "table-cell" }} />
           </Tr>

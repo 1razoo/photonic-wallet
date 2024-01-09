@@ -1,6 +1,6 @@
-import { Icon, Spinner, useToast } from "@chakra-ui/react";
 import { useState } from "react";
-import MenuButton from "./MenuButton";
+import { t, Trans } from "@lingui/macro";
+import { Icon, Spinner, useToast } from "@chakra-ui/react";
 import { LockIcon, SettingsIcon, UnlockIcon } from "@chakra-ui/icons";
 import {
   TbPlug as ConnectedIcon,
@@ -9,6 +9,7 @@ import {
 import { useElectrumManager } from "@app/electrum/useElectrum";
 import { electrumStatus, wallet, openModal } from "@app/signals";
 import { ElectrumStatus } from "@app/types";
+import MenuButton from "./MenuButton";
 
 const UnlockButton = () => {
   const toast = useToast();
@@ -21,7 +22,7 @@ const UnlockButton = () => {
   const lockWallet = () => {
     wallet.value = { ...wallet.value, locked: true, wif: undefined };
     toast({
-      title: "Wallet locked",
+      title: t`Wallet locked`,
       status: "success",
     });
   };
@@ -34,7 +35,7 @@ const UnlockButton = () => {
         onMouseOver={() => setHover(true)}
         onMouseOut={() => setHover(false)}
       >
-        {hover ? "Click to unlock" : "Locked"}
+        {hover ? t`Click to unlock` : t`Locked`}
       </MenuButton>
     );
   }
@@ -49,7 +50,7 @@ const UnlockButton = () => {
       onMouseOver={() => setHover(true)}
       onMouseOut={() => setHover(false)}
     >
-      {hover ? "Click to lock" : "Unlocked"}
+      {hover ? t`Click to lock` : t`Unlocked`}
     </MenuButton>
   );
 };
@@ -60,10 +61,10 @@ const ConnectButton = () => {
   const toast = useToast();
 
   const statusText = {
-    [ElectrumStatus.CONNECTED]: "Connected",
-    [ElectrumStatus.CONNECTING]: "Connecting",
-    [ElectrumStatus.DISCONNECTED]: "Disconnected",
-    [ElectrumStatus.LOADING]: "Disconnected",
+    [ElectrumStatus.CONNECTED]: t`Connected`,
+    [ElectrumStatus.CONNECTING]: t`Connecting`,
+    [ElectrumStatus.DISCONNECTED]: t`Disconnected`,
+    [ElectrumStatus.LOADING]: t`Disconnected`,
   };
 
   const electrum = useElectrumManager();
@@ -71,7 +72,7 @@ const ConnectButton = () => {
   const onClickConnect = () => {
     if (!electrum.reconnect()) {
       toast({
-        title: "No servers defined",
+        title: t`No servers defined`,
         status: "error",
       });
     }
@@ -90,7 +91,7 @@ const ConnectButton = () => {
         onMouseOver={() => setHover(true)}
         onMouseOut={() => setHover(false)}
       >
-        {hover ? "Click to disconnect" : statusText[electrumStatus.value]}
+        {hover ? t`Click to disconnect` : statusText[electrumStatus.value]}
       </MenuButton>
     );
   }
@@ -115,7 +116,7 @@ const ConnectButton = () => {
       onMouseOver={() => setHover(true)}
       onMouseOut={() => setHover(false)}
     >
-      {hover ? "Click to connect" : statusText[electrumStatus.value]}
+      {hover ? t`Click to connect` : statusText[electrumStatus.value]}
     </MenuButton>
   );
 };
@@ -130,7 +131,7 @@ export default function StatusBar() {
         leftIcon={<SettingsIcon boxSize={4} />}
         match="/settings"
       >
-        Settings
+        {t`Settings`}
       </MenuButton>
     </>
   );

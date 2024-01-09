@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Trans, t } from "@lingui/macro";
 import { Link } from "react-router-dom";
 import { PromiseExtended } from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -35,7 +36,7 @@ export default function IpfsSettings() {
       keys
     );
     toast({
-      title: "Saved",
+      title: t`Saved`,
       status: "success",
     });
   };
@@ -54,39 +55,43 @@ export default function IpfsSettings() {
     <Container as={Grid} maxW="container.lg" gap={4} pt={8}>
       <FormSection>
         <FormControl>
-          <FormLabel>NFT.Storage API Key</FormLabel>
+          <FormLabel>{t`NFT.Storage API Key`}</FormLabel>
           <Textarea
             ref={nftStorageApiKeyRef}
-            placeholder="API key"
+            placeholder={t`API key`}
             name="nftStorageKey"
             height={{ base: "200px", md: "120px" }}
             defaultValue={apiKey}
           />
           <FormHelperText>
-            An NFT.Storage API key is required for uploading files to IPFS.
-            Generate a key at{" "}
-            <Link to="https://nft.storage" target="_blank">
-              https://nft.storage
-            </Link>
-            .
+            <Trans>
+              An NFT.Storage API key is required for uploading files to IPFS.
+              Generate a key at{" "}
+              <Link to="https://nft.storage" target="_blank">
+                https://nft.storage
+              </Link>
+              .
+            </Trans>
           </FormHelperText>
         </FormControl>
         <FormControl>
-          <FormLabel>Method to resolve IPFS token content</FormLabel>
+          <FormLabel>{t`Method to resolve IPFS token content`}</FormLabel>
           <Select ref={ipfsMethodRef} defaultValue={ipfsMethod || "gateway"}>
-            <option value="gateway">Gateway</option>
-            <option value="default">Default</option>
+            <option value="gateway">{t`Gateway`}</option>
+            <option value="default">{t`Default`}</option>
           </Select>
           <FormHelperText>
-            Default setting will use <Code>ipfs://</Code> URLs which will be
-            handled according to your browser's configuration
+            <Trans>
+              Default setting will use <Code>ipfs://</Code> URLs which will be
+              handled according to your browser's configuration
+            </Trans>
           </FormHelperText>
         </FormControl>
         <FormControl>
-          <FormLabel>IPFS Gateway URL</FormLabel>
+          <FormLabel>{t`IPFS Gateway URL`}</FormLabel>
           <Input
             ref={ipfsGatewayUrlRef}
-            placeholder="IPFS gateway"
+            placeholder={t`IPFS gateway`}
             name="gateway"
             defaultValue={ipfsGatewayUrl}
           />
@@ -94,7 +99,7 @@ export default function IpfsSettings() {
       </FormSection>
       <Flex justifyContent="center" py={8} mb={16}>
         <Button size="lg" w="240px" maxW="100%" shadow="dark-md" onClick={save}>
-          Save
+          {t`Save`}
         </Button>
       </Flex>
     </Container>

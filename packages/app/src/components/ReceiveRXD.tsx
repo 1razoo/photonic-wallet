@@ -10,6 +10,7 @@ import {
   Box,
   useClipboard,
 } from "@chakra-ui/react";
+import { t, Trans } from "@lingui/macro";
 import { CopyIcon } from "@chakra-ui/icons";
 import { QRCodeSVG } from "qrcode.react";
 import Identifier from "./Identifier";
@@ -30,11 +31,13 @@ export default function ReceiveRXD({ disclosure }: Props) {
     <Modal closeOnOverlayClick isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
       <ModalContent m={4}>
-        <ModalHeader>Receive</ModalHeader>
+        <ModalHeader>{t`Receive`}</ModalHeader>
         <ModalCloseButton />
         <ModalBody alignItems="center" pb={8}>
           <Box mb={4}>
-            Send {network.value.name} coins and tokens to this address
+            <Trans>
+              Send {network.value.name} coins and tokens to this address
+            </Trans>
           </Box>
           <Box borderRadius="md" overflow="hidden" mb={4}>
             <QRCodeSVG size={256} value={address} includeMargin />
@@ -46,7 +49,7 @@ export default function ReceiveRXD({ disclosure }: Props) {
             variant="ghost"
             mt={2}
           >
-            {hasCopied ? "Copied!" : "Copy to clipboard"}
+            {hasCopied ? t`Copied!` : t`Copy to clipboard`}
           </Button>
         </ModalBody>
       </ModalContent>

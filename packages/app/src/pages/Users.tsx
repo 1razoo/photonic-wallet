@@ -1,5 +1,6 @@
 import { Grid } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
+import { t } from "@lingui/macro";
 import ContentContainer from "@app/components/ContentContainer";
 import NoContent from "@app/components/NoContent";
 import useRestoreScroll from "@app/hooks/useRestoreScroll";
@@ -17,7 +18,7 @@ export default function Users() {
   useRestoreScroll();
 
   if (nft.length === 0) {
-    return <NoContent>No users</NoContent>;
+    return <NoContent>{t`No users`}</NoContent>;
   }
 
   return (

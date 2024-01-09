@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import react from "@vitejs/plugin-react";
+import { lingui } from "@lingui/vite-plugin";
 // import { comlink } from "vite-plugin-comlink";
 import path from "path";
 
@@ -9,11 +10,13 @@ export default defineConfig({
   plugins: [
     react({
       babel: {
-        // useSignals hook is an alternative to this plugin
-        // If this plugin is removed @vitejs/plugin-react-swc can be used instead of Babel
-        plugins: [["module:@preact/signals-react-transform"]],
+        // useSignals hook is an alternative to signals-react-transform
+        // If this plugin is removed @vitejs/plugin-react-swc can be used instead of Babel and @lingui/swc-plugin instead of macros
+        plugins: ["module:@preact/signals-react-transform", "macros"],
       },
-    }) /*, comlink()*/,
+    }),
+    lingui(),
+    /*, comlink()*/
   ],
   // TODO
   /*worker: {

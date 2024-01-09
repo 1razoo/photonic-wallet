@@ -16,6 +16,7 @@ import {
   AlertIcon,
   ModalProps,
 } from "@chakra-ui/react";
+import { t } from "@lingui/macro";
 import Wallet from "@app/wallet/wallet";
 import { wallet } from "@app/signals";
 
@@ -80,18 +81,18 @@ export default function PasswordModal({
             {success || (
               <Alert status="error" mb={4}>
                 <AlertIcon />
-                <AlertDescription>Incorrect password</AlertDescription>
+                <AlertDescription>{t`Incorrect password`}</AlertDescription>
               </Alert>
             )}
             <FormControl>
-              <FormLabel>Password</FormLabel>
-              <Input ref={password} type="password" placeholder="Password" />
+              <FormLabel>{t`Password`}</FormLabel>
+              <Input ref={password} type="password" placeholder={t`Password`} />
             </FormControl>
           </ModalBody>
 
           <ModalFooter>
             <Button type="submit" isLoading={loading}>
-              Unlock
+              {t`Unlock`}
             </Button>
           </ModalFooter>
         </ModalContent>

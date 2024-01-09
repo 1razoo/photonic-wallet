@@ -11,6 +11,7 @@ import {
 } from "react-icons/tb";
 import Identifier from "./Identifier";
 import useIpfsUrl from "@app/hooks/useIpfsUrl";
+import { t } from "@lingui/macro";
 
 const ContentError = ({ notFound }: { notFound: boolean }) => (
   <Box
@@ -23,7 +24,7 @@ const ContentError = ({ notFound }: { notFound: boolean }) => (
     color="gray.200"
     userSelect="none"
   >
-    {notFound ? "NO CONTENT" : "UNRECOGNIZED CONTENT"}
+    {notFound ? t`NO CONTENT` : t`UNRECOGNIZED CONTENT`}
   </Box>
 );
 

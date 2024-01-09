@@ -48,11 +48,7 @@ class Wallet {
     return Wallet.recover(net, mnemonic, password);
   }
 
-  static async recover(
-    net: NetworkKey,
-    mnemonic: string,
-    password: string
-  ) {
+  static async recover(net: NetworkKey, mnemonic: string, password: string) {
     const seed = mnemonicToSeedSync(mnemonic);
     const hdKey = HDKey.fromMasterSeed(seed);
     const key = Buffer.from(

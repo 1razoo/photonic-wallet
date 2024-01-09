@@ -9,12 +9,15 @@ import {
 import AccountBar from "./AccountBar";
 import Logo from "./Logo";
 import StatusBar from "./StatusBar";
-import { openMenu } from "@app/signals";
+import { language, openMenu } from "@app/signals";
 
 export default function SideBar({
   children,
   ...rest
 }: PropsWithChildren & GridProps) {
+  // Trigger rerender when language changes
+  language.value;
+
   return (
     <Grid
       position="fixed"

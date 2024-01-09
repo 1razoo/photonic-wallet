@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { t } from "@lingui/macro";
 import { PrivateKey } from "@radiantblockchain/radiantjs";
 import coinSelect from "@lib/coinSelect";
 import {
@@ -64,7 +65,7 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
     if (!toAddress.current?.value) {
       // FIXME validate address
       fail = true;
-      setErrorMessage("Invalid address");
+      setErrorMessage(t`Invalid address`);
     }
 
     if (fail) {
@@ -91,7 +92,7 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
     );
     // FIXME errors here sometimes
     if (!selected.inputs?.length) {
-      setErrorMessage("Insufficient funds");
+      setErrorMessage(t`Insufficient funds`);
       setSuccess(false);
       setLoading(false);
       return;
@@ -116,7 +117,7 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
       )) as string;
       onSuccess && onSuccess(txid);
     } catch (error) {
-      setErrorMessage("Transaction rejected");
+      setErrorMessage(t`Transaction rejected`);
       setSuccess(false);
       setLoading(false);
     }
@@ -134,7 +135,7 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
       <form onSubmit={submit}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Send Asset</ModalHeader>
+          <ModalHeader>{t`Send Asset`}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6} gap={4}>
             {success || (
@@ -148,15 +149,15 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
               <Input
                 ref={toAddress}
                 type="text"
-                placeholder={`${network.value.name} address`}
+                placeholder={t`${network.value.name} address`}
               />
             </FormControl>
             <FormControl>
-              <FormLabel>Asset</FormLabel>
+              <FormLabel>{t`Asset`}</FormLabel>
               <Identifier>{ref.reverse().atom()}</Identifier>
             </FormControl>
             <FormControl>
-              <FormLabel>Amount</FormLabel>
+              <FormLabel>{t`Amount`}</FormLabel>
               <Identifier>{`${photonsToRXD(asset.value)} ${
                 network.value.ticker
               }`}</Identifier>
@@ -164,9 +165,9 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
           </ModalBody>
           <ModalFooter>
             <Button type="submit" variant="primary" isLoading={loading} mr={4}>
-              Send
+              {t`Send`}
             </Button>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose}>{t`Cancel`}</Button>
           </ModalFooter>
         </ModalContent>
       </form>

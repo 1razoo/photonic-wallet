@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { t } from "@lingui/macro";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Alert,
@@ -63,12 +64,12 @@ export default function CreateWallet() {
     const passwordValue = password.current?.value || "";
     const confirmValue = confirm.current?.value || "";
     if (confirmValue !== passwordValue) {
-      setError("Passwords do not match");
+      setError(t`Passwords do not match`);
       return false;
     }
 
     if (!networkKeys.includes(network.current?.value || "")) {
-      setError("Select a valid network");
+      setError(t`Select a valid network`);
       return false;
     }
 
@@ -119,7 +120,7 @@ export default function CreateWallet() {
           {step === 0 ? (
             <>
               <Heading size="md" mb={4}>
-                Create a wallet
+                {t`Create a wallet`}
               </Heading>
               {error && (
                 <Alert status="error" mb={4}>
@@ -129,19 +130,23 @@ export default function CreateWallet() {
               )}
               <form onSubmit={createWallet}>
                 <FormControl mb={4}>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t`Password`}</FormLabel>
                   <Input
                     ref={password}
                     type="password"
-                    placeholder="Password"
+                    placeholder={t`Password`}
                   />
                 </FormControl>
                 <FormControl mb={4}>
-                  <FormLabel>Confirm password</FormLabel>
-                  <Input ref={confirm} type="password" placeholder="Password" />
+                  <FormLabel>{t`Confirm password`}</FormLabel>
+                  <Input
+                    ref={confirm}
+                    type="password"
+                    placeholder={t`Password`}
+                  />
                 </FormControl>
                 <FormControl mb={4}>
-                  <FormLabel>Network</FormLabel>
+                  <FormLabel>{t`Network`}</FormLabel>
                   <Select ref={network}>
                     {networkKeys.map((k) => (
                       <option value={k}>{k}</option>
@@ -152,13 +157,13 @@ export default function CreateWallet() {
                   width="full"
                   type="submit"
                   isLoading={loading}
-                  loadingText="Creating wallet"
+                  loadingText={t`Creating wallet`}
                 >
-                  Next
+                  {t`Next`}
                 </Button>
                 <Center mt={4}>
                   <Button variant="ghost" as={Link} to="/recover">
-                    Recover my wallet
+                    {t`Recover my wallet`}
                   </Button>
                 </Center>
               </form>
@@ -166,15 +171,14 @@ export default function CreateWallet() {
           ) : (
             <>
               <Heading size="md" mb={4}>
-                Wallet created
+                {t`Wallet created`}
               </Heading>
               <Box mb={4}>
-                Your wallet has been created. Please record your recovery phrase
-                below.
+                {t`Your wallet has been created. Please record your recovery phrase below.`}
               </Box>
               <RecoveryPhrase phrase={phrase} />
               <Button as={Link} to="/objects" width="full">
-                Confirm
+                {t`Confirm`}
               </Button>
             </>
           )}

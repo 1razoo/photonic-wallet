@@ -1,4 +1,4 @@
-import { FocusEvent } from "react";
+import { useState, FocusEvent } from "react";
 import {
   Box,
   Container,
@@ -18,9 +18,9 @@ import {
   DeleteIcon,
   EditIcon,
 } from "@chakra-ui/icons";
-import { useState } from "react";
-import db from "@app/db";
 import { useLiveQuery } from "dexie-react-hooks";
+import { t } from "@lingui/macro";
+import db from "@app/db";
 import { PromiseExtended } from "dexie";
 import Card from "@app/components/Card";
 import { wallet } from "@app/signals";
@@ -31,7 +31,7 @@ function NewControls() {
   return (
     <IconButton
       icon={<AddIcon />}
-      aria-label="New"
+      aria-label={t`New`}
       size="sm"
       {...getEditButtonProps()}
     />
@@ -44,7 +44,7 @@ function EditableControls() {
   return (
     <IconButton
       icon={<EditIcon />}
-      aria-label="Edit"
+      aria-label={t`Edit`}
       size="sm"
       {...getEditButtonProps()}
     />
@@ -148,21 +148,21 @@ export default function Servers() {
               </Editable>
               <IconButton
                 icon={<ArrowUpIcon />}
-                aria-label="Move up"
+                aria-label={t`Move up`}
                 size="sm"
                 onClick={() => moveServer(index, true)}
                 isDisabled={index === 0}
               />
               <IconButton
                 icon={<ArrowDownIcon />}
-                aria-label="Move down"
+                aria-label={t`Move down`}
                 size="sm"
                 onClick={() => moveServer(index, false)}
                 isDisabled={index + 1 === servers.length}
               />
               <IconButton
                 icon={<DeleteIcon />}
-                aria-label="Delete"
+                aria-label={t`Delete`}
                 size="sm"
                 onClick={() => removeServer(index)}
               />

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { t } from "@lingui/macro";
 import { PrivateKey } from "@radiantblockchain/radiantjs";
 import Big from "big.js";
 import coinSelect from "@lib/coinSelect";
@@ -68,13 +69,13 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
     let fail = false;
     if (!amount.current?.value) {
       fail = true;
-      setErrorMessage("Invalid amount");
+      setErrorMessage(t`Invalid amount`);
     }
 
     if (!toAddress.current?.value) {
       // FIXME validate address
       fail = true;
-      setErrorMessage("Invalid address");
+      setErrorMessage(t`Invalid address`);
     }
 
     if (fail) {
@@ -93,7 +94,7 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
       const script = p2pkhScript(toAddress.current?.value as string);
 
       if (!script) {
-        setErrorMessage("Invalid address");
+        setErrorMessage(t`Invalid address`);
         setSuccess(false);
         setLoading(false);
         return;
@@ -108,7 +109,7 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
       );
 
       if (!selected.inputs?.length) {
-        setErrorMessage("Insufficient funds");
+        setErrorMessage(t`Insufficient funds`);
         setSuccess(false);
         setLoading(false);
         return;
@@ -130,13 +131,13 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
       )) as string;
       console.debug("Result", txid);
       toast({
-        title: `${photonsToRXD(value)} ${network.value.ticker} sent!`,
+        title: t`${photonsToRXD(value)} ${network.value.ticker} sent!`,
         status: "success",
       });
 
       onSuccess && onSuccess(txid);
     } catch (error) {
-      setErrorMessage("Could not send transaction");
+      setErrorMessage(t`Could not send transaction`);
       console.error(error);
       setSuccess(false);
       setLoading(false);
@@ -160,7 +161,7 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
           <ModalCloseButton />
           <ModalBody pb={6} gap={4}>
             <VStack>
-              <Heading size="sm">Balance</Heading>
+              <Heading size="sm">{t`Balance`}</Heading>
               <Box>
                 {photonsToRXD(totalBalance.value)} {network.value.ticker}
               </Box>
@@ -180,7 +181,7 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
               />
             </FormControl>
             <FormControl>
-              <FormLabel>Amount</FormLabel>
+              <FormLabel>{t`Amount`}</FormLabel>
               <InputGroup>
                 <Input
                   ref={amount}
@@ -198,9 +199,9 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
 
           <ModalFooter>
             <Button type="submit" variant="primary" isLoading={loading} mr={4}>
-              Send
+              {t`Send`}
             </Button>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose}>{t`Cancel`}</Button>
           </ModalFooter>
         </ModalContent>
       </form>

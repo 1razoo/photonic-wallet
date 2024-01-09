@@ -6,6 +6,7 @@ import {
   Spinner,
   Tag,
 } from "@chakra-ui/react";
+import { t } from "@lingui/macro";
 import { photonsToRXD } from "@lib/format";
 import { balance, network, openModal, totalBalance } from "@app/signals";
 
@@ -34,10 +35,10 @@ export default function AccountBar(props: FlexProps) {
 
         <SimpleGrid columns={[1, 2]} spacing={4} alignSelf="stretch">
           <Button onClick={() => (openModal.value = { modal: "send" })}>
-            Send
+            {t`Send`}
           </Button>
           <Button onClick={() => (openModal.value = { modal: "receive" })}>
-            Receive
+            {t`Receive`}
           </Button>
         </SimpleGrid>
       </Flex>

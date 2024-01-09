@@ -1,4 +1,5 @@
 import { Button, ButtonProps } from "@chakra-ui/react";
+import { t } from "@lingui/macro";
 
 export default function DownloadLink({
   data,
@@ -28,7 +29,7 @@ export default function DownloadLink({
 
   return (
     <Button onClick={downloadUint8ArrayAsFile} {...rest}>
-      Download
+      {t`Download`}
     </Button>
   );
 }

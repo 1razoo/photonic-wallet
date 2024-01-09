@@ -17,6 +17,7 @@ import {
   Tooltip,
   useDisclosure,
 } from "@chakra-ui/react";
+import { Trans, t } from "@lingui/macro";
 import { bytesToHex } from "@noble/hashes/utils";
 import { Buffer } from "buffer";
 import { filesize } from "filesize";
@@ -151,7 +152,7 @@ export default function ViewAsset({
     <>
       <Grid gridTemplateRows="auto 1fr" height="100vh" {...rest}>
         <PageHeader close to={`${context}${search}`} toolbar={toolbar}>
-          {nft?.name || "Unnamed token"}
+          {nft?.name || t`Unnamed token`}
         </PageHeader>
         <Container maxW="container.xl" overflowY="auto" pb={4}>
           <Grid
@@ -188,8 +189,10 @@ export default function ViewAsset({
                   colSpan={2}
                 >
                   <AlertIcon />
-                  <AlertTitle>Caution:</AlertTitle>
-                  Files may be unsafe
+                  <Trans>
+                    <AlertTitle>Caution:</AlertTitle>
+                    Files may be unsafe
+                  </Trans>
                 </Alert>
               )}
               {nft?.file && (
@@ -200,7 +203,7 @@ export default function ViewAsset({
                   leftIcon={<DownloadIcon />}
                   colSpan={2}
                 >
-                  Download
+                  {t`Download`}
                 </GridItem>
               )}
               {!nft?.file && nft.main && (
@@ -214,7 +217,7 @@ export default function ViewAsset({
                       leftIcon={<DownloadIcon />}
                       colSpan={2}
                     >
-                      Download
+                      {t`Download`}
                     </GridItem>
                   ) : (
                     <Alert
@@ -224,8 +227,10 @@ export default function ViewAsset({
                       colSpan={2}
                     >
                       <AlertIcon />
-                      <AlertTitle>Caution:</AlertTitle>
-                      URLs may be unsafe and result in loss of funds
+                      <Trans>
+                        <AlertTitle>Caution:</AlertTitle>
+                        URLs may be unsafe and result in loss of funds
+                      </Trans>
                     </Alert>
                   )}
                 </>
@@ -235,7 +240,7 @@ export default function ViewAsset({
                 onClick={() => unlock(openMelt)}
                 _hover={{ bg: "red.600" }}
               >
-                Melt
+                {t`Melt`}
               </Button>
             </SimpleGrid>
             <div>
@@ -283,7 +288,7 @@ export default function ViewAsset({
               )}
               <SimpleGrid columns={[1, 2]} spacing={4}>
                 {isIPFS && (
-                  <Meta heading="IPFS CID">
+                  <Meta heading={t`IPFS CID`}>
                     <div>
                       <Identifier showCopy>
                         {nft.main?.replace("ipfs://", "")}
@@ -296,7 +301,7 @@ export default function ViewAsset({
                     heading="HashStamp"
                     info={
                       <Tooltip
-                        label="A HashStamp is a compressed on-chain copy of the token image, displayed alongside the SHA-256 of the original file"
+                        label={t`A HashStamp is a compressed on-chain copy of the token image, displayed alongside the SHA-256 of the original file`}
                         placement="bottom-end"
                         hasArrow
                       >
@@ -329,53 +334,55 @@ export default function ViewAsset({
                     </Flex>
                   </Meta>
                 )}
-                <Meta heading="Owner">
+                <Meta heading={t`Owner`}>
                   <div>
                     <Identifier showCopy>{owner}</Identifier>
                   </div>
                 </Meta>
-                <Meta heading="Output value">
+                <Meta heading={t`Output value`}>
                   <Photons value={txo.value} />
                 </Meta>
                 {nft?.type && (
-                  <Meta heading="Type">
+                  <Meta heading={t`Type`}>
                     <AtomType type={nft?.type} />
                   </Meta>
                 )}
-                <Meta heading="Mint">
+                <Meta heading={t`Mint`}>
                   <div>
                     <Identifier showCopy copyValue={ref.ref("i")}>
                       {ref.shortInput()}
                     </Identifier>
                   </div>
                 </Meta>
-                <Meta heading="Location">
+                <Meta heading={t`Location`}>
                   <div>
                     <Identifier showCopy copyValue={txo.txid}>
                       {location.shortOutput()}
                     </Identifier>
                   </div>
                 </Meta>
-                <Meta heading="Received">
+                <Meta heading={t`Received`}>
                   {txo.date
                     ? dayjs(txo.date * 1000).format("lll")
                     : "Unconfirmed"}
                 </Meta>
-                <Meta heading="Height">
-                  {txo.height === Infinity ? "Unconfirmed" : txo.height}
+                <Meta heading={t`"Height`}>
+                  {txo.height === Infinity ? t`Unconfirmed` : txo.height}
                 </Meta>
                 {nft?.file && nft?.main && (
                   <>
-                    <Meta heading="Content length">
+                    <Meta heading={t`Content length`}>
                       {filesize(nft.file.byteLength) as string}
                     </Meta>
-                    <Meta heading="Content type">{mime.getType(nft.main)}</Meta>
+                    <Meta heading={t`Content type`}>
+                      {mime.getType(nft.main)}
+                    </Meta>
                   </>
                 )}
               </SimpleGrid>
               {(nft?.description || hasAttrs) && <Divider my={4} />}
               {nft?.description && (
-                <Meta heading="Description" mb={4}>
+                <Meta heading={t`Description`} mb={4}>
                   {nft.description}
                 </Meta>
               )}

@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useDisclosure, useToast } from "@chakra-ui/react";
+import { t } from "@lingui/macro";
 import PasswordModal from "./PasswordModal";
 import { openModal, wallet } from "@app/signals";
 import useModalSignal from "@app/hooks/useModalSignal";
@@ -23,7 +24,7 @@ export default function Unlock() {
 
   const onSuccess = (_: string, wif: string) => {
     toast({
-      title: "Wallet unlocked",
+      title: t`Wallet unlocked`,
       status: "success",
     });
 
@@ -50,7 +51,7 @@ export default function Unlock() {
 
   return (
     <PasswordModal
-      header="Unlock to enable spending"
+      header={t`Unlock to enable spending`}
       allowClose
       onSuccess={onSuccess}
       isOpen={disclosure.isOpen}

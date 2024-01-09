@@ -1,0 +1,773 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2024-01-09 12:03+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/components/ViewAsset.tsx:369
+msgid "\"Height"
+msgstr ""
+
+#: src/components/SendRXD.tsx:134
+msgid "{0} {1} sent!"
+msgstr ""
+
+#: src/components/SendAsset.tsx:152
+msgid "{0} address"
+msgstr ""
+
+#: src/pages/MobileHome.tsx:34
+msgid "{0} BALANCE"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:192
+msgid "<0>Caution:</0>Files may be unsafe"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:230
+msgid "<0>Caution:</0>URLs may be unsafe and result in loss of funds"
+msgstr ""
+
+#: src/pages/Mint.tsx:677
+msgid "<0>Your uploaded file will have the following URL</0><1>ipfs://{0}</1>"
+msgstr ""
+
+#: src/pages/Mint.tsx:702
+msgid "A compressed copy of the token image stored on-chain"
+msgstr ""
+
+#: src/pages/Mint.tsx:668
+msgid "A HashStamp image may be stored on-chain."
+msgstr ""
+
+#: src/components/ViewAsset.tsx:304
+msgid "A HashStamp is a compressed on-chain copy of the token image, displayed alongside the SHA-256 of the original file"
+msgstr ""
+
+#: src/layouts/SettingsLayout.tsx:18
+#: src/layouts/SettingsLayout.tsx:38
+msgid "About"
+msgstr ""
+
+#: src/pages/WalletSettings.tsx:57
+msgid "Address"
+msgstr ""
+
+#: src/components/SendAsset.tsx:160
+#: src/components/SendRXD.tsx:184
+msgid "Amount"
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:67
+msgid "An NFT.Storage API key is required for uploading files to IPFS. Generate a key at <0>https://nft.storage</0>."
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:61
+msgid "API key"
+msgstr ""
+
+#: src/components/SendAsset.tsx:156
+msgid "Asset"
+msgstr ""
+
+#: src/pages/Mint.tsx:559
+msgid "Assigning an author is recommended for authentication of tokens."
+msgstr ""
+
+#: src/pages/Mint.tsx:782
+msgid "Attributes"
+msgstr ""
+
+#: src/pages/Mint.tsx:549
+msgid "Author"
+msgstr ""
+
+#: src/components/MintSuccessModal.tsx:60
+msgid "Back to dashboard"
+msgstr ""
+
+#: src/components/SendRXD.tsx:164
+msgid "Balance"
+msgstr ""
+
+#: src/pages/Coins.tsx:51
+msgid "Block"
+msgstr ""
+
+#: src/pages/Mint.tsx:902
+msgid "Calculate Fee"
+msgstr ""
+
+#: src/components/MeltAsset.tsx:134
+#: src/components/SendAsset.tsx:170
+#: src/components/SendRXD.tsx:204
+msgid "Cancel"
+msgstr ""
+
+#: src/components/StatusBar.tsx:119
+msgid "Click to connect"
+msgstr ""
+
+#: src/components/StatusBar.tsx:94
+msgid "Click to disconnect"
+msgstr ""
+
+#: src/components/StatusBar.tsx:53
+msgid "Click to lock"
+msgstr ""
+
+#: src/components/StatusBar.tsx:38
+msgid "Click to unlock"
+msgstr ""
+
+#: src/components/TxSuccessModal.tsx:57
+msgid "Close"
+msgstr ""
+
+#: src/layouts/WalletLayout.tsx:84
+#: src/pages/Coins.tsx:43
+msgid "Coins"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:181
+msgid "Confirm"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:141
+#: src/pages/RecoverWallet.tsx:120
+msgid "Confirm password"
+msgstr ""
+
+#: src/components/StatusBar.tsx:64
+#: src/electrum/ElectrumProvider.tsx:53
+msgid "Connected"
+msgstr ""
+
+#: src/components/StatusBar.tsx:65
+msgid "Connecting"
+msgstr ""
+
+#: src/pages/Dashboard.tsx:98
+#: src/pages/Mint.tsx:567
+msgid "Container"
+msgstr ""
+
+#: src/pages/Dashboard.tsx:126
+msgid "Containers"
+msgstr ""
+
+#: src/pages/Mint.tsx:577
+msgid "Containers can be used to create token collections"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:374
+msgid "Content length"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:377
+msgid "Content type"
+msgstr ""
+
+#: src/components/ReceiveRXD.tsx:52
+#: src/components/RecoveryPhrase.tsx:27
+msgid "Copied!"
+msgstr ""
+
+#: src/components/ReceiveRXD.tsx:52
+#: src/components/RecoveryPhrase.tsx:27
+msgid "Copy to clipboard"
+msgstr ""
+
+#: src/components/SendRXD.tsx:140
+msgid "Could not send transaction"
+msgstr ""
+
+#: src/pages/Mint.tsx:337
+msgid "Couldn't find container"
+msgstr ""
+
+#: src/pages/Mint.tsx:317
+msgid "Couldn't find user"
+msgstr ""
+
+#: src/layouts/WalletLayout.tsx:95
+#: src/pages/Dashboard.tsx:118
+msgid "Create"
+msgstr ""
+
+#: src/pages/RecoverWallet.tsx:144
+msgid "Create a new wallet"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:123
+msgid "Create a wallet"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:160
+msgid "Creating wallet"
+msgstr ""
+
+#: src/pages/Coins.tsx:50
+msgid "Date"
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:81
+msgid "Default"
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:84
+msgid "Default setting will use <0>ipfs://</0> URLs which will be handled according to your browser's configuration"
+msgstr ""
+
+#: src/pages/Servers.tsx:165
+msgid "Delete"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:385
+#: src/pages/Mint.tsx:772
+#: src/pages/Mint.tsx:774
+msgid "Description"
+msgstr ""
+
+#: src/pages/Dashboard.tsx:91
+msgid "Digital Object"
+msgstr ""
+
+#: src/layouts/WalletLayout.tsx:75
+#: src/pages/Dashboard.tsx:123
+#: src/pages/Wallet.tsx:56
+msgid "Digital Objects"
+msgstr ""
+
+#: src/components/StatusBar.tsx:66
+#: src/components/StatusBar.tsx:67
+#: src/electrum/ElectrumProvider.tsx:61
+msgid "Disconnected"
+msgstr ""
+
+#: src/components/DownloadLink.tsx:32
+#: src/components/ViewAsset.tsx:206
+#: src/components/ViewAsset.tsx:220
+msgid "Download"
+msgstr ""
+
+#: src/pages/Mint.tsx:103
+msgid "Drop file"
+msgstr ""
+
+#: src/pages/Servers.tsx:47
+msgid "Edit"
+msgstr ""
+
+#: src/pages/WalletSettings.tsx:77
+msgid "Enter password"
+msgstr ""
+
+#: src/pages/RecoverWallet.tsx:106
+msgid "Enter your 12 word recovery phrase"
+msgstr ""
+
+#: src/pages/Mint.tsx:407
+msgid "Error"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:87
+msgid "Failed to create wallet"
+msgstr ""
+
+#: src/wallet/wallet.ts:22
+msgid "Failed to unlock"
+msgstr ""
+
+#: src/pages/Mint.tsx:853
+msgid "Fee"
+msgstr ""
+
+#: src/pages/Mint.tsx:587
+#: src/pages/Mint.tsx:599
+msgid "File"
+msgstr ""
+
+#: src/pages/Mint.tsx:422
+msgid "File is too large"
+msgstr ""
+
+#: src/pages/Mint.tsx:119
+msgid "Files over 1KB will be stored in IPFS"
+msgstr ""
+
+#: src/layouts/WalletLayout.tsx:81
+msgid "Fungible Tokens"
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:80
+msgid "Gateway"
+msgstr ""
+
+#: src/pages/Mint.tsx:691
+msgid "HashStamp"
+msgstr ""
+
+#: src/layouts/WalletLayout.tsx:87
+msgid "History"
+msgstr ""
+
+#: src/layouts/WalletLayout.tsx:68
+msgid "Home"
+msgstr ""
+
+#: src/pages/Mint.tsx:814
+msgid "Immutable"
+msgstr ""
+
+#: src/components/PasswordModal.tsx:84
+msgid "Incorrect password"
+msgstr ""
+
+#: src/components/MeltAsset.tsx:76
+#: src/components/SendAsset.tsx:95
+#: src/components/SendRXD.tsx:112
+msgid "Insufficient funds"
+msgstr ""
+
+#: src/components/SendAsset.tsx:68
+#: src/components/SendRXD.tsx:78
+#: src/components/SendRXD.tsx:97
+msgid "Invalid address"
+msgstr ""
+
+#: src/components/SendRXD.tsx:72
+msgid "Invalid amount"
+msgstr ""
+
+#: src/wallet/wallet.ts:32
+msgid "Invalid mnemonic phrase"
+msgstr ""
+
+#: src/pages/RecoverWallet.tsx:80
+msgid "Invalid recovery phrase"
+msgstr ""
+
+#: src/layouts/SettingsLayout.tsx:17
+#: src/layouts/SettingsLayout.tsx:35
+#: src/pages/Mint.tsx:676
+msgid "IPFS"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:291
+msgid "IPFS CID"
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:94
+msgid "IPFS gateway"
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:91
+msgid "IPFS Gateway URL"
+msgstr ""
+
+#: src/pages/WalletSettings.tsx:87
+msgid "Language"
+msgstr ""
+
+#: src/pages/About.tsx:8
+msgid "License"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:357
+msgid "Location"
+msgstr ""
+
+#: src/components/StatusBar.tsx:38
+msgid "Locked"
+msgstr ""
+
+#: src/components/MeltAsset.tsx:132
+#: src/components/ViewAsset.tsx:243
+msgid "Melt"
+msgstr ""
+
+#: src/components/MeltAsset.tsx:112
+msgid "Melt token"
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:78
+msgid "Method to resolve IPFS token content"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:350
+#: src/pages/Dashboard.tsx:83
+#: src/pages/Mint.tsx:887
+msgid "Mint"
+msgstr ""
+
+#: src/pages/Mint.tsx:513
+msgid "Mint <0/>"
+msgstr ""
+
+#: src/components/MintSuccessModal.tsx:58
+msgid "Mint another"
+msgstr ""
+
+#: src/components/MintSuccessModal.tsx:38
+msgid "Mint successful"
+msgstr ""
+
+#: src/pages/Mint.tsx:400
+msgid "Minted. Fee {0} {1}"
+msgstr ""
+
+#: src/pages/Servers.tsx:158
+msgid "Move down"
+msgstr ""
+
+#: src/pages/Servers.tsx:151
+msgid "Move up"
+msgstr ""
+
+#: src/pages/Mint.tsx:838
+msgid "Mutable tokens are not yet fully supported by Photonic Wallet, however a mutable contract containing 1 photon will be created."
+msgstr ""
+
+#: src/pages/Mint.tsx:830
+msgid "Mutable tokens are recommended for user and container tokens"
+msgstr ""
+
+#: src/pages/Mint.tsx:762
+#: src/pages/Mint.tsx:764
+#: src/pages/Mint.tsx:786
+msgid "Name"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:149
+#: src/pages/RecoverWallet.tsx:124
+msgid "Network"
+msgstr ""
+
+#: src/pages/Servers.tsx:34
+msgid "New"
+msgstr ""
+
+#: src/pages/RecoverWallet.tsx:116
+msgid "New password"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:162
+msgid "Next"
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:58
+msgid "NFT.Storage API Key"
+msgstr ""
+
+#: src/pages/Wallet.tsx:37
+msgid "No assets"
+msgstr ""
+
+#: src/components/TokenContent.tsx:27
+msgid "NO CONTENT"
+msgstr ""
+
+#: src/pages/Mint.tsx:698
+msgid "No HashStamp"
+msgstr ""
+
+#: src/pages/Mint.tsx:531
+msgid "No NFT.Storage API key has been provided. To upload large files, please go to <0>IPFS Settings</0> and enter your key."
+msgstr ""
+
+#: src/pages/Mint.tsx:271
+msgid "No NFT.Storage API key provided"
+msgstr ""
+
+#: src/components/StatusBar.tsx:75
+msgid "No servers defined"
+msgstr ""
+
+#: src/pages/Users.tsx:21
+msgid "No users"
+msgstr ""
+
+#: src/pages/Mint.tsx:824
+msgid "No, allow token owner to modify"
+msgstr ""
+
+#: src/pages/Mint.tsx:551
+msgid "None"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:342
+msgid "Output value"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:337
+msgid "Owner"
+msgstr ""
+
+#: src/components/PasswordModal.tsx:88
+#: src/components/PasswordModal.tsx:89
+#: src/pages/CreateWallet.tsx:133
+#: src/pages/CreateWallet.tsx:137
+#: src/pages/CreateWallet.tsx:145
+msgid "Password"
+msgstr ""
+
+#: src/wallet/encrypt.ts:75
+msgid "Password incorrect"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:67
+#: src/pages/RecoverWallet.tsx:42
+msgid "Passwords do not match"
+msgstr ""
+
+#: src/pages/Exit.tsx:7
+msgid "Please close the window"
+msgstr ""
+
+#: src/pages/Mint.tsx:872
+msgid "Please reconnect to mint your token"
+msgstr ""
+
+#: src/pages/Mint.tsx:795
+msgid "Properties that describe your asset"
+msgstr ""
+
+#: src/components/AccountBar.tsx:41
+#: src/components/ReceiveRXD.tsx:34
+#: src/pages/MobileHome.tsx:68
+msgid "Receive"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:364
+msgid "Received"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:166
+msgid "Recover my wallet"
+msgstr ""
+
+#: src/pages/RecoverWallet.tsx:96
+msgid "Recover your wallet"
+msgstr ""
+
+#: src/pages/RecoverWallet.tsx:135
+msgid "Recovering"
+msgstr ""
+
+#: src/pages/RecoverWallet.tsx:109
+#: src/pages/WalletSettings.tsx:65
+msgid "Recovery phrase"
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:102
+msgid "Save"
+msgstr ""
+
+#: src/pages/IpfsSettings.tsx:39
+msgid "Saved"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:72
+#: src/pages/RecoverWallet.tsx:47
+msgid "Select a valid network"
+msgstr ""
+
+#: src/components/AccountBar.tsx:38
+#: src/components/SendAsset.tsx:168
+#: src/components/SendRXD.tsx:202
+#: src/pages/MobileHome.tsx:61
+msgid "Send"
+msgstr ""
+
+#: src/components/ReceiveRXD.tsx:38
+msgid "Send {0} coins and tokens to this address"
+msgstr ""
+
+#: src/components/SendAsset.tsx:138
+msgid "Send Asset"
+msgstr ""
+
+#: src/layouts/SettingsLayout.tsx:16
+#: src/layouts/SettingsLayout.tsx:32
+msgid "Servers"
+msgstr ""
+
+#: src/components/StatusBar.tsx:134
+#: src/layouts/SettingsLayout.tsx:25
+msgid "Settings"
+msgstr ""
+
+#: src/pages/WalletSettings.tsx:72
+msgid "Show recovery phrase"
+msgstr ""
+
+#: src/pages/Mint.tsx:697
+msgid "Store HashStamp on-chain"
+msgstr ""
+
+#: src/pages/RecoverWallet.tsx:137
+msgid "Submit"
+msgstr ""
+
+#: src/pages/Mint.tsx:844
+msgid "Summary"
+msgstr ""
+
+#: src/pages/Mint.tsx:589
+msgid "Text"
+msgstr ""
+
+#: src/pages/Placeholder.tsx:11
+msgid "This feature is coming soon"
+msgstr ""
+
+#: src/components/MeltAsset.tsx:122
+msgid "This will destroy your token! Are you sure?"
+msgstr ""
+
+#: src/components/MeltAsset.tsx:99
+msgid "Token melted"
+msgstr ""
+
+#: src/components/MintSuccessModal.tsx:41
+#: src/components/TxSuccessModal.tsx:40
+msgid "Transaction ID:"
+msgstr ""
+
+#: src/components/MeltAsset.tsx:101
+#: src/components/SendAsset.tsx:120
+msgid "Transaction rejected"
+msgstr ""
+
+#: src/pages/Mint.tsx:851
+msgid "Transaction size"
+msgstr ""
+
+#: src/components/TxSuccessModal.tsx:37
+msgid "Transaction successful"
+msgstr ""
+
+#: src/pages/Coins.tsx:49
+msgid "TX ID"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:346
+msgid "Type"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:370
+msgid "Unconfirmed"
+msgstr ""
+
+#: src/pages/RecoverWallet.tsx:85
+msgid "Unknown error"
+msgstr ""
+
+#: src/components/PasswordModal.tsx:95
+msgid "Unlock"
+msgstr ""
+
+#: src/components/Unlock.tsx:54
+msgid "Unlock to enable spending"
+msgstr ""
+
+#: src/components/StatusBar.tsx:53
+msgid "Unlocked"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:155
+msgid "Unnamed token"
+msgstr ""
+
+#: src/components/TokenContent.tsx:27
+msgid "UNRECOGNIZED CONTENT"
+msgstr ""
+
+#: src/pages/Mint.tsx:428
+msgid "Unrecognized file type"
+msgstr ""
+
+#: src/pages/Mint.tsx:601
+msgid "Upload an image, text file or other content"
+msgstr ""
+
+#: src/pages/Mint.tsx:116
+msgid "Upload file"
+msgstr ""
+
+#: src/pages/Mint.tsx:588
+msgid "URL"
+msgstr ""
+
+#: src/pages/Dashboard.tsx:105
+msgid "User"
+msgstr ""
+
+#: src/pages/Dashboard.tsx:129
+msgid "Users"
+msgstr ""
+
+#: src/pages/Coins.tsx:52
+#: src/pages/Mint.tsx:789
+msgid "Value"
+msgstr ""
+
+#: src/components/MintSuccessModal.tsx:52
+#: src/components/TxSuccessModal.tsx:51
+msgid "View on block explorer"
+msgstr ""
+
+#: src/layouts/SettingsLayout.tsx:15
+#: src/layouts/SettingsLayout.tsx:29
+msgid "Wallet"
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:174
+msgid "Wallet created"
+msgstr ""
+
+#: src/components/StatusBar.tsx:25
+msgid "Wallet locked"
+msgstr ""
+
+#: src/components/Unlock.tsx:27
+msgid "Wallet unlocked"
+msgstr ""
+
+#: src/pages/Mint.tsx:584
+msgid "What data do you want to store?"
+msgstr ""
+
+#: src/pages/Mint.tsx:821
+msgid "Yes"
+msgstr ""
+
+#: src/pages/Mint.tsx:666
+msgid "Your file will be stored in IPFS."
+msgstr ""
+
+#: src/pages/Mint.tsx:660
+msgid "Your file will be stored on-chain."
+msgstr ""
+
+#: src/components/RecoveryPhrase.tsx:21
+msgid "Your recovery phrase is the only way to restore your wallet after logging out. Keep it in a safe place and never share it."
+msgstr ""
+
+#: src/pages/Mint.tsx:867
+msgid "Your token is ready to mint. Please review all data and the transaction fee before proceeding."
+msgstr ""
+
+#: src/pages/CreateWallet.tsx:177
+msgid "Your wallet has been created. Please record your recovery phrase below."
+msgstr ""

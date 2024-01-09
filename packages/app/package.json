@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "tauri": "tauri",
+    "i18n:extract": "lingui extract",
+    "i18n:compile": "lingui compile",
     "lint": "eslint \"src/**/*.ts*\"",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "preview": "vite preview"
@@ -21,6 +23,11 @@
     "@fontsource-variable/inter": "^5.0.8",
     "@fontsource-variable/source-code-pro": "^5.0.17",
     "@fontsource/days-one": "^5.0.18",
+    "@lingui/core": "^4.7.0",
+    "@lingui/detect-locale": "^4.7.0",
+    "@lingui/macro": "^4.7.0",
+    "@lingui/react": "^4.7.0",
+    "@lingui/vite-plugin": "^4.7.0",
     "@noble/hashes": "^1.3.0",
     "@photonic/lib": "workspace:*",
     "@preact/signals-react": "^2.0.0",
@@ -58,6 +65,7 @@
     "ws-electrumx-client": "^1.0.1"
   },
   "devDependencies": {
+    "@lingui/cli": "^4.7.0",
     "@photonic/eslint-config": "workspace:*",
     "@photonic/typescript-config": "workspace:*",
     "@tauri-apps/cli": "^1.5.0",
@@ -67,7 +75,9 @@
     "@types/node": "^18.15.11",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
+    "babel-plugin-macros": "^3.1.0",
     "eslint": "^8.38.0",
+    "eslint-plugin-lingui": "^0.2.2",
     "typescript": "^4.9.3",
     "vite": "^5.0.0",
     "vite-plugin-comlink": "^3.0.5"

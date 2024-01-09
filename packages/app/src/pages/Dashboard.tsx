@@ -1,3 +1,4 @@
+import { NavLink, useLocation, useParams } from "react-router-dom";
 import {
   Button,
   Grid,
@@ -12,7 +13,7 @@ import {
   TabList,
   Tabs,
 } from "@chakra-ui/react";
-import { NavLink, useLocation, useParams } from "react-router-dom";
+import { t } from "@lingui/macro";
 import TokenCard from "@app/components/TokenCard";
 import useTokenQuery from "@app/hooks/useTokenQuery";
 import { AtomNft } from "@app/types";
@@ -79,7 +80,7 @@ function TokenGrid({
           rightIcon={<ChevronDownIcon />}
           shadow="dark-md"
         >
-          Mint
+          {t`Mint`}
         </MenuButton>
         <MenuList>
           <MenuItem
@@ -87,21 +88,21 @@ function TokenGrid({
             to="/mint/object"
             icon={<Icon as={TbTriangleSquareCircle} fontSize="2xl" />}
           >
-            Digital Object
+            {t`Digital Object`}
           </MenuItem>
           <MenuItem
             as={NavLink}
             to="/mint/container"
             icon={<Icon as={TbBox} fontSize="2xl" />}
           >
-            Container
+            {t`Container`}
           </MenuItem>
           <MenuItem
             as={NavLink}
             to="/mint/user"
             icon={<Icon as={TbUserCircle} fontSize="2xl" />}
           >
-            User
+            {t`User`}
           </MenuItem>
         </MenuList>
       </Menu>
@@ -114,18 +115,18 @@ function TokenGrid({
 
   return (
     <>
-      <PageHeader toolbar={toolbar}>Create</PageHeader>
+      <PageHeader toolbar={toolbar}>{t`Create`}</PageHeader>
 
       <Tabs index={["object", "container", "user"].indexOf(type)} mb={4} px={4}>
         <TabList>
           <Tab as={NavLink} to="/create/object">
-            Digital Objects
+            {t`Digital Objects`}
           </Tab>
           <Tab as={NavLink} to="/create/container">
-            Containers
+            {t`Containers`}
           </Tab>
           <Tab as={NavLink} to="/create/user">
-            Users
+            {t`Users`}
           </Tab>
           <Spacer />
           <Pagination

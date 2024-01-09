@@ -34,5 +34,12 @@
     },
     "ipfsMethod": "gateway",
     "ipfsGatewayUrl": "https://{cid}.ipfs.nftstorage.link"
+  },
+  "i18n": {
+    "languages": {
+      "en": "English",
+      "es": "Español"
+    },
+    "defaultLanguage": "en"
   }
 }
