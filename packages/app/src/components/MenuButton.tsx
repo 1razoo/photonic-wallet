@@ -1,7 +1,7 @@
 import { PropsWithChildren } from "react";
 import { Button, ButtonProps } from "@chakra-ui/react";
 import { Link, useLocation } from "react-router-dom";
-import gradient from "../images/gradient.svg";
+import gradient from "/gradient.svg";
 import { openMenu } from "@app/signals";
 
 export default function MenuButton({

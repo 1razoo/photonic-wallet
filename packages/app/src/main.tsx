@@ -28,7 +28,7 @@ import Coins from "./pages/Coins";
 import MobileHome from "./pages/MobileHome";
 import IpfsSettings from "./pages/IpfsSettings";
 import About from "./pages/About";
-import gradient from "./images/gradient.svg";
+import gradient from "/gradient.svg";
 import Exit from "./pages/Exit";
 
 dayjs.extend(localizedFormat);
