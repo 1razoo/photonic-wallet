@@ -124,7 +124,7 @@ export default function RecoverWallet() {
           <FormLabel>{t`Network`}</FormLabel>
           <Select ref={network}>
             {networkKeys.map((k) => (
-              <option value={k}>{k}</option>
+              <option key={k} value={k}>{k}</option>
             ))}
           </Select>
         </FormControl>

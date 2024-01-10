@@ -6,10 +6,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
-
-#: src/components/ViewAsset.tsx:369
-msgid "\"Height"
-msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
 
 #: src/components/SendRXD.tsx:134
 msgid "{0} {1} sent!"
@@ -301,6 +303,10 @@ msgstr ""
 
 #: src/pages/Mint.tsx:691
 msgid "HashStamp"
+msgstr ""
+
+#: src/components/ViewAsset.tsx:369
+msgid "Height"
 msgstr ""
 
 #: src/layouts/WalletLayout.tsx:87

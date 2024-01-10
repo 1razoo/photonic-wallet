@@ -99,7 +99,7 @@ export function nftScriptHash(address: string) {
 
 export function parseCommitScript(script: string): string[] {
   const pattern =
-    /^((d1[0-9a-f]{72}75)+)aa20[0-9a-f]{64}88036e667488047373737388c0c8c0c954807eda529d.*/; // Don't need to match p2pkh
+    /^((d1[0-9a-f]{72}75)+)aa20[0-9a-f]{64}88036e667488047370723588c0c8c0c954807eda529d.*/; // Don't need to match p2pkh
   const match = script.match(pattern);
 
   if (match) {

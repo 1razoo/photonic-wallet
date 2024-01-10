@@ -366,7 +366,7 @@ export default function ViewAsset({
                     ? dayjs(txo.date * 1000).format("lll")
                     : "Unconfirmed"}
                 </Meta>
-                <Meta heading={t`"Height`}>
+                <Meta heading={t`Height`}>
                   {txo.height === Infinity ? t`Unconfirmed` : txo.height}
                 </Meta>
                 {nft?.file && nft?.main && (
