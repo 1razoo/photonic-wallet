@@ -18,7 +18,7 @@ export class Database extends Dexie {
   header!: Table<BlockHeader>;
 
   constructor() {
-    super("database");
+    super("photonic");
     this.version(1).stores({
       txo: "++id, &[txid+vout], contractType, [contractType+spent], height",
       subscriptionStatus: "scriptHash",
