@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   Center,
+  Container,
   FormControl,
   FormLabel,
   Heading,
@@ -116,73 +117,77 @@ export default function CreateWallet() {
   return (
     <>
       {licenseRead && (
-        <Card mb={4} p={4} width="2xl" maxW="100%" mx="auto" mt="120px">
-          {step === 0 ? (
-            <>
-              <Heading size="md" mb={4}>
-                {t`Create a wallet`}
-              </Heading>
-              {error && (
-                <Alert status="error" mb={4}>
-                  <AlertIcon />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <form onSubmit={createWallet}>
-                <FormControl mb={4}>
-                  <FormLabel>{t`Password`}</FormLabel>
-                  <Input
-                    ref={password}
-                    type="password"
-                    placeholder={t`Password`}
-                  />
-                </FormControl>
-                <FormControl mb={4}>
-                  <FormLabel>{t`Confirm password`}</FormLabel>
-                  <Input
-                    ref={confirm}
-                    type="password"
-                    placeholder={t`Password`}
-                  />
-                </FormControl>
-                <FormControl mb={4}>
-                  <FormLabel>{t`Network`}</FormLabel>
-                  <Select ref={network}>
-                    {networkKeys.map((k) => (
-                      <option key={k} value={k}>{k}</option>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Button
-                  width="full"
-                  type="submit"
-                  isLoading={loading}
-                  loadingText={t`Creating wallet`}
-                >
-                  {t`Next`}
-                </Button>
-                <Center mt={4}>
-                  <Button variant="ghost" as={Link} to="/recover">
-                    {t`Recover my wallet`}
+        <Container display="flex" alignItems="center" height="100vh">
+          <Card mb={4} p={4} width="2xl">
+            {step === 0 ? (
+              <>
+                <Heading size="md" mb={4}>
+                  {t`Create a wallet`}
+                </Heading>
+                {error && (
+                  <Alert status="error" mb={4}>
+                    <AlertIcon />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                <form onSubmit={createWallet}>
+                  <FormControl mb={4}>
+                    <FormLabel>{t`Password`}</FormLabel>
+                    <Input
+                      ref={password}
+                      type="password"
+                      placeholder={t`Password`}
+                    />
+                  </FormControl>
+                  <FormControl mb={4}>
+                    <FormLabel>{t`Confirm password`}</FormLabel>
+                    <Input
+                      ref={confirm}
+                      type="password"
+                      placeholder={t`Password`}
+                    />
+                  </FormControl>
+                  <FormControl mb={4}>
+                    <FormLabel>{t`Network`}</FormLabel>
+                    <Select ref={network}>
+                      {networkKeys.map((k) => (
+                        <option key={k} value={k}>
+                          {k}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <Button
+                    width="full"
+                    type="submit"
+                    isLoading={loading}
+                    loadingText={t`Creating wallet`}
+                  >
+                    {t`Next`}
                   </Button>
-                </Center>
-              </form>
-            </>
-          ) : (
-            <>
-              <Heading size="md" mb={4}>
-                {t`Wallet created`}
-              </Heading>
-              <Box mb={4}>
-                {t`Your wallet has been created. Please record your recovery phrase below.`}
-              </Box>
-              <RecoveryPhrase phrase={phrase} />
-              <Button as={Link} to="/objects" width="full">
-                {t`Confirm`}
-              </Button>
-            </>
-          )}
-        </Card>
+                  <Center mt={4}>
+                    <Button variant="ghost" as={Link} to="/recover">
+                      {t`Recover my wallet`}
+                    </Button>
+                  </Center>
+                </form>
+              </>
+            ) : (
+              <>
+                <Heading size="md" mb={4}>
+                  {t`Wallet created`}
+                </Heading>
+                <Box mb={4}>
+                  {t`Your wallet has been created. Please record your recovery phrase below.`}
+                </Box>
+                <RecoveryPhrase phrase={phrase} />
+                <Button as={Link} to="/objects" width="full">
+                  {t`Confirm`}
+                </Button>
+              </>
+            )}
+          </Card>
+        </Container>
       )}
       <LicenseModal
         isOpen={licenseOpen === true}

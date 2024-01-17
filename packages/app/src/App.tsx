@@ -13,6 +13,7 @@ import { balance, network, wallet } from "./signals";
 import { nftScriptHash, p2pkhScriptHash } from "@lib/script";
 import config from "./config.json";
 import useLanguageDetect from "./hooks/useLanguageDetect";
+import ReloadPrompt from "./components/ReloadPrompt";
 
 // Sync wallet balance signals with database
 // TODO move this somewhere else
@@ -64,6 +65,7 @@ function Main() {
           </>
         )}
       </ElectrumProvider>
+      <ReloadPrompt />
     </I18nProvider>
   );
 }

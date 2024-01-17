@@ -68,7 +68,6 @@ export default function ViewPanelLayout({
           <Grid
             as={Panel}
             minSizePixels={minSize}
-            minWidth={minSize}
             display={
               sref
                 ? { base: "none", "2xl": collapsed ? "none" : "grid" }
@@ -104,7 +103,6 @@ export default function ViewPanelLayout({
                 as={Panel}
                 order={1}
                 minSizePixels={minSize}
-                minWidth={minSize}
                 defaultSizePercentage={savedSize}
                 height="100vh"
               >

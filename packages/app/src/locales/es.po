@@ -134,12 +134,12 @@ msgstr ""
 msgid "Coins"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:181
+#: src/pages/CreateWallet.tsx:185
 msgid "Confirm"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:141
-#: src/pages/RecoverWallet.tsx:120
+#: src/pages/CreateWallet.tsx:143
+#: src/pages/RecoverWallet.tsx:122
 msgid "Confirm password"
 msgstr ""
 
@@ -200,15 +200,15 @@ msgstr ""
 msgid "Create"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:144
+#: src/pages/RecoverWallet.tsx:148
 msgid "Create a new wallet"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:123
+#: src/pages/CreateWallet.tsx:125
 msgid "Create a wallet"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:160
+#: src/pages/CreateWallet.tsx:164
 msgid "Creating wallet"
 msgstr ""
 
@@ -240,7 +240,7 @@ msgstr ""
 
 #: src/layouts/WalletLayout.tsx:75
 #: src/pages/Dashboard.tsx:123
-#: src/pages/Wallet.tsx:56
+#: src/pages/Wallet.tsx:52
 msgid "Digital Objects"
 msgstr ""
 
@@ -268,7 +268,7 @@ msgstr ""
 msgid "Enter password"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:106
+#: src/pages/RecoverWallet.tsx:108
 msgid "Enter your 12 word recovery phrase"
 msgstr ""
 
@@ -341,7 +341,7 @@ msgstr ""
 msgid "Invalid amount"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:80
+#: src/pages/RecoverWallet.tsx:81
 msgid "Invalid recovery phrase"
 msgstr ""
 
@@ -436,8 +436,8 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:149
-#: src/pages/RecoverWallet.tsx:124
+#: src/pages/CreateWallet.tsx:151
+#: src/pages/RecoverWallet.tsx:126
 msgid "Network"
 msgstr ""
 
@@ -445,11 +445,11 @@ msgstr ""
 msgid "New"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:116
+#: src/pages/RecoverWallet.tsx:118
 msgid "New password"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:162
+#: src/pages/CreateWallet.tsx:166
 msgid "Next"
 msgstr ""
 
@@ -457,7 +457,7 @@ msgstr ""
 msgid "NFT.Storage API Key"
 msgstr ""
 
-#: src/pages/Wallet.tsx:37
+#: src/pages/Wallet.tsx:56
 msgid "No assets"
 msgstr ""
 
@@ -503,14 +503,14 @@ msgstr ""
 
 #: src/components/PasswordModal.tsx:88
 #: src/components/PasswordModal.tsx:89
-#: src/pages/CreateWallet.tsx:133
-#: src/pages/CreateWallet.tsx:137
-#: src/pages/CreateWallet.tsx:145
+#: src/pages/CreateWallet.tsx:135
+#: src/pages/CreateWallet.tsx:139
+#: src/pages/CreateWallet.tsx:147
 msgid "Password"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:67
-#: src/pages/RecoverWallet.tsx:42
+#: src/pages/CreateWallet.tsx:68
+#: src/pages/RecoverWallet.tsx:43
 msgid "Passwords do not match"
 msgstr ""
 
@@ -536,19 +536,19 @@ msgstr ""
 msgid "Received"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:166
+#: src/pages/CreateWallet.tsx:170
 msgid "Recover my wallet"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:96
+#: src/pages/RecoverWallet.tsx:98
 msgid "Recover your wallet"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:135
+#: src/pages/RecoverWallet.tsx:139
 msgid "Recovering"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:109
+#: src/pages/RecoverWallet.tsx:111
 #: src/pages/WalletSettings.tsx:65
 msgid "Recovery phrase"
 msgstr ""
@@ -561,8 +561,8 @@ msgstr ""
 msgid "Saved"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:72
-#: src/pages/RecoverWallet.tsx:47
+#: src/pages/CreateWallet.tsx:73
+#: src/pages/RecoverWallet.tsx:48
 msgid "Select a valid network"
 msgstr ""
 
@@ -599,7 +599,7 @@ msgstr ""
 msgid "Store HashStamp on-chain"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:137
+#: src/pages/RecoverWallet.tsx:141
 msgid "Submit"
 msgstr ""
 
@@ -653,7 +653,7 @@ msgstr ""
 msgid "Unconfirmed"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:85
+#: src/pages/RecoverWallet.tsx:86
 msgid "Unknown error"
 msgstr ""
 
@@ -720,7 +720,7 @@ msgstr ""
 msgid "Wallet"
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:174
+#: src/pages/CreateWallet.tsx:178
 msgid "Wallet created"
 msgstr ""
 
@@ -756,6 +756,6 @@ msgstr ""
 msgid "Your token is ready to mint. Please review all data and the transaction fee before proceeding."
 msgstr ""
 
-#: src/pages/CreateWallet.tsx:177
+#: src/pages/CreateWallet.tsx:181
 msgid "Your wallet has been created. Please record your recovery phrase below."
 msgstr ""

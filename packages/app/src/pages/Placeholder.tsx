@@ -1,4 +1,4 @@
-import { Center } from "@chakra-ui/react";
+import { Flex, Text } from "@chakra-ui/react";
 import { t } from "@lingui/macro";
 import ContentContainer from "@app/components/ContentContainer";
 import PageHeader from "../components/PageHeader";
@@ -6,10 +6,10 @@ import PageHeader from "../components/PageHeader";
 export default function Placeholder() {
   return (
     <ContentContainer>
-      <PageHeader showLogo display={{ base: "flex", lg: "none" }} />
-      <Center fontSize="xl" fontWeight="bold" mt="20vh">
-        {t`This feature is coming soon`}
-      </Center>
+      <PageHeader showLogo />
+      <Flex flexDirection="column" alignItems="center" pt="33vh">
+        <Text fontSize="2xl">{t`This feature is coming soon`}</Text>
+      </Flex>
     </ContentContainer>
   );
 }

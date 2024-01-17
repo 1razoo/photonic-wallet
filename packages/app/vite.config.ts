@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import react from "@vitejs/plugin-react";
 import { lingui } from "@lingui/vite-plugin";
+import { VitePWA } from "vite-plugin-pwa";
 // import { comlink } from "vite-plugin-comlink";
 import path from "path";
 
@@ -16,6 +17,44 @@ export default defineConfig({
       },
     }),
     lingui(),
+    VitePWA({
+      workbox: { globPatterns: ["**/*"] },
+      registerType: "prompt",
+      includeAssets: ["**/*"],
+      manifest: {
+        theme_color: "#01579b",
+        background_color: "#26262b",
+        display: "standalone",
+        scope: "/",
+        start_url: "/",
+        short_name: "Photonic Wallet",
+        description: "Mint and transfer tokens on Radiant",
+        name: "Photonic Wallet",
+        icons: [
+          {
+            src: "pwa-64x64.png",
+            sizes: "64x64",
+            type: "image/png",
+          },
+          {
+            src: "pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+          {
+            src: "maskable-icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
+      },
+    }),
     /*, comlink()*/
   ],
   // TODO

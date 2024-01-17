@@ -51,8 +51,9 @@ export const buildTx = (
           sigType,
           index,
           output.script,
+          // Pass value as string to get around bn.js safe number limit
           // @ts-ignore
-          new crypto.BN(output.satoshis)
+          new crypto.BN(`${output.satoshis}`)
         );
         const spendScript = Script.empty()
           .add(Buffer.concat([sig.toBuffer(), Buffer.from([sigType])]))

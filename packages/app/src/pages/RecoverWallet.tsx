@@ -6,6 +6,7 @@ import {
   AlertIcon,
   Button,
   Center,
+  Container,
   FormControl,
   FormLabel,
   Heading,
@@ -91,59 +92,63 @@ export default function RecoverWallet() {
   };
 
   return (
-    <Card mb={4} p={4} width="2xl" maxW="100%" mx="auto" mt="120px">
-      <Heading size="md" mb={4}>
-        {t`Recover your wallet`}
-      </Heading>
-      {error && (
-        <Alert status="error" mb={4}>
-          <AlertIcon />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      <form onSubmit={submit}>
-        <FormControl mb={4}>
-          <FormLabel>{t`Enter your 12 word recovery phrase`}</FormLabel>
-          <Textarea
-            ref={phrase}
-            placeholder={t`Recovery phrase`}
-            size="sm"
-            resize="none"
-            autoFocus
-          />
-        </FormControl>
-        <FormControl mb={4}>
-          <FormLabel>{t`New password`}</FormLabel>
-          <Input ref={password} type="password" placeholder="Password" />
-        </FormControl>
-        <FormControl mb={4}>
-          <FormLabel>{t`Confirm password`}</FormLabel>
-          <Input ref={confirm} type="password" placeholder="Password" />
-        </FormControl>
-        <FormControl mb={4}>
-          <FormLabel>{t`Network`}</FormLabel>
-          <Select ref={network}>
-            {networkKeys.map((k) => (
-              <option key={k} value={k}>{k}</option>
-            ))}
-          </Select>
-        </FormControl>
-        <Button
-          width="full"
-          type="submit"
-          isLoading={loading}
-          loadingText={t`Recovering`}
-        >
-          {t`Submit`}
-        </Button>
-        <Center mt={4}>
+    <Container display="flex" alignItems="center" height="100vh">
+      <Card mb={4} p={4} width="2xl">
+        <Heading size="md" mb={4}>
+          {t`Recover your wallet`}
+        </Heading>
+        {error && (
+          <Alert status="error" mb={4}>
+            <AlertIcon />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        <form onSubmit={submit}>
+          <FormControl mb={4}>
+            <FormLabel>{t`Enter your 12 word recovery phrase`}</FormLabel>
+            <Textarea
+              ref={phrase}
+              placeholder={t`Recovery phrase`}
+              size="sm"
+              resize="none"
+              autoFocus
+            />
+          </FormControl>
+          <FormControl mb={4}>
+            <FormLabel>{t`New password`}</FormLabel>
+            <Input ref={password} type="password" placeholder="Password" />
+          </FormControl>
+          <FormControl mb={4}>
+            <FormLabel>{t`Confirm password`}</FormLabel>
+            <Input ref={confirm} type="password" placeholder="Password" />
+          </FormControl>
+          <FormControl mb={4}>
+            <FormLabel>{t`Network`}</FormLabel>
+            <Select ref={network}>
+              {networkKeys.map((k) => (
+                <option key={k} value={k}>
+                  {k}
+                </option>
+              ))}
+            </Select>
+          </FormControl>
           <Button
-            variant="ghost"
-            as={Link}
-            to="/create-wallet"
-          >{t`Create a new wallet`}</Button>
-        </Center>
-      </form>
-    </Card>
+            width="full"
+            type="submit"
+            isLoading={loading}
+            loadingText={t`Recovering`}
+          >
+            {t`Submit`}
+          </Button>
+          <Center mt={4}>
+            <Button
+              variant="ghost"
+              as={Link}
+              to="/create-wallet"
+            >{t`Create a new wallet`}</Button>
+          </Center>
+        </form>
+      </Card>
+    </Container>
   );
 }

@@ -12,7 +12,7 @@
     "noEmit": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["vite/client", "node"],
+    "types": ["vite/client", "vite-plugin-pwa/client", "node"],
     "allowSyntheticDefaultImports": true,
     "declaration": false,
     "declarationMap": false

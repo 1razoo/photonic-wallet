@@ -14,7 +14,6 @@ export default function coinSelect(
   feeRate: number
 ) {
   const inputs = utxos
-    .filter(({ value }) => value < 100000000000000)
     .map((u) => ({
       address,
       txid: u.txid,

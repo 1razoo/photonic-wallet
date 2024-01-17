@@ -48,6 +48,20 @@ index 774ecb8cbac8bbc447f93e9c6f1e33175106eafe..5a40fd5f0f03f3ba4004b42694e04e09
  module.exports = Address
 -
 -var Script = require('./script')
+diff --git a/lib/crypto/bn.js b/lib/crypto/bn.js
+index 73231d9ee7a4071ec6a0140313b78ff69706aaa0..84e79c52e75be50b4dc73b6cd871829a3031ae69 100644
+--- a/lib/crypto/bn.js
++++ b/lib/crypto/bn.js
+@@ -106,7 +106,8 @@ BN.Minus1 = new BN(-1)
+  */
+ BN.fromNumber = function (n) {
+   $.checkArgument(_.isNumber(n))
+-  return new BN(n)
++  // Convert to string to get around bn.js safe number limit
++  return new BN(`${n}`)
+ }
+ 
+ /**
 diff --git a/lib/crypto/hash.browser.js b/lib/crypto/hash.browser.js
 index 1cf58d246b1ff81d9c46112d6597880cb28fd66c..8c8cf3004f25b9d52a13aca03faf0746be597c4b 100644
 --- a/lib/crypto/hash.browser.js

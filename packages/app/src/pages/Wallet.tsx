@@ -33,10 +33,6 @@ function TokenGrid({ open }: { open: boolean }) {
 
   useRestoreScroll();
 
-  if (nft.length === 0) {
-    return <NoContent>{t`No assets`}</NoContent>;
-  }
-
   return (
     <>
       <PageHeader
@@ -56,32 +52,36 @@ function TokenGrid({ open }: { open: boolean }) {
         {t`Digital Objects`}
       </PageHeader>
 
-      <Grid
-        gridTemplateColumns={`repeat(auto-fill, minmax(${
-          open ? "168px" : "240px"
-        }, 1fr))`}
-        gridAutoRows="max-content"
-        overflowY="auto"
-        pb={4}
-        px={4}
-        gap={4}
-      >
-        {nft
-          .slice(0, pageSize)
-          .map(
-            (token) =>
-              token && (
-                <TokenCard
-                  token={token}
-                  key={token.txo.id}
-                  to={`/objects/atom/${token.atom.ref}${
-                    page > 0 ? `?p=${page}` : ""
-                  }`}
-                  size={open ? "sm" : "md"}
-                />
-              )
-          )}
-      </Grid>
+      {nft.length === 0 ? (
+        <NoContent>{t`No assets`}</NoContent>
+      ) : (
+        <Grid
+          gridTemplateColumns={`repeat(auto-fill, minmax(${
+            open ? "168px" : "240px"
+          }, 1fr))`}
+          gridAutoRows="max-content"
+          overflowY="auto"
+          pb={4}
+          px={4}
+          gap={4}
+        >
+          {nft
+            .slice(0, pageSize)
+            .map(
+              (token) =>
+                token && (
+                  <TokenCard
+                    token={token}
+                    key={token.txo.id}
+                    to={`/objects/atom/${token.atom.ref}${
+                      page > 0 ? `?p=${page}` : ""
+                    }`}
+                    size={open ? "sm" : "md"}
+                  />
+                )
+            )}
+        </Grid>
+      )}
     </>
   );
 }
