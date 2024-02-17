@@ -1,7 +1,6 @@
 import {
   Alert,
   AlertIcon,
-  AlertTitle,
   Box,
   BoxProps,
   Button,
@@ -14,7 +13,9 @@ import {
   Heading,
   Image,
   SimpleGrid,
+  Text,
   Tooltip,
+  useClipboard,
   useDisclosure,
 } from "@chakra-ui/react";
 import { Trans, t } from "@lingui/macro";
@@ -24,9 +25,8 @@ import { filesize } from "filesize";
 import mime from "mime/lite";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useLocation, useNavigate } from "react-router-dom";
-import dayjs from "dayjs";
 import db from "@app/db";
-import { DownloadIcon, InfoIcon } from "@chakra-ui/icons";
+import { CopyIcon, DownloadIcon, EditIcon, InfoIcon } from "@chakra-ui/icons";
 import { Address } from "@radiantblockchain/radiantjs";
 import Outpoint from "@lib/Outpoint";
 import Identifier from "@app/components/Identifier";
@@ -40,11 +40,12 @@ import DownloadLink from "@app/components/DownloadLink";
 import TokenContent from "@app/components/TokenContent";
 import AtomType from "@app/components/AtomType";
 import PageHeader from "@app/components/PageHeader";
-import LinkButton from "./LinkButton";
 import MeltAsset from "./MeltAsset";
 import TxSuccessModal from "./TxSuccessModal";
 import { AtomNft, TxO } from "../types";
 import { openModal, wallet } from "@app/signals";
+import EditTokenTest from "./EditTokenTest";
+import FetchTokenTest from "./FetchMutableTest";
 
 const Meta = ({
   heading,
@@ -69,6 +70,15 @@ const Meta = ({
   );
 };
 
+function Warning({ children }: PropsWithChildren) {
+  return (
+    <Alert status="warning" as={GridItem} justifyContent="center" colSpan={2}>
+      <AlertIcon />
+      <Trans>{children}</Trans>
+    </Alert>
+  );
+}
+
 export default function ViewAsset({
   sref,
   context,
@@ -86,19 +96,22 @@ export default function ViewAsset({
   const sendDisclosure = useDisclosure();
   const meltDisclosure = useDisclosure();
   const successDisclosure = useDisclosure();
-  const [nft, txo] = useLiveQuery(
+  const [nft, txo, author, container] = useLiveQuery(
     async () => {
       const nft = await db.atomNft.get({ ref: sref });
       if (!nft?.lastTxoId) return [undefined, undefined];
       const txo = await db.txo.get(nft?.lastTxoId);
-      return [nft, txo] as [AtomNft, TxO];
+      const a = nft.author && (await db.atomNft.get({ ref: nft.author }));
+      const c = nft.container && (await db.atomNft.get({ ref: nft.container }));
+      return [nft, txo, a, c] as [AtomNft, TxO, AtomNft?, AtomNft?];
     },
     [sref],
     [undefined, undefined]
   );
   const txid = useRef("");
+  const { onCopy: onLinkCopy } = useClipboard(nft?.main || "");
 
-  // FIXME show loading or 404
+  // TODO show loading or 404
   if (!txo || !nft) {
     return (
       <ContentContainer>
@@ -116,9 +129,8 @@ export default function ViewAsset({
 
   const location = Outpoint.fromUTXO(txo.txid, txo.vout);
   const atom = ref.ref("i");
-  const author = nft?.author && Outpoint.fromString(nft.author).reverse();
-  const container =
-    nft?.container && Outpoint.fromString(nft.container).reverse();
+  const authorRef = nft?.author && Outpoint.fromString(nft.author);
+  const containerRef = nft?.container && Outpoint.fromString(nft.container);
 
   const unlock = (fn: () => void) => {
     if (wallet.value.locked) {
@@ -146,7 +158,8 @@ export default function ViewAsset({
     ".gif",
     ".webp",
     ".svg",
-  ].includes(nft?.main?.substring(nft?.main?.lastIndexOf(".")) || "");
+    ".avif",
+  ].includes(nft?.filename?.substring(nft?.filename?.lastIndexOf(".")) || "");
 
   return (
     <>
@@ -182,18 +195,12 @@ export default function ViewAsset({
                 {nft && <TokenContent nft={nft} />}
               </GridItem>
               {nft?.file && !isKnownEmbed && (
-                <Alert
-                  status="error"
-                  as={GridItem}
-                  justifyContent="center"
-                  colSpan={2}
-                >
-                  <AlertIcon />
-                  <Trans>
-                    <AlertTitle>Caution:</AlertTitle>
-                    Files may be unsafe
-                  </Trans>
-                </Alert>
+                <Warning>Files may be unsafe</Warning>
+              )}
+              {!nft?.file && nft.main && !isIPFS && (
+                <Warning>
+                  URLs may be unsafe and result in loss of funds
+                </Warning>
               )}
               {nft?.file && (
                 <GridItem
@@ -208,33 +215,24 @@ export default function ViewAsset({
               )}
               {!nft?.file && nft.main && (
                 <>
-                  {nft.main.startsWith("ipfs://") || isKnownEmbed ? (
-                    <GridItem
-                      as={LinkButton}
-                      to={nft.main}
-                      target="_blank"
-                      download
-                      leftIcon={<DownloadIcon />}
-                      colSpan={2}
-                    >
-                      {t`Download`}
-                    </GridItem>
-                  ) : (
-                    <Alert
-                      status="error"
-                      as={GridItem}
-                      justifyContent="center"
-                      colSpan={2}
-                    >
-                      <AlertIcon />
-                      <Trans>
-                        <AlertTitle>Caution:</AlertTitle>
-                        URLs may be unsafe and result in loss of funds
-                      </Trans>
-                    </Alert>
-                  )}
+                  <GridItem
+                    as={Button}
+                    onClick={onLinkCopy}
+                    leftIcon={<CopyIcon />}
+                    colSpan={2}
+                  >
+                    {t`Copy URL`}
+                  </GridItem>
                 </>
               )}
+              {/* Edit mutable token, for testing purposes only
+              {nft.immutable === false && (
+                <>
+                  <EditTokenTest token={nft} txo={txo} />
+                  <FetchTokenTest token={nft} />
+                </>
+              )}
+              */}
               <Button onClick={() => unlock(openSend)}>Send</Button>
               <Button
                 onClick={() => unlock(openMelt)}
@@ -253,37 +251,55 @@ export default function ViewAsset({
                     sx={{ svg: { height: "26px" } }}
                     float="left"
                   />
-                  <Identifier showCopy copyValue={atom}>
+                  <Identifier showCopy copyValue={ref.ref()}>
                     {atom}
                   </Identifier>
                 </div>
               </Meta>
-              {author && (
+              {authorRef && (
                 <Meta heading="Author" mb={4}>
-                  <div>
-                    <Identicon
-                      value={author.refHash()}
-                      width="26px"
-                      height="24px"
-                      sx={{ svg: { height: "26px" } }}
-                      float="left"
-                    />
-                    <Identifier showCopy>{author.ref("i")}</Identifier>
-                  </div>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    {author?.name ? (
+                      <Text>{author.name}</Text>
+                    ) : (
+                      <Text fontStyle="italic">&lt;Unnamed author&gt;</Text>
+                    )}
+                    <div>
+                      <Identicon
+                        value={authorRef.refHash()}
+                        width="26px"
+                        height="24px"
+                        sx={{ svg: { height: "26px" } }}
+                        float="left"
+                      />
+                      <Identifier showCopy copyValue={authorRef.ref()}>
+                        {authorRef.shortRef()}
+                      </Identifier>
+                    </div>
+                  </Flex>
                 </Meta>
               )}
-              {container && (
+              {containerRef && (
                 <Meta heading="Container" mb={4}>
-                  <div>
-                    <Identicon
-                      value={container.refHash()}
-                      width="26px"
-                      height="24px"
-                      sx={{ svg: { height: "26px" } }}
-                      float="left"
-                    />
-                    <Identifier showCopy>{container.ref("i")}</Identifier>
-                  </div>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    {container?.name ? (
+                      <Text>{container.name}</Text>
+                    ) : (
+                      <Text fontStyle="italic">&lt;Unnamed container&gt;</Text>
+                    )}
+                    <div>
+                      <Identicon
+                        value={containerRef.refHash()}
+                        width="26px"
+                        height="24px"
+                        sx={{ svg: { height: "26px" } }}
+                        float="left"
+                      />
+                      <Identifier showCopy copyValue={containerRef.ref()}>
+                        {containerRef.shortRef()}
+                      </Identifier>
+                    </div>
+                  </Flex>
                 </Meta>
               )}
               <SimpleGrid columns={[1, 2]} spacing={4}>
@@ -321,7 +337,6 @@ export default function ViewAsset({
                         width="64px"
                         height="64px"
                         objectFit="contain"
-                        sx={{ imageRendering: "pixelated" }}
                         backgroundColor="white"
                       />
                       {nft.hash && (
@@ -361,11 +376,13 @@ export default function ViewAsset({
                     </Identifier>
                   </div>
                 </Meta>
+                {/* Temporarily disabled. See comment regarding date in buildUpdateTXOs.
                 <Meta heading={t`Received`}>
                   {txo.date
                     ? dayjs(txo.date * 1000).format("lll")
                     : "Unconfirmed"}
                 </Meta>
+                */}
                 <Meta heading={t`Height`}>
                   {txo.height === Infinity ? t`Unconfirmed` : txo.height}
                 </Meta>

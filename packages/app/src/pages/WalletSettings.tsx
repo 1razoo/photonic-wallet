@@ -1,19 +1,23 @@
-import { ChangeEventHandler, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { t } from "@lingui/macro";
 import {
   Button,
   Center,
   Container,
+  Flex,
   FormControl,
+  FormHelperText,
   FormLabel,
   Heading,
+  Input,
   Select,
   Text,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import PasswordModal from "@app/components/PasswordModal";
 import RecoveryPhrase from "@app/components/RecoveryPhrase";
-import { language, wallet } from "@app/signals";
+import { feeRate, language, wallet } from "@app/signals";
 import FormSection from "@app/components/FormSection";
 import db from "@app/db";
 import { loadCatalog } from "@app/i18n";
@@ -31,25 +35,43 @@ export default function WalletSettings() {
     disclosure.onClose();
   };
   const languageRef = useRef<HTMLSelectElement>(null);
+  const feeRateRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
 
-  const savedLanguage = useLiveQuery(
-    () => db.kvp.get("language") as PromiseExtended<string>,
+  const keys = ["language", "feeRate"];
+  const save = async () => {
+    const newLanguage = languageRef.current?.value;
+    const changeLang = language.value !== newLanguage;
+    const feeRateNum = parseInt(feeRateRef.current?.value || "", 10);
+
+    db.kvp.bulkPut(
+      [languageRef.current?.value, feeRateRef.current?.value],
+      keys
+    );
+    toast({
+      title: t`Saved`,
+      status: "success",
+    });
+
+    // Update fee rate signal
+    feeRate.value = feeRateNum;
+
+    if (changeLang && newLanguage) {
+      // Change language
+      await loadCatalog(newLanguage);
+      // Trigger rerender on the currently rendered components
+      language.value = newLanguage;
+    }
+  };
+  const response = useLiveQuery(
+    async () => await (db.kvp.bulkGet(keys) as PromiseExtended<string[]>),
     [],
     null
   );
 
-  const changeLanguage: ChangeEventHandler<HTMLSelectElement> = async ({
-    target: { value },
-  }) => {
-    // Save to DB. This is only used when loading the app.
-    db.kvp.put(value, "language");
-    // Change language
-    await loadCatalog(value);
-    // Trigger rerender on the currently rendered components
-    language.value = value;
-  };
+  if (response === null) return null;
 
-  if (savedLanguage === null) return null;
+  const [savedLanguage, savedFeeRate] = response;
 
   return (
     <Container maxW="container.md" px={4} display="grid" gap={8}>
@@ -85,11 +107,7 @@ export default function WalletSettings() {
       <FormSection>
         <FormControl>
           <FormLabel>{t`Language`}</FormLabel>
-          <Select
-            ref={languageRef}
-            onChange={changeLanguage}
-            defaultValue={savedLanguage || ""}
-          >
+          <Select ref={languageRef} defaultValue={savedLanguage || ""}>
             {Object.entries(config.i18n.languages).map(([k, v]) => (
               <option value={k} key={k}>
                 {v}
@@ -97,7 +115,22 @@ export default function WalletSettings() {
             ))}
           </Select>
         </FormControl>
+        <FormControl>
+          <FormLabel>{t`Fee Rate`}</FormLabel>
+          <Input
+            ref={feeRateRef}
+            placeholder="5000"
+            name="gateway"
+            defaultValue={savedFeeRate}
+          />
+          <FormHelperText>Photons per byte</FormHelperText>
+        </FormControl>
       </FormSection>
+      <Flex justifyContent="center" py={8} mb={16}>
+        <Button size="lg" w="240px" maxW="100%" shadow="dark-md" onClick={save}>
+          {t`Save`}
+        </Button>
+      </Flex>
     </Container>
   );
 }

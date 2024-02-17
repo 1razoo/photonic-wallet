@@ -20,7 +20,7 @@ This is alpha software in active development. If you would like to test it, plea
 - Fungible tokens
 - Mutable tokens
 - Transfer history
-- CLI for batch minting
+- SPV
 
 ## Getting Started
 
@@ -33,6 +33,7 @@ pnpm install
 ### Run development server
 
 ```bash
+cd packages/app
 pnpm turbo dev
 ```
 
@@ -53,6 +54,10 @@ pnpm -F app tauri build
 Executables will be in `pacakges/app/src-tauri/target/release`.
 
 Add `-d` for a debug build.
+
+## Photonic Factory CLI
+
+The CLI is used for batch minting tokens. See `packages/cli/README.md` for more information.
 
 ## License
 

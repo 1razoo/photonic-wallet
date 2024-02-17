@@ -15,13 +15,8 @@
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strict": true,
-    "paths": {
-      "@app/*": ["packages/app/src/*"],
-      "@ui/*": ["packages/ui/src/*"],
-      "@lib/*": ["packages/lib/src/*"]
-    },
-    "baseUrl": "../../",
-    "target": "ES2020"
+    "target": "ES2020",
+    "baseUrl": "../"
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }

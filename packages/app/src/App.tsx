@@ -8,12 +8,13 @@ import Unlock from "./components/Unlock";
 import ElectrumProvider from "./electrum/ElectrumProvider";
 import SendReceive from "./components/SendReceive";
 import db from "./db";
-import { NetworkKey, SavedWallet } from "./types";
-import { balance, network, wallet } from "./signals";
+import { SavedWallet } from "./types";
+import { balance, feeRate, network, wallet } from "./signals";
 import { nftScriptHash, p2pkhScriptHash } from "@lib/script";
 import config from "./config.json";
 import useLanguageDetect from "./hooks/useLanguageDetect";
 import ReloadPrompt from "./components/ReloadPrompt";
+import { NetworkKey } from "@lib/types";
 
 // Sync wallet balance signals with database
 // TODO move this somewhere else
@@ -72,7 +73,8 @@ function Main() {
 
 export default function App() {
   const saved = useLiveQuery(
-    async () => (await db.kvp.get("wallet")) as SavedWallet,
+    async () =>
+      (await db.kvp.bulkGet(["wallet", "feeRate"])) as [SavedWallet, number],
     [],
     null
   );
@@ -81,16 +83,18 @@ export default function App() {
 
   useEffect(() => {
     if (saved !== null) {
-      const net = saved?.net || "testnet";
+      const [savedWallet, savedFeeRate] = saved;
+      const net = savedWallet?.net || "testnet";
       batch(() => {
         wallet.value = {
           ready: true,
-          address: saved?.address || "",
-          exists: !!saved,
+          address: savedWallet?.address || "",
+          exists: !!savedWallet,
           net,
           locked: true,
         };
         network.value = config.networks[net as NetworkKey];
+        feeRate.value = savedFeeRate;
       });
     }
   }, [saved]);

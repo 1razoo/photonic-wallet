@@ -15,5 +15,6 @@ module.exports = {
   },
   rules: {
     "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
   },
 };

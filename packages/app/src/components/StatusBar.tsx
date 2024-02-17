@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { t, Trans } from "@lingui/macro";
+import { t } from "@lingui/macro";
 import { Icon, Spinner, useToast } from "@chakra-ui/react";
 import { LockIcon, SettingsIcon, UnlockIcon } from "@chakra-ui/icons";
 import {
@@ -30,6 +30,7 @@ const UnlockButton = () => {
   if (wallet.value.locked) {
     return (
       <MenuButton
+        as="button"
         leftIcon={hover ? <UnlockIcon boxSize={4} /> : <LockIcon boxSize={4} />}
         onClick={() => unlockWallet()}
         onMouseOver={() => setHover(true)}
@@ -42,6 +43,7 @@ const UnlockButton = () => {
 
   return (
     <MenuButton
+      as="button"
       leftIcon={hover ? <LockIcon boxSize={4} /> : <UnlockIcon boxSize={4} />}
       onClick={() => {
         lockWallet();
@@ -81,6 +83,7 @@ const ConnectButton = () => {
   if (electrumStatus.value === ElectrumStatus.CONNECTED) {
     return (
       <MenuButton
+        as="button"
         leftIcon={
           <Icon as={hover ? DisconnectedIcon : ConnectedIcon} boxSize={4} />
         }
@@ -98,7 +101,7 @@ const ConnectButton = () => {
 
   if (electrumStatus.value === ElectrumStatus.CONNECTING) {
     return (
-      <MenuButton leftIcon={<Spinner size="sm" />}>
+      <MenuButton as="button" leftIcon={<Spinner size="sm" />}>
         {statusText[electrumStatus.value]}
       </MenuButton>
     );
@@ -106,6 +109,7 @@ const ConnectButton = () => {
 
   return (
     <MenuButton
+      as="button"
       leftIcon={
         <Icon as={hover ? ConnectedIcon : DisconnectedIcon} boxSize={4} />
       }

@@ -36,7 +36,7 @@ function ReloadPrompt() {
 
   useEffect(() => {
     if (offlineReady)
-      toast({ status: "info", description: "App ready for offline use" });
+      toast({ status: "info", title: "App ready for offline use" });
   }, [offlineReady]);
 
   const close = () => {

@@ -20,12 +20,19 @@ export default class Outpoint {
 
   static fromUTXO(txid: string, vout: number) {
     const voutBuf = Buffer.alloc(4);
-    voutBuf.writeInt32BE(vout);
+    voutBuf.writeUInt32BE(vout);
     return new Outpoint(Buffer.from(txid, "hex"), voutBuf);
   }
 
+  static fromObject({ txid, vout }: { txid: string; vout: number }) {
+    return Outpoint.fromUTXO(txid, vout);
+  }
+
   reverse() {
-    return new Outpoint(this.txid.reverse(), this.vout.reverse());
+    return new Outpoint(
+      Buffer.from(this.txid).reverse(),
+      Buffer.from(this.vout).reverse()
+    );
   }
 
   ref(type?: string) {
@@ -33,6 +40,10 @@ export default class Outpoint {
       ? `${type}${this.vout.readUInt32BE()}`
       : `${this.vout.toString("hex").padStart(8, "0")}`;
     return `${this.txid.toString("hex")}${vout}`;
+  }
+
+  toString() {
+    return this.ref();
   }
 
   short(type: string) {
@@ -71,5 +82,20 @@ export default class Outpoint {
 
   refHash() {
     return Buffer.from(sha256(Buffer.from(this.ref(), "hex"))).toString("hex");
+  }
+
+  getTxid() {
+    return this.txid.toString("hex");
+  }
+
+  getVout() {
+    return this.vout.readUInt32BE();
+  }
+
+  toObject() {
+    return {
+      txid: this.getTxid(),
+      vout: this.getVout(),
+    };
   }
 }

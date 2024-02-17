@@ -4,11 +4,12 @@ import {
   // @ts-ignore
 } from "@radiantblockchain/radiantjs";
 import db from "@app/db";
-import { ContractType, ElectrumTxResponse, TxO, Utxo } from "@app/types";
+import { ContractType, TxO } from "@app/types";
 import ElectrumManager from "@app/electrum/ElectrumManager";
+import { ElectrumTxResponse, ElectrumUtxo } from "@lib/types";
 
 export type ElectrumTxMap = {
-  [key: string]: { raw: ElectrumTxResponse; tx: Transaction };
+  [key: string]: { hex: string; tx: Transaction };
 };
 
 export const buildUpdateTXOs =
@@ -18,9 +19,9 @@ export const buildUpdateTXOs =
     newStatus: string
   ): Promise<{
     added: TxO[];
-    confs: Map<number, Utxo>;
+    confs: Map<number, ElectrumUtxo>;
     newTxs?: ElectrumTxMap;
-    spent: number[];
+    spent: { id: number; value: number }[];
   }> => {
     // Check if status has changed
     const currentStatus = await db.subscriptionStatus
@@ -37,15 +38,15 @@ export const buildUpdateTXOs =
     const utxos = (await electrum.client?.request(
       "blockchain.scripthash.listunspent",
       scriptHash
-    )) as Utxo[];
+    )) as ElectrumUtxo[];
     console.debug("Unspent", contractType, utxos);
 
     // Check tx exists in database
     // Dedup any transactions that have multiple UTXOs for this wallet
-    const txIds = new Set<string>();
-    const newUtxos: Utxo[] = [];
+    const newTxIds = new Set<string>();
+    const newUtxos: ElectrumUtxo[] = [];
     const outpoints: string[] = []; // All UTXO outpoints
-    const confs: Map<number, Utxo> = new Map(); // Newly confirmed transactions mapped by txo id
+    const confs: Map<number, ElectrumUtxo> = new Map(); // Newly confirmed transactions mapped by txo id
     await Promise.all(
       utxos.map(async (utxo) => {
         outpoints.push(`${utxo.tx_hash}${utxo.tx_pos}`);
@@ -53,11 +54,9 @@ export const buildUpdateTXOs =
           .where({ txid: utxo.tx_hash, vout: utxo.tx_pos })
           .first();
         if (!exist) {
-          txIds.add(utxo.tx_hash);
+          newTxIds.add(utxo.tx_hash);
           newUtxos.push(utxo);
         } else if (exist.id && exist.height != utxo.height) {
-          // FIXME this will cause fetch on these utxos, is that necessary?
-          txIds.add(utxo.tx_hash);
           confs.set(exist.id, utxo);
         }
       })
@@ -65,13 +64,11 @@ export const buildUpdateTXOs =
 
     // Update spent UTXOs
     const spent = (await db.txo.where({ contractType, spent: 0 }).toArray())
-      .map(({ id, txid, vout }) =>
-        outpoints.includes(`${txid}${vout}`) ? undefined : id
-      )
-      .filter(Boolean) as number[];
+      .filter(({ txid, vout }) => !outpoints.includes(`${txid}${vout}`))
+      .map(({ id, value }) => ({ id: id as number, value }));
     await db.transaction("rw", db.txo, async () => {
-      for (const update of spent) {
-        await db.txo.update(update, {
+      for (const { id } of spent) {
+        await db.txo.update(id, {
           spent: 1,
         });
       }
@@ -79,20 +76,17 @@ export const buildUpdateTXOs =
 
     // Get transactions not in the database
     // Convert to an object indexed by txid
-    const newTxs: {
-      [key: string]: { tx: Transaction; raw: ElectrumTxResponse };
-    } = Object.fromEntries(
+    const newTxs: ElectrumTxMap = Object.fromEntries(
       await Promise.all(
-        [...txIds].map(async (txId) => {
-          const raw = (await electrum.client?.request(
+        [...newTxIds].map(async (txId) => {
+          const hex = (await electrum.client?.request(
             "blockchain.transaction.get",
-            txId,
-            true
+            txId
           )) as ElectrumTxResponse;
 
-          if (raw) {
-            const tx = new Transaction(raw.hex);
-            return [raw.hash, { tx, raw }];
+          if (hex) {
+            const tx = new Transaction(hex);
+            return [txId, { tx, hex }];
           }
           return [undefined, undefined];
         })
@@ -106,7 +100,9 @@ export const buildUpdateTXOs =
           vout: utxo.tx_pos,
           script: newTxs[utxo.tx_hash].tx.outputs[utxo.tx_pos].script.toHex(),
           value: utxo.value,
-          date: newTxs[utxo.tx_hash].raw.time || undefined,
+          // FIXME find a better way to store date
+          // Maybe when block header subscription is finished it can be used
+          // date: newTxs[utxo.tx_hash].raw.time || undefined,
           height: utxo.height || Infinity,
           spent: 0,
           contractType,
@@ -123,7 +119,7 @@ export const buildUpdateTXOs =
       for (const [id, utxo] of confs) {
         await db.txo.update(id, {
           height: utxo.height || Infinity,
-          date: newTxs[utxo.tx_hash].raw.time || undefined,
+          // date: newTxs[utxo.tx_hash].raw.time || undefined, // how to get date without fetching?
         });
       }
     });

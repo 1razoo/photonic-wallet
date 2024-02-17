@@ -106,6 +106,20 @@ const theme = extendTheme({
         },
       },
     },
+    Alert: {
+      variants: {
+        subtle: {
+          // Default subtle toast colours are too transparent and difficult to read
+          // This will apply to Alert and Toast
+          container: {
+            "&[data-status='success']": { bg: "#1C4532EE" },
+            "&[data-status='error']": { bg: "#C53030EE" },
+            "&[data-status='warning']": { bg: "#C05621EE" },
+            "&[data-status='info']": { bg: "#1A365DEE" },
+          },
+        },
+      },
+    },
     Button: {
       baseStyle: {
         transition: "none",
@@ -140,7 +154,7 @@ const theme = extendTheme({
         },
         dialog: {
           bgGradient: "linear(to-b, transparent, blackAlpha.500)",
-          bgColor: "#2D2D2D80",
+          bgColor: "#2D2D2DA0",
         },
         body: {
           display: "flex",
@@ -241,7 +255,7 @@ const router = createHashRouter([
   {
     path: "/",
     element: <App />,
-    errorElement: <div>Error</div>, // FIXME
+    errorElement: <div>Error</div>, // TODO
     children: [
       {
         path: "",

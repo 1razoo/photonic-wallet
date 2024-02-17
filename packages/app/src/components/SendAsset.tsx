@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { t } from "@lingui/macro";
 import { PrivateKey } from "@radiantblockchain/radiantjs";
-import coinSelect from "@lib/coinSelect";
+import coinSelect, { SelectableInput } from "@lib/coinSelect";
 import {
   Modal,
   ModalOverlay,
@@ -28,7 +28,7 @@ import { buildTx } from "@lib/tx";
 import Identifier from "./Identifier";
 import Outpoint from "@lib/Outpoint";
 import useElectrum from "@app/electrum/useElectrum";
-import { network, wallet } from "@app/signals";
+import { feeRate, network, wallet } from "@app/signals";
 
 interface Props {
   asset: TxO;
@@ -63,7 +63,7 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
 
     let fail = false;
     if (!toAddress.current?.value) {
-      // FIXME validate address
+      // TODO validate address
       fail = true;
       setErrorMessage(t`Invalid address`);
     }
@@ -74,23 +74,22 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
       return;
     }
 
-    const required = { ...asset, required: true };
-    const coins: (TxO & { required?: boolean })[] = [required, ...rxd.slice()];
+    const required: SelectableInput = { ...asset, required: true };
+    const inputs: SelectableInput[] = [required, ...rxd.slice()];
 
     const changeScript = p2pkhScript(wallet.value.address);
     const script = nftScript(
       toAddress.current?.value as string,
-      ref.reverse().ref()
+      ref.toString()
     );
 
     const selected = coinSelect(
       wallet.value.address,
-      coins,
+      inputs,
       [{ script, value: asset.value }],
       changeScript,
-      2000
+      feeRate.value
     );
-    // FIXME errors here sometimes
     if (!selected.inputs?.length) {
       setErrorMessage(t`Insufficient funds`);
       setSuccess(false);
@@ -101,7 +100,6 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
     selected.inputs[0].script = asset.script;
 
     const privKey = PrivateKey.fromString(wallet.value.wif as string);
-    console.log(selected);
 
     const rawTx = buildTx(
       wallet.value.address,

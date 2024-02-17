@@ -15,6 +15,10 @@
     "types": ["vite/client", "vite-plugin-pwa/client", "node"],
     "allowSyntheticDefaultImports": true,
     "declaration": false,
-    "declarationMap": false
+    "declarationMap": false,
+    "paths": {
+      "@app/*": ["app/src/*"],
+      "@lib/*": ["lib/src/*"]
+    }
   }
 }

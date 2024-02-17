@@ -3,23 +3,28 @@ import { sha256 } from "@noble/hashes/sha256";
 import { Buffer } from "buffer";
 import { decode, encode } from "cbor-x";
 // @ts-ignore
-import { Script } from "@radiantblockchain/radiantjs";
-import { AtomPayload } from "@app/types";
+import rjs from "@radiantblockchain/radiantjs";
+import { AtomFile, AtomPayload } from "./types";
+import { bytesToHex } from "@noble/hashes/utils";
+import { nAsm } from "./script";
 
-const atomHex = "73707235";
+// ESM compatibility
+const { Script } = rjs;
+type Script = rjs.Script;
+
+export const atomHex = "72633031";
+//export const atomHex = "61746f6d"; // atom
 export const atomBuffer = Buffer.from(atomHex, "hex");
 
 const toObject = (obj: unknown) =>
   typeof obj === "object" ? (obj as { [key: string]: unknown }) : {};
-
-const toArray = (arr: unknown) => (Array.isArray(arr) ? arr : []);
 
 export function decodeAtom(script: Script):
   | undefined
   | {
       operation?: string;
       payload: AtomPayload;
-      files: { [key: string]: unknown };
+      files: { [key: string]: AtomFile };
     } {
   let result: { operation?: string; payload: object } = {
     operation: undefined,
@@ -59,38 +64,73 @@ export function decodeAtom(script: Script):
 
   if (!result.operation) return undefined;
 
-  const {
-    meta,
-    args,
-    ctx,
-    by,
-    in: container,
-    ...rest
-  } = result.payload as { [key: string]: unknown };
+  const { args, ctx, ...rest } = result.payload as {
+    [key: string]: unknown;
+  };
+
+  // Separate meta and file fields from root object
+  const { meta, files } = Object.entries(rest).reduce<{
+    meta: [string, unknown][];
+    files: [string, unknown][];
+  }>(
+    (a, [k, v]) => {
+      a[k.indexOf(".") > 0 ? "files" : "meta"].push([k, v]);
+      return a;
+    },
+    { meta: [], files: [] }
+  );
 
   return {
     operation: result.operation,
     payload: {
-      meta: toObject(meta),
       args: toObject(args),
       ctx: toObject(ctx),
-      in: toArray(container),
-      by: toArray(by),
+      ...Object.fromEntries(meta),
     },
-    files: rest,
+    files: Object.fromEntries(files) as { [key: string]: AtomFile },
   };
 }
 
 export function encodeAtom(
   operation: string,
   payload: unknown
-): { atomScript: Script; atomPayloadHash: Buffer } {
-  const encodedPayload = Buffer.from(encode(payload));
+): { script: string; payloadHash: string } {
+  const encodedPayload = encode(payload);
   return {
-    atomScript: new Script()
+    script: new Script()
       .add(atomBuffer)
       .add(Buffer.from(operation))
-      .add(encodedPayload),
-    atomPayloadHash: Buffer.from(sha256(sha256(Buffer.from(encodedPayload)))),
+      .add(encodedPayload)
+      .toHex(),
+    payloadHash: bytesToHex(sha256(sha256(Buffer.from(encodedPayload)))),
   };
+}
+
+export function encodeAtomMutable(
+  operation: "mod" | "sl",
+  payload: unknown,
+  contractOutputIndex: number,
+  refHashIndex: number,
+  refIndex: number,
+  tokenOutputIndex: number
+) {
+  const opHex = Buffer.from(operation).toString("hex");
+  const encodedPayload = encode(payload);
+  const asm = `${atomHex} ${opHex} ${encodedPayload.toString("hex")} ${nAsm(
+    contractOutputIndex
+  )} ${nAsm(refHashIndex)} ${nAsm(refIndex)} ${nAsm(tokenOutputIndex)}`;
+  const script = Script.fromASM(asm);
+  const scriptSigHash = bytesToHex(sha256(script.toBuffer()));
+  const payloadHash = bytesToHex(sha256(sha256(Buffer.from(encodedPayload))));
+
+  return {
+    script,
+    payloadHash,
+    scriptSigHash,
+  };
+}
+
+export function isImmutableToken(payload: AtomPayload) {
+  // Default to immutable if arg.i isn't given
+  return payload.args?.i !== undefined ? payload.args.i === true : true;
 }

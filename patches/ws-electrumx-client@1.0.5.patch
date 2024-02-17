@@ -1,0 +1,35 @@
+diff --git a/build/main/lib/electrum-ws.js b/build/main/lib/electrum-ws.js
+index 30647c24079f5e280e4ed85c4f7205d5014387fc..9fddb8c273773d65fdee74da0346774548a4f506 100644
+--- a/build/main/lib/electrum-ws.js
++++ b/build/main/lib/electrum-ws.js
+@@ -38,7 +38,7 @@ var ElectrumWSEvent;
+ })(ElectrumWSEvent = exports.ElectrumWSEvent || (exports.ElectrumWSEvent = {}));
+ const RECONNECT_TIMEOUT = 1000;
+ const CONNECTED_TIMEOUT = 500;
+-const REQUEST_TIMEOUT = 1000 * 10; // 10 seconds
++const REQUEST_TIMEOUT = 1000 * 30; // 30 seconds 
+ const CLOSE_CODE = 1000; // 1000 indicates a normal closure, meaning that the purpose for which the connection was established has been fulfilled
+ /**
+  * ElectrumWS is a WebSocket client for Electrum servers.
+diff --git a/build/module/lib/electrum-ws.js b/build/module/lib/electrum-ws.js
+index 888e2a60d324e997de325355ed101af62c4d3b74..55b1ec806e7e709afe225b2e15438070ae0a3078 100644
+--- a/build/module/lib/electrum-ws.js
++++ b/build/module/lib/electrum-ws.js
+@@ -30,7 +30,7 @@ export var ElectrumWSEvent;
+ })(ElectrumWSEvent || (ElectrumWSEvent = {}));
+ const RECONNECT_TIMEOUT = 1000;
+ const CONNECTED_TIMEOUT = 500;
+-const REQUEST_TIMEOUT = 1000 * 10; // 10 seconds
++const REQUEST_TIMEOUT = 1000 * 30; // 30 seconds 
+ const CLOSE_CODE = 1000; // 1000 indicates a normal closure, meaning that the purpose for which the connection was established has been fulfilled
+ /**
+  * ElectrumWS is a WebSocket client for Electrum servers.
+@@ -204,7 +204,7 @@ export class ElectrumWS extends Observable {
+         // Handle potential multi-line frames
+         const raw = typeof msg.data === 'string' ? msg.data : bytesToString(msg.data);
+         // eslint-disable-next-line no-control-regex
+-        const regExpNewLineOrBlank = new RegExp('\r|\n| ', 'g');
++        const regExpNewLineOrBlank = new RegExp('\r|\n', 'g');
+         const lines = raw
+             .split(regExpNewLineOrBlank)
+             .filter((line) => line.length > 0);

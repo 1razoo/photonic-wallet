@@ -5,7 +5,17 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "lint": {},
+    "lint": {
+      "dependsOn": ["prettier"]
+    },
+    "check-types": {
+      "dependsOn": ["^build"]
+    },
+    "deploy": {
+      "dependsOn": ["lint", "build"]
+    },
+    "prettier": {},
+    "prettier:fix": {},
     "dev": {
       "cache": false,
       "persistent": true

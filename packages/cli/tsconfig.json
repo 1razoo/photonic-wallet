@@ -1,0 +1,6 @@
+{
+  "extends": "@photonic/typescript-config/cli.json",
+  "compilerOptions": {
+    "rootDir": "."
+  }
+}

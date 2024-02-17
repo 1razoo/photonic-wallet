@@ -2,29 +2,30 @@ import { Box, Icon, Image } from "@chakra-ui/react";
 import mime from "mime";
 import { QRCodeSVG } from "qrcode.react";
 import { AtomNft } from "@app/types";
+import { TbLink } from "react-icons/tb";
 import {
-  TbFileSymlink,
-  TbFileText,
-  TbFileUnknown,
-  TbFileX,
-  TbLink,
-} from "react-icons/tb";
+  BsFileEarmarkFill,
+  BsFillFileTextFill,
+  BsFillFileImageFill,
+  BsFillFileXFill,
+} from "react-icons/bs";
 import Identifier from "./Identifier";
 import useIpfsUrl from "@app/hooks/useIpfsUrl";
 import { t } from "@lingui/macro";
+import UnsafeImage from "./UnsafeImage";
 
-const ContentError = ({ notFound }: { notFound: boolean }) => (
+const ContentMessage = ({ message = "No content" }: { message?: string }) => (
   <Box
     bg="blackAlpha.400"
     p={4}
-    fontSize="sm"
+    fontSize="md"
     mx={4}
     textAlign="center"
     fontWeight="bold"
     color="gray.200"
     userSelect="none"
   >
-    {notFound ? t`NO CONTENT` : t`UNRECOGNIZED CONTENT`}
+    {message}
   </Box>
 );
 
@@ -37,33 +38,38 @@ export default function TokenContent({
 }) {
   const { main, file, filename } = nft || {};
   const maxLen = 1000;
+  const type = filename && mime.getType(filename);
+  const isImage = type?.startsWith("image/");
 
-  const isIPFS = main?.match(/^ipfs:\/\//);
-  if (isIPFS) {
-    const url = useIpfsUrl(main as string);
-    return (
-      <Image
-        src={url}
-        width="100%"
-        height="100%"
-        objectFit="contain"
-        sx={{ imageRendering: "pixelated" }}
-        backgroundColor="black"
-      />
-    );
-  }
-
-  // Links or main filename without a file
-  const isURL = main?.match(/^http(s)?:\/\//);
-  if (isURL || (main && !filename)) {
-    if (thumbnail) {
+  if (isImage && main) {
+    const isIpfs = main?.match(/^ipfs:\/\//);
+    const url = isIpfs ? useIpfsUrl(main) : main;
+    if (isIpfs) {
       return (
-        <Icon
-          as={isURL ? TbLink : TbFileSymlink}
-          fontSize="9xl"
-          color="gray.500"
+        <Image
+          src={url}
+          width="100%"
+          height="100%"
+          objectFit="contain"
+          //sx={{ imageRendering: "pixelated" }}
+          backgroundColor="black"
         />
       );
+    } else {
+      if (thumbnail) {
+        return (
+          <Icon as={BsFillFileImageFill} fontSize="9xl" color="gray.500" />
+        );
+      } else {
+        return <UnsafeImage src={url} />;
+      }
+    }
+  }
+
+  // Non-image URL
+  if (main) {
+    if (thumbnail) {
+      return <Icon as={TbLink} fontSize="9xl" color="gray.500" />;
     }
     return (
       <>
@@ -82,14 +88,12 @@ export default function TokenContent({
     );
   }
 
-  if (main && main === filename) {
-    const type = mime.getType(main);
-
+  if (filename && file) {
     // Text file
     if (type?.startsWith("text/plain")) {
       const text = new TextDecoder("utf-8").decode(file);
       if (thumbnail) {
-        return <Icon as={TbFileText} fontSize="9xl" color="gray.500" />;
+        return <Icon as={BsFillFileTextFill} fontSize="9xl" color="gray.500" />;
       }
 
       return (
@@ -101,12 +105,7 @@ export default function TokenContent({
     }
 
     // Image file
-    if (
-      file &&
-      [".jpg", ".png", ".gif", ".webp", ".svg"].includes(
-        main.substring(main.lastIndexOf("."))
-      )
-    ) {
+    if (file && type?.startsWith("image/")) {
       return (
         <Image
           src={`data:${type};base64, ${btoa(
@@ -115,7 +114,7 @@ export default function TokenContent({
           width="100%"
           height="100%"
           objectFit="contain"
-          sx={{ imageRendering: "pixelated" }}
+          //sx={{ imageRendering: "pixelated" }} // TODO find a way to apply this to pixel art
           backgroundColor="white"
         />
       );
@@ -123,24 +122,25 @@ export default function TokenContent({
 
     // Unknown file
     if (thumbnail) {
-      return <Icon as={TbFileUnknown} fontSize="9xl" color="gray.500" />;
+      return <Icon as={BsFileEarmarkFill} fontSize="9xl" color="gray.500" />;
     }
 
     return (
       <>
-        <Icon as={TbFileUnknown} fontSize="9xl" color="gray.500" mb={2} />
-        <ContentError notFound={false} />
+        <Icon as={BsFileEarmarkFill} fontSize="9xl" color="gray.500" mb={2} />
+        <ContentMessage message={filename} />
       </>
     );
   }
 
   if (thumbnail) {
-    return <Icon as={TbFileX} fontSize="9xl" color="gray.500" />;
+    return <Icon as={BsFillFileXFill} fontSize="9xl" color="gray.500" />;
   }
+
   return (
     <>
-      <Icon as={TbFileX} fontSize="9xl" color="gray.500" mb={2} />
-      <ContentError notFound />
+      <Icon as={BsFillFileXFill} fontSize="9xl" color="gray.500" mb={2} />
+      <ContentMessage />
     </>
   );
 }

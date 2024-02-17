@@ -13,6 +13,7 @@ export default function useTokenQuery(
       const results = await db.atomNft
         .orderBy("height")
         .filter(criteria)
+        .filter((atom) => !!atom.lastTxoId) // This will be undefined for related tokens not owned by the user
         .reverse()
         .offset(page * pageSize)
         // Use page size + 1 so we know if there's a next page

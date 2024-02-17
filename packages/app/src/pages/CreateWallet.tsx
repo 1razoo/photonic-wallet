@@ -18,7 +18,7 @@ import {
 import Wallet from "@app/wallet/wallet";
 import RecoveryPhrase from "@app/components/RecoveryPhrase";
 import Card from "@app/components/Card";
-import { NetworkKey } from "../types";
+import { NetworkKey } from "@lib/types";
 import LicenseModal from "@app/components/LicenseModal";
 import { useLiveQuery } from "dexie-react-hooks";
 import db from "@app/db";

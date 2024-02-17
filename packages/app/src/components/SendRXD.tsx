@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { t } from "@lingui/macro";
 import { PrivateKey } from "@radiantblockchain/radiantjs";
 import Big from "big.js";
-import coinSelect from "@lib/coinSelect";
+import coinSelect, { SelectableInput } from "@lib/coinSelect";
 import {
   Modal,
   ModalOverlay,
@@ -33,7 +33,7 @@ import { ContractType, TxO } from "@app/types";
 import { p2pkhScript } from "@lib/script";
 import { buildTx } from "@lib/tx";
 import useElectrum from "@app/electrum/useElectrum";
-import { network, totalBalance, wallet } from "@app/signals";
+import { feeRate, network, totalBalance, wallet } from "@app/signals";
 
 interface Props {
   onSuccess?: (txid: string) => void;
@@ -73,7 +73,6 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
     }
 
     if (!toAddress.current?.value) {
-      // FIXME validate address
       fail = true;
       setErrorMessage(t`Invalid address`);
     }
@@ -88,7 +87,7 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
       .times(100000000)
       .toNumber();
 
-    const coins: (TxO & { required?: boolean })[] = rxd.slice();
+    const coins: SelectableInput[] = rxd.slice();
     try {
       const changeScript = p2pkhScript(wallet.value.address);
       const script = p2pkhScript(toAddress.current?.value as string);
@@ -105,7 +104,7 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
         coins,
         [{ script, value }],
         changeScript,
-        2000
+        feeRate.value
       );
 
       if (!selected.inputs?.length) {

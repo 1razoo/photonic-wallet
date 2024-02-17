@@ -1,5 +1,4 @@
 {
-  "exclude": ["node_modules"],
   "extends": "@photonic/typescript-config/base.json",
   "include": ["src"]
 }

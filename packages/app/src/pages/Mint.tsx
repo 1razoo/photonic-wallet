@@ -1,4 +1,5 @@
 import React, { useCallback, useReducer, useRef, useState } from "react";
+import mime from "mime";
 import { t, Trans } from "@lingui/macro";
 import { Link } from "react-router-dom";
 import { PromiseExtended } from "dexie";
@@ -32,6 +33,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { sha256 } from "@noble/hashes/sha256";
+import { hexToBytes } from "@noble/hashes/utils";
 import { filesize } from "filesize";
 import { useLiveQuery } from "dexie-react-hooks";
 import { DeleteIcon } from "@chakra-ui/icons";
@@ -42,7 +44,7 @@ import db from "@app/db";
 import { ContractType, ElectrumStatus } from "@app/types";
 import Outpoint from "@lib/Outpoint";
 import useElectrum from "@app/electrum/useElectrum";
-import mintNft from "@lib/mintNft";
+import { mintToken } from "@lib/mint";
 import { encodeCid, upload } from "@lib/ipfs";
 import { photonsToRXD } from "@lib/format";
 import AtomType from "@app/components/AtomType";
@@ -53,9 +55,18 @@ import FormField from "@app/components/FormField";
 import Identifier from "@app/components/Identifier";
 import FormSection from "@app/components/FormSection";
 import MintSuccessModal from "@app/components/MintSuccessModal";
-import { electrumStatus, network, openModal, wallet } from "@app/signals";
+import {
+  electrumStatus,
+  feeRate,
+  network,
+  openModal,
+  wallet,
+} from "@app/signals";
+import { AtomFile, AtomPayload, AtomRemoteFile, Utxo } from "@lib/types";
 
 const MAX_BYTES = 10240000;
+
+type ContentMode = "file" | "text" | "url";
 
 function Divider() {
   return <CUIDivider borderColor="whiteAlpha.300" borderBottomWidth={2} />;
@@ -145,29 +156,31 @@ const formReducer = (
 };
 
 const encodeContent = (
+  mode: ContentMode,
   fileState: FileState,
   text?: string,
-  url?: string
-): [string, object] => {
-  if (fileState.ipfs) {
-    return [`ipfs://${fileState.cid}`, {}];
+  url?: string,
+  urlFileType?: string
+): [string, AtomFile | undefined] => {
+  if (mode === "url") {
+    return [`main.${urlFileType}`, { src: url as string }];
   }
+
+  if (mode === "text") {
+    return ["main.txt", new TextEncoder().encode(text)];
+  }
+
   if (fileState.file) {
-    const index = fileState.file.name.lastIndexOf(".");
-    const filename =
-      index === -1 ? "_" : `_${fileState.file.name.substring(index)}`;
-    return [filename, { [filename]: fileState.file.data }];
+    const filename = `main.${mime.getExtension(fileState.file?.type)}`;
+
+    if (fileState.ipfs) {
+      return [filename, { src: `ipfs://${fileState.cid}` }];
+    }
+
+    return [filename, new Uint8Array(fileState.file.data)];
   }
 
-  if (text) {
-    return ["_.txt", { "_.txt": new TextEncoder().encode(text) }];
-  }
-
-  if (url) {
-    return [url, {}];
-  }
-
-  return ["", {}];
+  return ["", undefined];
 };
 
 type FileState = {
@@ -214,7 +227,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   const [stats, setStats] = useState({ fee: 0, size: 0 });
   const [loading, setLoading] = useState(false);
   const [attrs, setAttrs] = reset(useState<[string, string][]>([]));
-  const [mode, setMode] = reset(useState("file"));
+  const [mode, setMode] = reset(useState<ContentMode>("file"));
   const [fileState, setFileState] = reset(useState<FileState>({ ...noFile }));
   const [enableHashstamp, setEnableHashstamp] = reset(useState(true));
   const [hashStamp, setHashstamp] = reset(useState<ArrayBuffer | undefined>());
@@ -278,33 +291,49 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       return;
     }
 
+    const {
+      authorId,
+      containerId,
+      text,
+      url,
+      urlFileType = "html",
+      immutable,
+      ...fields
+    } = formData;
+
+    if (mode === "url" && !mime.getType(urlFileType)) {
+      toast({
+        status: "error",
+        title: t`Unrecognized URL file type`,
+      });
+      return;
+    }
+
     setLoading(true);
 
     const coins = await db.txo
       .where({ contractType: ContractType.RXD, spent: 0 })
       .toArray();
-    const { author, container, text, url, immutable, ...fields } = formData;
-    const isImmutable = immutable === "1";
-    const [main, content] = encodeContent(fileState, text, url);
-    const args = isImmutable ? { i: true } : undefined;
-    const tn =
-      enableHashstamp && hashStamp
-        ? {
-            "hs.webp": hashStamp,
-          }
-        : undefined;
-    const meta = {
-      ...(tokenType !== "object" && { type: tokenType }),
-      ...(main && { main }),
-      ...(fileState.ipfs && { hash: fileState.hash }),
-      ...Object.fromEntries(
-        Object.entries(fields).filter(([, value]) => value)
-      ),
-      ...(Object.keys(attrs).length && { attrs: Object.fromEntries(attrs) }),
-    };
+
+    const [payloadFilename, content] = encodeContent(
+      mode,
+      fileState,
+      text,
+      url,
+      urlFileType
+    );
+    // Default for immutable is true so only add args.i if creating a mutable token
+    const args = immutable === "0" ? { i: false } : undefined;
+
+    if (content && enableHashstamp && hashStamp) {
+      (content as AtomRemoteFile).hs = new Uint8Array(hashStamp);
+      (content as AtomRemoteFile).h = fileState.hash;
+    }
 
     const userIndex =
-      author !== "" && author !== undefined ? parseInt(author, 10) : undefined;
+      authorId !== "" && authorId !== undefined
+        ? parseInt(authorId, 10)
+        : undefined;
     const userAtom = userIndex !== undefined ? users[userIndex] : undefined;
     const userInput = userAtom
       ? await db.txo.get(userAtom.lastTxoId as number)
@@ -321,8 +350,8 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     }
 
     const containerIndex =
-      container !== "" && container !== undefined
-        ? parseInt(container, 10)
+      containerId !== "" && containerId !== undefined
+        ? parseInt(containerId, 10)
         : undefined;
     const containerAtom =
       containerIndex !== undefined ? containers[containerIndex] : undefined;
@@ -340,25 +369,41 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       return;
     }
 
-    const payload: { [key: string]: unknown } = {
+    const meta = Object.fromEntries(
+      [
+        ["name", fields.name],
+        ["type", tokenType === "object" ? undefined : tokenType],
+        ["license", fields.license],
+        ["desc", fields.desc],
+        [
+          "in",
+          containerAtom && [
+            hexToBytes(
+              Outpoint.fromString(containerAtom.ref).reverse().toString()
+            ),
+          ],
+        ],
+        [
+          "by",
+          userAtom && [
+            hexToBytes(Outpoint.fromString(userAtom.ref).reverse().toString()),
+          ],
+        ],
+        ["attrs", attrs.length && { attrs: Object.fromEntries(attrs) }],
+      ].filter(([, v]) => v)
+    );
+
+    const fileObj =
+      content && payloadFilename
+        ? {
+            [payloadFilename]: content,
+          }
+        : undefined;
+
+    const payload: AtomPayload = {
       ...(args && { args }),
-      ...(Object.keys(meta).length && { meta }),
-      ...(userAtom && {
-        by: [
-          new TextEncoder().encode(
-            Outpoint.fromString(userAtom.ref).reverse().ref()
-          ),
-        ],
-      }),
-      ...(containerAtom && {
-        in: [
-          new TextEncoder().encode(
-            Outpoint.fromString(containerAtom.ref).reverse().ref()
-          ),
-        ],
-      }),
-      ...tn,
-      ...content,
+      ...meta,
+      ...fileObj,
     };
 
     try {
@@ -372,24 +417,34 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         );
       }
 
-      const { fee, size, reveal } = await mintNft(
-        async (rawTx) =>
-          (await electrum.request(
-            "blockchain.transaction.broadcast",
-            rawTx
-          )) as string,
+      const relInputs: Utxo[] = [];
+      if (userInput) relInputs.push(userInput);
+      if (containerInput) relInputs.push(containerInput);
 
+      const { commitTx, revealTx, fees, ref, size } = mintToken(
         wallet.value.address,
+        wallet.value.wif as string,
         coins,
         payload,
-        wallet.value.wif as string,
-        isImmutable,
-        userInput,
-        containerInput,
-        dryRun
+        relInputs,
+        feeRate.value
       );
 
-      revealTxIdRef.current = reveal;
+      const broadcast = async (rawTx: string) =>
+        (await electrum.request(
+          "blockchain.transaction.broadcast",
+          rawTx
+        )) as string;
+
+      if (!dryRun) {
+        // Broadcast commit
+        await broadcast(commitTx.toString());
+        // Broadcast reveal
+        await broadcast(revealTx.toString());
+      }
+
+      revealTxIdRef.current = ref.toString();
+      const fee = fees.reduce((a, f) => a + f, 0);
 
       if (dryRun) {
         setStats({ fee, size });
@@ -443,6 +498,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         "image/png",
         "image/webp",
         "image/gif",
+        "image/avif",
       ].includes(type);
 
       const typedArray = new Uint8Array(reader.result as ArrayBuffer);
@@ -453,6 +509,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
           "image/png",
           "image/webp",
           "image/gif",
+          "image/avif",
           "image/svg+xml",
         ].includes(type)
       ) {
@@ -465,7 +522,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
 
       newState.hash = sha256(typedArray);
 
-      if (size > 1000) {
+      if (size > 2000) {
         newState.ipfs = true;
         newState.cid = await encodeCid(reader.result as ArrayBuffer);
       }
@@ -499,7 +556,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     setHashstamp(undefined);
   };
 
-  const changeMode = (m: string) => {
+  const changeMode = (m: ContentMode) => {
     setMode(m);
     delImg();
     setFormData({ name: "text", value: "" });
@@ -547,11 +604,11 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
             <FormSection>
               <FormControl>
                 <FormLabel>{t`Author`}</FormLabel>
-                <Select name="author" onChange={onFormChange}>
+                <Select name="authorId" onChange={onFormChange}>
                   <option value="">{t`None`}</option>
                   {users.map((u, index) => (
-                    <option key={u.lastTxoId} value={index}>
-                      {u.name} [{Outpoint.fromString(u.ref).shortAtom()}]
+                    <option key={u.ref} value={index}>
+                      {u.name} [{Outpoint.fromString(u.ref).shortRef()}]
                     </option>
                   ))}
                 </Select>
@@ -565,11 +622,11 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
             <FormSection>
               <FormControl>
                 <FormLabel>{t`Container`}</FormLabel>
-                <Select name="container" onChange={onFormChange}>
+                <Select name="containerId" onChange={onFormChange}>
                   <option value="">None</option>
                   {containers.map((c, index) => (
-                    <option key={c.lastTxoId} value={index}>
-                      {c.name} [{Outpoint.fromString(c.ref).shortAtom()}]
+                    <option key={c.ref} value={index}>
+                      {c.name} [{Outpoint.fromString(c.ref).shortRef()}]
                     </option>
                   ))}
                 </Select>
@@ -618,7 +675,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                           objectFit="contain"
                           height="100%"
                           maxW={{ base: "160px", md: "230px" }}
-                          sx={{ imageRendering: "pixelated" }}
+                          //sx={{ imageRendering: "pixelated" }} // TODO find a way to apply this to pixel art
                         />
                       )}
                       <Box flexGrow={1}>
@@ -740,10 +797,23 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
               </>
             )}
             {mode === "url" && (
-              <FormControl>
-                <FormLabel>URL</FormLabel>
-                <Input name="url" onChange={onFormChange} />
-              </FormControl>
+              <>
+                <FormControl>
+                  <FormLabel>URL</FormLabel>
+                  <Input name="url" onChange={onFormChange} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>File type</FormLabel>
+                  <Input
+                    placeholder="html"
+                    name="urlFileType"
+                    onChange={onFormChange}
+                  />
+                  <FormHelperText>
+                    {t`Type of content the URL links. Leave empty for a website link.`}
+                  </FormHelperText>
+                </FormControl>
+              </>
             )}
           </FormSection>
           {/*
@@ -773,6 +843,16 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
               <Input
                 placeholder={t`Description`}
                 name="desc"
+                onChange={onFormChange}
+              />
+            </FormControl>
+          </FormSection>
+          <FormSection>
+            <FormControl>
+              <FormLabel>{t`License`}</FormLabel>
+              <Input
+                placeholder={t`License`}
+                name="license"
                 onChange={onFormChange}
               />
             </FormControl>

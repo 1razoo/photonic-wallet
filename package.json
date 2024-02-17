@@ -12,27 +12,24 @@
     "build": "turbo run build",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "lint": "turbo run lint",
-    "test": "turbo run test"
+    "cli": "node packages/cli/dist/cli.js"
   },
   "devDependencies": {
-    "@photonic/eslint-config": "workspace:*",
+    "@photonic/cli": "workspace:*",
     "@types/node": "^18.19.7",
     "eslint": "^8.56.0",
     "prettier": "^2.8.8",
     "turbo": "^1.11.3",
     "typescript": "^5.3.3"
   },
-  "dependencies": {
-    "app": "^0.1.0",
-    "assert": "^2.1.0"
-  },
   "pnpm": {
     "patchedDependencies": {
-      "ws-electrumx-client@1.0.1": "patches/ws-electrumx-client@1.0.1.patch",
       "@radiantblockchain/radiantjs@1.9.4": "patches/@radiantblockchain__radiantjs@1.9.4.patch",
-      "bsv-coinselect@4.2.5": "patches/bsv-coinselect@4.2.5.patch"
+      "bsv-coinselect@4.2.5": "patches/bsv-coinselect@4.2.5.patch",
+      "ws-electrumx-client@1.0.5": "patches/ws-electrumx-client@1.0.5.patch"
     }
+  },
+  "dependencies": {
+    "assert": "^2.1.0"
   }
 }

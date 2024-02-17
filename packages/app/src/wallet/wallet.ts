@@ -8,9 +8,9 @@ import {
 } from "@scure/bip39";
 import { HDKey } from "@scure/bip32";
 import { wordlist } from "@scure/bip39/wordlists/english";
-import { EncryptedData, decrypt, encrypt } from "./encrypt";
+import { EncryptedData, decrypt, encrypt } from "@lib/encryption";
 import db from "@app/db";
-import { NetworkKey } from "@app/types";
+import { NetworkKey } from "@lib/types";
 
 const derivationPath = "m/44'/0'/0'/0/0";
 

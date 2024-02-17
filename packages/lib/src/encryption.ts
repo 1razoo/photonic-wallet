@@ -1,6 +1,9 @@
 import { scrypt } from "@noble/hashes/scrypt";
 import { sha256 } from "@noble/hashes/sha256";
 
+const { crypto } = globalThis;
+const { subtle } = crypto;
+
 export type EncryptedData = {
   ciphertext: ArrayBuffer;
   salt: Uint8Array;
@@ -19,22 +22,22 @@ export const encrypt = async (
   data: Uint8Array,
   password: string
 ): Promise<EncryptedData> => {
-  const salt = window.crypto.getRandomValues(new Uint8Array(32));
-  const iv = window.crypto.getRandomValues(new Uint8Array(16));
+  const salt = crypto.getRandomValues(new Uint8Array(32));
+  const iv = crypto.getRandomValues(new Uint8Array(16));
 
   const derivedKey = await scrypt(
     new TextEncoder().encode(password),
     salt,
     scryptParams
   );
-  const importedKey = await crypto.subtle.importKey(
+  const importedKey = await subtle.importKey(
     "raw",
     derivedKey.slice(0, 16),
     { name: "AES-CTR", length: 128 },
     false,
     ["encrypt"]
   );
-  const ciphertext = await crypto.subtle.encrypt(
+  const ciphertext = await subtle.encrypt(
     {
       name: "AES-CTR",
       counter: iv,
@@ -70,11 +73,11 @@ export const decrypt = async (data: EncryptedData, password: string) => {
 
   const mac = sha256(concat);
 
-  if (indexedDB.cmp(data.mac, mac) !== 0) {
+  if (Buffer.compare(Buffer.from(data.mac), Buffer.from(mac)) !== 0) {
     throw new Error("Password incorrect");
   }
 
-  const importedKey = await crypto.subtle.importKey(
+  const importedKey = await subtle.importKey(
     "raw",
     derivedKey.slice(0, 16),
     { name: "AES-CTR", length: 128 },
@@ -82,7 +85,7 @@ export const decrypt = async (data: EncryptedData, password: string) => {
     ["decrypt"]
   );
 
-  const decrypted = await crypto.subtle.decrypt(
+  const decrypted = await subtle.decrypt(
     {
       name: "AES-CTR",
       counter: data.iv,

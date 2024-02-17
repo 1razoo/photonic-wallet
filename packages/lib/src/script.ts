@@ -1,9 +1,84 @@
-import { Address, Opcode, Script } from "@radiantblockchain/radiantjs";
+//import { Address, Opcode, Script } from "@radiantblockchain/radiantjs";
+import rjs from "@radiantblockchain/radiantjs";
 import { sha256 } from "@noble/hashes/sha256";
 import { Buffer } from "buffer";
-import { atomBuffer } from "./atom";
+import { atomBuffer, atomHex } from "./atom";
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
+
+const { Address, Opcode, Script } = rjs;
+
+// NOTE: All ref inputs for script functions must be little-endian
+
+// Size of scripts (not including length VarInt)
+export const commitScriptSize = 81;
+export const commitScriptWithDelegateSize = commitScriptSize + 36;
+export const p2pkhScriptSize = 25;
+export const nftScriptSize = 63;
+export const delegateTokenScriptSize = 63;
+export const delegateBurnScriptSize = 38;
+export const p2pkhScriptSigSize = 107;
+export const mutableNftScriptSize = 175;
 
 const zeroRef = "00".repeat(36);
+
+export function varIntSize(n: number) {
+  if (n < 253) {
+    return 1;
+  } else if (n <= 65535) {
+    return 3;
+  } else if (n <= 4294967295) {
+    return 5;
+  } else if (n <= 18446744073709551615n) {
+    return 9;
+  } else {
+    throw new Error("Invalid VarInt");
+  }
+}
+
+export function pushDataSize(len: number) {
+  if (len >= 0 && len < Opcode.OP_PUSHDATA1) {
+    return 1;
+  } else if (len < Math.pow(2, 8)) {
+    return 2;
+  } else if (len < Math.pow(2, 16)) {
+    return 3;
+  } else if (len < Math.pow(2, 32)) {
+    return 4;
+  }
+  throw new Error("Invalid push data length");
+}
+
+// Transaction size without scripts (not including input/output script size VarInt and script)
+export function baseTxSize(numInputs: number, numOutputs: number) {
+  return (
+    4 + // version
+    varIntSize(numInputs) + // Input count
+    (32 + // Prev tx hash
+      4 + // Prev tx index
+      4) * // Sequence num
+      numInputs +
+    varIntSize(numOutputs) + // Output count
+    8 * // Value
+      numOutputs +
+    4 // nLockTime
+  );
+}
+
+// Calcualte size of a transaction, given sizes of input and output scripts
+export function txSize(
+  inputScriptSizes: number[],
+  outputScriptSizes: number[]
+) {
+  return (
+    baseTxSize(inputScriptSizes.length, outputScriptSizes.length) +
+    inputScriptSizes.reduce((a, s) => a + varIntSize(s) + s, 0) +
+    outputScriptSizes.reduce((a, s) => a + varIntSize(s) + s, 0)
+  );
+}
+
+export function revealScriptSigSize(atomLen: number) {
+  return p2pkhScriptSigSize + pushDataSize(atomLen) + atomLen;
+}
 
 export function scriptHash(hex: string): string {
   return Buffer.from(sha256(Buffer.from(hex, "hex")))
@@ -25,25 +100,28 @@ export function p2pkhScriptHash(address: string): string {
 
 export function nftCommitScript(
   address: string,
-  payloadHash: Buffer,
-  authorRef?: string,
-  containerRef?: string
+  payloadHash: string,
+  delegateRef: string | undefined
 ) {
   const script = new Script();
 
-  // REQUIREINPUTREFs at the start of the script are used to prove the minter has permission to create a relationship with these tokens
-  if (authorRef) {
-    script.add(Script.fromString(`OP_REQUIREINPUTREF 0x${authorRef} OP_DROP`));
-  }
-
-  if (containerRef) {
+  // Delegate ref is used for assigning related refs to the token
+  // The delegate burn code script hash must be in an output. This output will prove the delegate ref exists in an input.
+  if (delegateRef) {
     script.add(
-      Script.fromString(`OP_REQUIREINPUTREF 0x${containerRef} OP_DROP`)
+      Script.fromASM(
+        `OP_PUSHINPUTREF ${delegateRef} OP_DUP ` +
+          `OP_REFOUTPUTCOUNT_OUTPUTS OP_0 OP_NUMEQUALVERIFY ` + // Push ref disallowed
+          `d1 OP_SWAP 6a OP_CAT OP_CAT OP_HASH256 OP_CODESCRIPTHASHOUTPUTCOUNT_OUTPUTS OP_1 OP_NUMEQUALVERIFY` // Ref must be burned using REQUIREINPUTREF RETURN
+      )
     );
   }
 
   // Check payload hash
-  script.add(Opcode.OP_HASH256).add(payloadHash).add(Opcode.OP_EQUALVERIFY);
+  script
+    .add(Opcode.OP_HASH256)
+    .add(Buffer.from(payloadHash, "hex"))
+    .add(Opcode.OP_EQUALVERIFY);
   // atom nft
   script
     .add(Buffer.from("nft"))
@@ -52,43 +130,68 @@ export function nftCommitScript(
     .add(Opcode.OP_EQUALVERIFY);
   // Ensure singleton for this input exists in an output
   script.add(
-    Script.fromString(
+    Script.fromASM(
       "OP_INPUTINDEX OP_OUTPOINTTXHASH OP_INPUTINDEX OP_OUTPOINTINDEX OP_4 OP_NUM2BIN OP_CAT OP_REFTYPE_OUTPUT OP_2 OP_NUMEQUALVERIFY"
     )
   );
 
   // P2PKH
-  // FIXME would be better to have this first so "atom nft" is at the start of the script sig
   script.add(Script.buildPublicKeyHashOut(Address.fromString(address)));
 
   return script.toHex();
 }
 
 export function nftScript(address: string, ref: string) {
-  const script = new Script(`OP_PUSHINPUTREFSINGLETON 0x${ref} OP_DROP`).add(
+  const script = Script.fromASM(`OP_PUSHINPUTREFSINGLETON ${ref} OP_DROP`).add(
     Script.buildPublicKeyHashOut(address)
   );
   return script.toHex();
 }
 
-export function mutableNftScript(
-  mutableRef: string,
-  nftRef: string,
-  payloadHash: Buffer
+export function nftAuthScript(
+  address: string,
+  ref: string,
+  auths: { ref: string; scriptSigHash: string }[]
 ) {
-  // @ts-ignore
+  if (!auths.length) {
+    throw new Error("No auths given");
+  }
+
+  const authScript = auths
+    .map(
+      (auth) => `OP_REQUIREINPUTREF ${auth.ref} ${auth.scriptSigHash} OP_2DROP`
+    )
+    .join(" ");
+  const script = Script.fromASM(
+    `${authScript} OP_STATESEPARATOR OP_PUSHINPUTREFSINGLETON ${ref} OP_DROP`
+  ).add(Script.buildPublicKeyHashOut(address));
+  return script.toHex();
+}
+
+export function mutableNftScript(mutableRef: string, payloadHash: string) {
+  /* Script sig:
+   * atom
+   * mod
+   * <cbor payload>
+   * <contract output index>
+   * <ref+hash index in token output>
+   * <ref index in token output data summary>
+   * <token output index>
+   */
+
   return Script.fromASM(
     [
-      `${payloadHash.toString("hex")} OP_DROP`, // State
+      `${payloadHash} OP_DROP`, // State
       // Pay to token script
-      `OP_STATESEPARATOR OP_PUSHINPUTREFSINGLETON ${mutableRef}`, // Contract ref
-      `OP_OVER OP_REFDATASUMMARY_OUTPUT OP_3 OP_ROLL 24 OP_MUL OP_SPLIT OP_NIP 24 OP_SPLIT OP_DROP ${nftRef} OP_EQUALVERIFY`, // Check token ref exists in the token output
-      `OP_SWAP OP_STATESCRIPTBYTECODE_OUTPUT OP_ROT OP_SPLIT OP_NIP 45 OP_SPLIT OP_DROP OP_OVER 20 OP_CAT OP_INPUTINDEX OP_INPUTBYTECODE OP_HASH256 OP_CAT OP_EQUALVERIFY`, // Compare ref + hash in token output to ref + hash of this script's unlocking code
+      `OP_STATESEPARATOR OP_PUSHINPUTREFSINGLETON ${mutableRef}`, // Mutable contract ref
+      `OP_DUP 20 OP_SPLIT OP_BIN2NUM OP_1SUB OP_4 OP_NUM2BIN OP_CAT`, // Build token ref (mutable ref -1)
+      `OP_2 OP_PICK OP_REFDATASUMMARY_OUTPUT OP_4 OP_ROLL 24 OP_MUL OP_SPLIT OP_NIP 24 OP_SPLIT OP_DROP OP_EQUALVERIFY`, // Check token ref exists in token output at given refdatasummary index
+      `OP_SWAP OP_STATESCRIPTBYTECODE_OUTPUT OP_ROT OP_SPLIT OP_NIP 45 OP_SPLIT OP_DROP OP_OVER 20 OP_CAT OP_INPUTINDEX OP_INPUTBYTECODE OP_SHA256 OP_CAT OP_EQUALVERIFY`, // Compare ref + scriptsig hash in token output to this script's ref + scriptsig hash
       `OP_3 OP_PICK 6d6f64 OP_EQUAL OP_IF`, // Modify operation
       `OP_OVER OP_CODESCRIPTBYTECODE_OUTPUT OP_INPUTINDEX OP_CODESCRIPTBYTECODE_UTXO OP_EQUALVERIFY`, // Contract script must exist unchanged in output
-      `OP_OVER OP_STATESCRIPTBYTECODE_OUTPUT 20 OP_4 OP_PICK OP_HASH256 OP_CAT 75 OP_CAT OP_EQUALVERIFY`, // State script must contain payload hash
-      `OP_ELSE OP_3 OP_PICK 736c OP_EQUALVERIFY OP_OVER OP_OUTPUTBYTECODE d8 OP_2 OP_PICK OP_CAT 6a OP_CAT OP_EQUAL OP_OVER OP_REFTYPE_OUTPUT OP_0 OP_NUMEQUAL OP_BOOLOR OP_VERIFY OP_ENDIF`, // Seal operation
-      `OP_4 OP_ROLL 61746f6d OP_EQUALVERIFY OP_2DROP OP_2DROP OP_1`, // Atom header
+      `OP_OVER OP_STATESCRIPTBYTECODE_OUTPUT 20 OP_4 OP_PICK OP_HASH256 OP_CAT 75 OP_CAT OP_EQUALVERIFY OP_ELSE`, // State script must contain payload hash
+      `OP_3 OP_PICK 736c OP_EQUALVERIFY OP_OVER OP_OUTPUTBYTECODE d8 OP_2 OP_PICK OP_CAT 6a OP_CAT OP_EQUAL OP_OVER OP_REFTYPE_OUTPUT OP_0 OP_NUMEQUAL OP_BOOLOR OP_VERIFY OP_ENDIF`, // Seal operation
+      `OP_4 OP_ROLL ${atomHex} OP_EQUALVERIFY OP_2DROP OP_2DROP OP_1`, // Atom header
     ].join(" ")
   ).toHex() as string;
 }
@@ -113,22 +216,79 @@ export function parseCommitScript(script: string): string[] {
   return [];
 }
 
-type MutableScriptParams = {
-  hash: string;
-  mutableRef: string;
-  tokenRef: string;
-};
+export function parseMutableScript(script: string) {
+  // Use RegExp so atomHex variable can be used
+  const pattern = new RegExp(
+    `^20([0-9a-f]{64})75bdd8([0-9a-f]{72})7601207f818c54807e5279e2547a0124957f7701247f75887cec7b7f7701457f757801207ec0caa87e885379036d6f64876378eac0e98878ec01205479aa7e01757e8867537902736c8878cd01d852797e016a7e8778da009c9b6968547a04${atomHex}886d6d51$`
+  );
+  const [, hash, ref] = script.match(pattern) || [];
+  return { hash, ref };
+}
 
-export function parseMutableScript(
-  script: string
-): MutableScriptParams | undefined {
-  const pattern =
-    /^20(?<hash>[0-9a-f]{64})75bdd8(?<mutableRef>[0-9a-f]{72})78e2537a0124957f7701247f7524(?<tokenRef>[0-9a-f]{72})887cec7b7f7701457f757801207ec0caaa7e885379036d6f64876378eac0e98878ec01205479aa7e01757e8867537902736c8878cd01d852797e016a7e8778da009c9b6968547a0461746f6d886d6d51$/;
+export function parseNftScript(script: string): {
+  ref?: string;
+  address?: string;
+} {
+  const pattern = /^d8([0-9a-f]{72})7576a914([0-9a-f]{40})88ac$/;
+  const [, ref, address] = script.match(pattern) || [];
+  return { ref, address };
+}
+
+export function delegateBaseScript(address: string, refs: string[]) {
+  const script = new Script();
+  refs?.forEach((rel) => {
+    script.add(Script.fromASM(`OP_REQUIREINPUTREF ${rel} OP_DROP`));
+  });
+  script.add(Script.buildPublicKeyHashOut(Address.fromString(address)));
+  return script.toHex();
+}
+
+export function delegateTokenScript(address: string, ref: string) {
+  const script = Script.fromASM(`OP_PUSHINPUTREF ${ref} OP_DROP`).add(
+    Script.buildPublicKeyHashOut(address)
+  );
+  return script.toHex();
+}
+
+export function delegateBurnScript(ref: string) {
+  return Script.fromASM(`OP_REQUIREINPUTREF ${ref} OP_RETURN`).toHex();
+}
+
+export function parseDelegateBaseScript(script: string): string[] {
+  const pattern = /^((d1[0-9a-f]{72}75)+).*/; // Don't need to match p2pkh
   const match = script.match(pattern);
 
   if (match) {
-    return match.groups as MutableScriptParams;
+    // Return required refs
+    const refs = match[1].match(/.{76}/g);
+    if (refs) {
+      return refs.map((ref) => ref.substring(2, 74));
+    }
   }
 
-  return undefined;
+  return [];
+}
+
+export function parseDelegateBurnScript(script: string): string | undefined {
+  const pattern = /^d1([0-9a-f]{72})6a$/;
+  const [, ref] = script.match(pattern) || [];
+  return ref;
+}
+
+export function codeScriptHash(script: string) {
+  return bytesToHex(sha256(sha256(hexToBytes(script))));
+}
+
+// Convert number to opcode
+export function nAsm(n: number) {
+  // Use OP_0 to OP_16 to avoid "Data push larger than necessary" error
+  if (n >= 0 && n <= 16) {
+    return `OP_${n}`;
+  }
+  if (n === -1) {
+    return "OP_1NEGATE";
+  }
+  if (n === 1) return "OP_1";
+  const h = n.toString(16);
+  return h.length % 2 ? `0${h}` : h;
 }

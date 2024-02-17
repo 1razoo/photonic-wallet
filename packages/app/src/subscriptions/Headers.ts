@@ -1,10 +1,7 @@
 import { Buffer } from "buffer";
 import { BlockHeader as RadJSBlockHeader } from "@radiantblockchain/radiantjs";
-import {
-  Subscription,
-  ElectrumHeaderResponse,
-  ElectrumHeadersResponse,
-} from "@app/types";
+import { Subscription } from "@app/types";
+import { ElectrumHeaderResponse, ElectrumHeadersResponse } from "@lib/types";
 import ElectrumManager from "@app/electrum/ElectrumManager";
 import { nextBitsAserti32D, bitsToTarget } from "@lib/difficulty";
 import db from "@app/db";

@@ -227,7 +227,7 @@ index 4d78dfd78906c8f173d680649ca2a7e14a123fc6..feea0b242782d2c4d3b95cb6b9bd5a7f
      "lint": "standard",
      "lint_test": "standard && mocha",
 diff --git a/radiant.d.ts b/radiant.d.ts
-index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..c48099937aba636932173c9dbb69d785849d1f10 100644
+index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..0de915ec9d989382c96ecd0e6061963eeb6af84a 100644
 --- a/radiant.d.ts
 +++ b/radiant.d.ts
 @@ -10,7 +10,7 @@
@@ -239,17 +239,20 @@ index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..c48099937aba636932173c9dbb69d785
  
      export namespace crypto {
          class BN { }
-@@ -41,7 +41,8 @@ declare module 'radiantjs' {
+@@ -41,7 +41,11 @@ declare module 'radiantjs' {
          class Signature {
              static fromDER(sig: Buffer): Signature;
              static fromString(data: string): Signature;
 -            SIGHASH_ALL: number;
 +            static SIGHASH_ALL: number;
++            static SIGHASH_SINGLE: number;
++            static SIGHASH_NONE: number;
++            static SIGHASH_ANYONECANPAY: number;
 +            static SIGHASH_FORKID: number;
              toString(): string;
          }
      }
-@@ -77,6 +78,7 @@ declare module 'radiantjs' {
+@@ -77,6 +81,7 @@ declare module 'radiantjs' {
          }
  
          class Input {
@@ -257,7 +260,7 @@ index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..c48099937aba636932173c9dbb69d785
              readonly prevTxId: Buffer;
              readonly outputIndex: number;
              readonly sequenceNumber: number;
-@@ -84,6 +86,10 @@ declare module 'radiantjs' {
+@@ -84,6 +89,10 @@ declare module 'radiantjs' {
              output?: Output;
              isValidSignature(tx: Transaction, sig: any): boolean;
          }
@@ -268,7 +271,7 @@ index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..c48099937aba636932173c9dbb69d785
      }
  
      export class Transaction {
-@@ -97,12 +103,13 @@ declare module 'radiantjs' {
+@@ -97,12 +106,13 @@ declare module 'radiantjs' {
  
          constructor(serialized?: any);
  
@@ -283,7 +286,7 @@ index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..c48099937aba636932173c9dbb69d785
          applySignature(sig: crypto.Signature): this;
          addInput(input: Transaction.Input): this;
          addOutput(output: Transaction.Output): this;
-@@ -316,7 +323,7 @@ declare module 'radiantjs' {
+@@ -316,7 +326,7 @@ declare module 'radiantjs' {
          function buildWitnessMultisigOutFromScript(script: Script): Script;
          function buildMultisigIn(pubkeys: PublicKey[], threshold: number, signatures: Buffer[], opts: object): Script;
          function buildP2SHMultisigIn(pubkeys: PublicKey[], threshold: number, signatures: Buffer[], opts: object): Script;
@@ -292,7 +295,7 @@ index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..c48099937aba636932173c9dbb69d785
          function buildPublicKeyOut(pubkey: PublicKey): Script;
          function buildDataOut(data: string | Buffer, encoding?: string): Script;
          function buildScriptHashOut(script: Script): Script;
-@@ -343,7 +350,8 @@ declare module 'radiantjs' {
+@@ -343,7 +353,8 @@ declare module 'radiantjs' {
      }
  
      export class Script {
@@ -302,23 +305,25 @@ index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..c48099937aba636932173c9dbb69d785
  
          set(obj: object): this;
  
-@@ -394,6 +402,7 @@ declare module 'radiantjs' {
+@@ -394,6 +405,8 @@ declare module 'radiantjs' {
          getSignatureOperationsCount(accurate: boolean): number;
  
          toAddress(network?: string): Address;
 +        static fromString(script: string): Script;
++        static fromASM(script: string): Script;
      }
  
      export interface Util {
-@@ -423,6 +432,7 @@ declare module 'radiantjs' {
+@@ -423,6 +436,8 @@ declare module 'radiantjs' {
          readonly type: string;
  
          constructor(data: Buffer | Uint8Array | string | object, network?: Networks.Network | string, type?: string);
 +        static fromString(address: string): Address;
++        toObject(): { hash: string; type: string; network: string; };
      }
  
      export class Unit {
-@@ -438,4 +448,190 @@ declare module 'radiantjs' {
+@@ -438,4 +453,190 @@ declare module 'radiantjs' {
          toBits(): number;
          toSatoshis(): number;
      }

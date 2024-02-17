@@ -19,13 +19,13 @@ import {
 import { ContractType, TxO } from "@app/types";
 import useElectrum from "@app/electrum/useElectrum";
 import { WarningIcon } from "@chakra-ui/icons";
-import coinSelect from "@lib/coinSelect";
+import coinSelect, { SelectableInput } from "@lib/coinSelect";
 import { p2pkhScript } from "@lib/script";
 import { buildTx } from "@lib/tx";
 import { PrivateKey } from "@radiantblockchain/radiantjs";
 import { useLiveQuery } from "dexie-react-hooks";
 import db from "../db";
-import { wallet } from "@app/signals";
+import { feeRate, wallet } from "@app/signals";
 
 interface Props {
   asset: TxO;
@@ -59,8 +59,8 @@ export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
     setSuccess(true);
     setLoading(true);
 
-    const required = { ...asset, required: true };
-    const coins: (TxO & { required?: boolean })[] = [required, ...rxd.slice()];
+    const required: SelectableInput = { ...asset, required: true };
+    const coins: SelectableInput[] = [required, ...rxd.slice()];
 
     const changeScript = p2pkhScript(wallet.value.address);
 
@@ -69,9 +69,8 @@ export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
       coins,
       [],
       changeScript,
-      2000
+      feeRate.value
     );
-    // FIXME errors here sometimes
     if (!selected.inputs?.length) {
       setErrorMessage(t`Insufficient funds`);
       setSuccess(false);

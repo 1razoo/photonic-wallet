@@ -32,6 +32,7 @@
       "testnet": ["wss://electrumx-testnet.radiant4people.com:53002"],
       "mainnet": ["wss://electrumx.radiant4people.com:50012"]
     },
+    "feeRate": 5000,
     "ipfsMethod": "gateway",
     "ipfsGatewayUrl": "https://{cid}.ipfs.nftstorage.link"
   },

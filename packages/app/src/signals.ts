@@ -36,6 +36,7 @@ export const totalBalance = computed(
   () => balance.value.coins.confirmed + balance.value.coins.unconfirmed
 );
 export const network = signal<NetworkConfig>(config.networks.testnet);
+export const feeRate = signal<number>(config.defaultConfig.feeRate);
 
 // Language signal is used to trigger a rerender on the relevant components when the language changes
 // Since the language selector is on the wallet settings page, only the sidebar and settings page need to be rerendered

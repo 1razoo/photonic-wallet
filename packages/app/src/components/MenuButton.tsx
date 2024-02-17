@@ -6,11 +6,16 @@ import { openMenu } from "@app/signals";
 
 export default function MenuButton({
   to,
+  as,
   match,
   children,
   ...rest
 }: PropsWithChildren<
-  { to?: string; match?: string | string[] } & ButtonProps
+  {
+    to?: string;
+    as?: React.ElementType;
+    match?: string | string[];
+  } & ButtonProps
 >) {
   const { pathname } = useLocation();
 
@@ -27,7 +32,7 @@ export default function MenuButton({
       variant="ghost"
       borderRadius={0}
       justifyContent="left"
-      as={Link}
+      as={as || Link}
       to={to}
       p={6}
       color={active ? undefined : "whiteAlpha.700"}

@@ -17,7 +17,7 @@ import {
 import { t } from "@lingui/macro";
 import Wallet from "@app/wallet/wallet";
 import Card from "@app/components/Card";
-import { NetworkKey } from "../types";
+import { NetworkKey } from "@lib/types";
 import { wallet } from "@app/signals";
 import config from "@app/config.json";
 

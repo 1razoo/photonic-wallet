@@ -1,5 +1,5 @@
 diff --git a/utils.js b/utils.js
-index 73dfb5ff7fb6ca62383f01b319f263a8f5073ba6..eaf3114c69d8d3182180b3aeb2e9cbefc78800ba 100644
+index 73dfb5ff7fb6ca62383f01b319f263a8f5073ba6..705204076208322eefc5205ac0c31397240ef1df 100644
 --- a/utils.js
 +++ b/utils.js
 @@ -1,9 +1,10 @@
@@ -30,3 +30,14 @@ index 73dfb5ff7fb6ca62383f01b319f263a8f5073ba6..eaf3114c69d8d3182180b3aeb2e9cbef
    } else {
      scriptLen = TX_INPUT_PUBKEYHASH
    }
+@@ -119,8 +120,8 @@ function finalize (inputs, outputs, feeRate, changeScript) {
+     return { fee: innerFee }
+   }
+ 
+-  // Emergency cap for fee (0.1 BSV) which is enough for 20MB * 0.5 sat/byte
+-  if (fee > 10000000) {
++  // Emergency cap for fee (100 RXD) which is enough for 20MB * 0.5 sat/byte
++  if (fee > 10000000000) {
+     throw new Error('Filepay Error: Too large fee')
+   }
+ 

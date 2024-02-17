@@ -40,8 +40,8 @@ export default function ElectrumProvider({ children }: PropsWithChildren) {
 
   const onConnected = async () => {
     if (!wallet.value.address) return;
-    rxd.register(wallet.value.address);
-    nft.register(wallet.value.address);
+    rxd.register(wallet.value.address, toast);
+    nft.register(wallet.value.address, toast);
     //headers.register();
   };
 
