@@ -133,7 +133,7 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
       <form onSubmit={submit}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{t`Send Asset`}</ModalHeader>
+          <ModalHeader>{t`Send Digital Object`}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6} gap={4}>
             {success || (
@@ -151,7 +151,7 @@ export default function SendAsset({ asset, onSuccess, disclosure }: Props) {
               />
             </FormControl>
             <FormControl>
-              <FormLabel>{t`Asset`}</FormLabel>
+              <FormLabel>{t`Digital Object`}</FormLabel>
               <Identifier>{ref.reverse().atom()}</Identifier>
             </FormControl>
             <FormControl>

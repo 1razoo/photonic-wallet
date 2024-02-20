@@ -115,7 +115,7 @@ export default function TokenContent({
           height="100%"
           objectFit="contain"
           //sx={{ imageRendering: "pixelated" }} // TODO find a way to apply this to pixel art
-          backgroundColor="white"
+          //backgroundColor="white"
         />
       );
     }

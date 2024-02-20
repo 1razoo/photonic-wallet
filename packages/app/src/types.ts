@@ -39,6 +39,7 @@ export interface AtomNft {
   id?: number;
   ref: string;
   lastTxoId?: number;
+  revealOutpoint?: string;
   spent: TxSpent;
   fresh: TxSpent;
   main?: string; // TODO It would be good to rename this

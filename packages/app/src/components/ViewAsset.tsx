@@ -13,6 +13,11 @@ import {
   Heading,
   Image,
   SimpleGrid,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   Text,
   Tooltip,
   useClipboard,
@@ -26,7 +31,7 @@ import mime from "mime/lite";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useLocation, useNavigate } from "react-router-dom";
 import db from "@app/db";
-import { CopyIcon, DownloadIcon, EditIcon, InfoIcon } from "@chakra-ui/icons";
+import { CopyIcon, DownloadIcon, InfoIcon } from "@chakra-ui/icons";
 import { Address } from "@radiantblockchain/radiantjs";
 import Outpoint from "@lib/Outpoint";
 import Identifier from "@app/components/Identifier";
@@ -44,24 +49,32 @@ import MeltAsset from "./MeltAsset";
 import TxSuccessModal from "./TxSuccessModal";
 import { AtomNft, TxO } from "../types";
 import { openModal, wallet } from "@app/signals";
-import EditTokenTest from "./EditTokenTest";
-import FetchTokenTest from "./FetchMutableTest";
+import AtomData from "./AtomData";
 
-const Meta = ({
+export const PropertyCard = ({
   heading,
   info,
   children,
   ...rest
-}: PropsWithChildren<{ heading: string; info?: ReactNode } & BoxProps>) => {
+}: PropsWithChildren<
+  { heading: React.ReactNode; info?: ReactNode } & BoxProps
+>) => {
   return (
     <Card
       p={4}
       display="grid"
-      gridArea={`"heading info" "child child"`}
+      gridTemplateAreas={`"heading info" "child child"`}
       gridTemplateColumns="auto 30px"
       {...rest}
     >
-      <Heading size="xs" mb={2} color="lightBlue.A400">
+      <Heading
+        size="sm"
+        mb={2}
+        color="lightBlue.A400"
+        display="flex"
+        flexDirection="row"
+        alignItems="center"
+      >
         {heading}
       </Heading>
       <Box>{info}</Box>
@@ -187,8 +200,8 @@ export default function ViewAsset({
                 colSpan={2}
                 sx={{
                   "& img": {
-                    maxWidth: "600px",
-                    maxHeight: "600px",
+                    maxWidth: "400px",
+                    maxHeight: "400px",
                   },
                 }}
               >
@@ -242,178 +255,207 @@ export default function ViewAsset({
               </Button>
             </SimpleGrid>
             <div>
-              <Meta heading="Ref" mb={4}>
-                <div>
-                  <Identicon
-                    value={ref.refHash()}
-                    width="26px"
-                    height="24px"
-                    sx={{ svg: { height: "26px" } }}
-                    float="left"
-                  />
-                  <Identifier showCopy copyValue={ref.ref()}>
-                    {atom}
-                  </Identifier>
-                </div>
-              </Meta>
-              {authorRef && (
-                <Meta heading="Author" mb={4}>
-                  <Flex justifyContent="space-between" alignItems="center">
-                    {author?.name ? (
-                      <Text>{author.name}</Text>
-                    ) : (
-                      <Text fontStyle="italic">&lt;Unnamed author&gt;</Text>
+              <Tabs>
+                <TabList>
+                  <Tab>Details</Tab>
+                  <Tab>Inspect</Tab>
+                </TabList>
+                <TabPanels>
+                  <TabPanel px={0}>
+                    {nft?.description && (
+                      <PropertyCard heading={t`Description`} mb={4}>
+                        {nft.description}
+                      </PropertyCard>
                     )}
-                    <div>
-                      <Identicon
-                        value={authorRef.refHash()}
-                        width="26px"
-                        height="24px"
-                        sx={{ svg: { height: "26px" } }}
-                        float="left"
-                      />
-                      <Identifier showCopy copyValue={authorRef.ref()}>
-                        {authorRef.shortRef()}
-                      </Identifier>
-                    </div>
-                  </Flex>
-                </Meta>
-              )}
-              {containerRef && (
-                <Meta heading="Container" mb={4}>
-                  <Flex justifyContent="space-between" alignItems="center">
-                    {container?.name ? (
-                      <Text>{container.name}</Text>
-                    ) : (
-                      <Text fontStyle="italic">&lt;Unnamed container&gt;</Text>
-                    )}
-                    <div>
-                      <Identicon
-                        value={containerRef.refHash()}
-                        width="26px"
-                        height="24px"
-                        sx={{ svg: { height: "26px" } }}
-                        float="left"
-                      />
-                      <Identifier showCopy copyValue={containerRef.ref()}>
-                        {containerRef.shortRef()}
-                      </Identifier>
-                    </div>
-                  </Flex>
-                </Meta>
-              )}
-              <SimpleGrid columns={[1, 2]} spacing={4}>
-                {isIPFS && (
-                  <Meta heading={t`IPFS CID`}>
-                    <div>
-                      <Identifier showCopy>
-                        {nft.main?.replace("ipfs://", "")}
-                      </Identifier>
-                    </div>
-                  </Meta>
-                )}
-                {nft.hashstamp && (
-                  <Meta
-                    heading="HashStamp"
-                    info={
-                      <Tooltip
-                        label={t`A HashStamp is a compressed on-chain copy of the token image, displayed alongside the SHA-256 of the original file`}
-                        placement="bottom-end"
-                        hasArrow
-                      >
-                        <InfoIcon
-                          right={0}
-                          color="gray.400"
-                          display={{ base: "none", md: "block" }}
+                    <PropertyCard heading="Atomical ID" mb={4}>
+                      <div>
+                        <Identicon
+                          value={ref.refHash()}
+                          width="24px"
+                          height="24px"
+                          sx={{ svg: { height: "26px" } }}
+                          float="left"
                         />
-                      </Tooltip>
-                    }
-                  >
-                    <Flex gap={4}>
-                      <Image
-                        src={`data:image/webp;base64, ${btoa(
-                          String.fromCharCode(...new Uint8Array(nft.hashstamp))
-                        )}`}
-                        width="64px"
-                        height="64px"
-                        objectFit="contain"
-                        backgroundColor="white"
-                      />
-                      {nft.hash && (
+                        <Identifier showCopy copyValue={ref.ref()}>
+                          {atom}
+                        </Identifier>
+                      </div>
+                    </PropertyCard>
+                    {authorRef && (
+                      <PropertyCard heading="Author" mb={4}>
+                        <Flex
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          {author?.name ? (
+                            <Text>{author.name}</Text>
+                          ) : (
+                            <Text fontStyle="italic">
+                              &lt;Unnamed author&gt;
+                            </Text>
+                          )}
+                          <div>
+                            <Identicon
+                              value={authorRef.refHash()}
+                              width="24px"
+                              height="24px"
+                              sx={{ svg: { height: "26px" } }}
+                              float="left"
+                            />
+                            <Identifier showCopy copyValue={authorRef.ref()}>
+                              {authorRef.shortRef()}
+                            </Identifier>
+                          </div>
+                        </Flex>
+                      </PropertyCard>
+                    )}
+                    {containerRef && (
+                      <PropertyCard heading="Container" mb={4}>
+                        <Flex
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          {container?.name ? (
+                            <Text>{container.name}</Text>
+                          ) : (
+                            <Text fontStyle="italic">
+                              &lt;Unnamed container&gt;
+                            </Text>
+                          )}
+                          <div>
+                            <Identicon
+                              value={containerRef.refHash()}
+                              width="24px"
+                              height="24px"
+                              sx={{ svg: { height: "26px" } }}
+                              float="left"
+                            />
+                            <Identifier showCopy copyValue={containerRef.ref()}>
+                              {containerRef.shortRef()}
+                            </Identifier>
+                          </div>
+                        </Flex>
+                      </PropertyCard>
+                    )}
+                    <SimpleGrid columns={[1, 2]} spacing={4}>
+                      {isIPFS && (
+                        <PropertyCard heading={t`IPFS CID`}>
+                          <div>
+                            <Identifier showCopy>
+                              {nft.main?.replace("ipfs://", "")}
+                            </Identifier>
+                          </div>
+                        </PropertyCard>
+                      )}
+                      {nft.hashstamp && (
+                        <PropertyCard
+                          heading="HashStamp"
+                          info={
+                            <Tooltip
+                              label={t`A HashStamp is a compressed on-chain copy of the token image, displayed alongside the SHA-256 of the original file`}
+                              placement="bottom-end"
+                              hasArrow
+                            >
+                              <InfoIcon
+                                right={0}
+                                color="gray.400"
+                                display={{ base: "none", md: "block" }}
+                              />
+                            </Tooltip>
+                          }
+                        >
+                          <Flex gap={4}>
+                            <Image
+                              src={`data:image/webp;base64, ${btoa(
+                                String.fromCharCode(
+                                  ...new Uint8Array(nft.hashstamp)
+                                )
+                              )}`}
+                              width="64px"
+                              height="64px"
+                              objectFit="contain"
+                              backgroundColor="white"
+                            />
+                            {nft.hash && (
+                              <div>
+                                <Identifier>
+                                  {bytesToHex(new Uint8Array(nft.hash))}
+                                </Identifier>
+                              </div>
+                            )}
+                          </Flex>
+                        </PropertyCard>
+                      )}
+                      <PropertyCard heading={t`Owner`}>
                         <div>
-                          <Identifier>
-                            {bytesToHex(new Uint8Array(nft.hash))}
+                          <Identifier showCopy>{owner}</Identifier>
+                        </div>
+                      </PropertyCard>
+                      <PropertyCard heading={t`Output value`}>
+                        <Photons value={txo.value} />
+                      </PropertyCard>
+                      {nft?.type && (
+                        <PropertyCard heading={t`Type`}>
+                          <AtomType type={nft?.type} />
+                        </PropertyCard>
+                      )}
+                      <PropertyCard heading={t`Mint`}>
+                        <div>
+                          <Identifier showCopy copyValue={ref.ref("i")}>
+                            {ref.shortInput()}
                           </Identifier>
                         </div>
+                      </PropertyCard>
+                      <PropertyCard heading={t`Location`}>
+                        <div>
+                          <Identifier showCopy copyValue={txo.txid}>
+                            {location.shortOutput()}
+                          </Identifier>
+                        </div>
+                      </PropertyCard>
+                      {/* Temporarily disabled. See comment regarding date in buildUpdateTXOs.
+                      <PropertyCard heading={t`Received`}>
+                        {txo.date
+                          ? dayjs(txo.date * 1000).format("lll")
+                          : "Unconfirmed"}
+                      </PropertyCard>
+                      */}
+                      <PropertyCard heading={t`Height`}>
+                        {txo.height === Infinity ? t`Unconfirmed` : txo.height}
+                      </PropertyCard>
+                      {nft?.file && nft?.main && (
+                        <>
+                          <PropertyCard heading={t`Content length`}>
+                            {filesize(nft.file.byteLength) as string}
+                          </PropertyCard>
+                          <PropertyCard heading={t`Content type`}>
+                            {mime.getType(nft.main)}
+                          </PropertyCard>
+                        </>
                       )}
-                    </Flex>
-                  </Meta>
-                )}
-                <Meta heading={t`Owner`}>
-                  <div>
-                    <Identifier showCopy>{owner}</Identifier>
-                  </div>
-                </Meta>
-                <Meta heading={t`Output value`}>
-                  <Photons value={txo.value} />
-                </Meta>
-                {nft?.type && (
-                  <Meta heading={t`Type`}>
-                    <AtomType type={nft?.type} />
-                  </Meta>
-                )}
-                <Meta heading={t`Mint`}>
-                  <div>
-                    <Identifier showCopy copyValue={ref.ref("i")}>
-                      {ref.shortInput()}
-                    </Identifier>
-                  </div>
-                </Meta>
-                <Meta heading={t`Location`}>
-                  <div>
-                    <Identifier showCopy copyValue={txo.txid}>
-                      {location.shortOutput()}
-                    </Identifier>
-                  </div>
-                </Meta>
-                {/* Temporarily disabled. See comment regarding date in buildUpdateTXOs.
-                <Meta heading={t`Received`}>
-                  {txo.date
-                    ? dayjs(txo.date * 1000).format("lll")
-                    : "Unconfirmed"}
-                </Meta>
-                */}
-                <Meta heading={t`Height`}>
-                  {txo.height === Infinity ? t`Unconfirmed` : txo.height}
-                </Meta>
-                {nft?.file && nft?.main && (
-                  <>
-                    <Meta heading={t`Content length`}>
-                      {filesize(nft.file.byteLength) as string}
-                    </Meta>
-                    <Meta heading={t`Content type`}>
-                      {mime.getType(nft.main)}
-                    </Meta>
-                  </>
-                )}
-              </SimpleGrid>
-              {(nft?.description || hasAttrs) && <Divider my={4} />}
-              {nft?.description && (
-                <Meta heading={t`Description`} mb={4}>
-                  {nft.description}
-                </Meta>
-              )}
-              {hasAttrs && (
-                <>
-                  <SimpleGrid columns={[1, 2]} spacing={4} gridAutoRows="1fr">
-                    {Object.entries(nft.attrs).map(([k, v]) => (
-                      <Meta heading={k} key={k}>
-                        {v}
-                      </Meta>
-                    ))}
-                  </SimpleGrid>
-                </>
-              )}
+                    </SimpleGrid>
+                    {hasAttrs && (
+                      <>
+                        <Divider my={4} />
+                        <SimpleGrid
+                          columns={[1, 2]}
+                          spacing={4}
+                          gridAutoRows="1fr"
+                        >
+                          {Object.entries(nft.attrs).map(([k, v]) => (
+                            <PropertyCard heading={k} key={k}>
+                              {v}
+                            </PropertyCard>
+                          ))}
+                        </SimpleGrid>
+                      </>
+                    )}
+                  </TabPanel>
+                  <TabPanel px={0}>
+                    <AtomData sref={sref} />
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
             </div>
           </Grid>
         </Container>

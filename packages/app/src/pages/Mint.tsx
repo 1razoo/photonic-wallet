@@ -127,7 +127,7 @@ function TargetBox({
               {t`Upload file`}
             </Text>
             <Text color="gray.300" fontSize="md">
-              {t`Files over 1KB will be stored in IPFS`}
+              {t`Files over 2KB will be stored in IPFS`}
             </Text>
           </>
         )}
@@ -389,7 +389,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
             hexToBytes(Outpoint.fromString(userAtom.ref).reverse().toString()),
           ],
         ],
-        ["attrs", attrs.length && { attrs: Object.fromEntries(attrs) }],
+        ["attrs", attrs.length && Object.fromEntries(attrs)],
       ].filter(([, v]) => v)
     );
 

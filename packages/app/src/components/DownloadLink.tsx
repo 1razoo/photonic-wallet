@@ -2,6 +2,7 @@ import { Button, ButtonProps } from "@chakra-ui/react";
 import { t } from "@lingui/macro";
 
 export default function DownloadLink({
+  children,
   data,
   filename,
   mimeType,
@@ -29,7 +30,7 @@ export default function DownloadLink({
 
   return (
     <Button onClick={downloadUint8ArrayAsFile} {...rest}>
-      {t`Download`}
+      {children || t`Download`}
     </Button>
   );
 }

@@ -147,6 +147,7 @@ export class NFTSubscription implements Subscription {
         await Promise.all(
           Array.from(foundDelegates).map(async (delegateRef) => {
             // Check if it's cached
+            // FIXME should this use txid instead of ref?
             let hex = await opfs.getTx(delegateRef);
             const refBE = Outpoint.fromString(delegateRef).reverse();
 
@@ -310,12 +311,13 @@ export class NFTSubscription implements Subscription {
     const refVout = parseInt(ref.substring(64), 10);
 
     // Find NFT script in the reveal tx
-    const script = reveal.inputs.find((input) => {
+    const revealIndex = reveal.inputs.findIndex((input) => {
       return (
         input.prevTxId.toString("hex") === refTxId &&
         input.outputIndex === refVout
       );
-    })?.script;
+    });
+    const script = revealIndex >= 0 && reveal.inputs[revealIndex].script;
 
     if (!script) return { related: [] };
 
@@ -373,6 +375,7 @@ export class NFTSubscription implements Subscription {
     const record: AtomNft = {
       ref,
       lastTxoId: receivedTxo?.id,
+      revealOutpoint: Outpoint.fromUTXO(reveal.id, revealIndex).toString(),
       spent: 0,
       fresh: fresh ? 1 : 0,
       type,
