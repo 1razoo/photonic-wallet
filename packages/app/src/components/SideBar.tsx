@@ -85,6 +85,7 @@ export default function SideBar({ ...rest }: GridProps) {
           {t`Fungible Tokens`}
         </MenuButton>
         <MenuButton
+          display="none"
           to="/names"
           leftIcon={<Icon as={HiOutlineAtSymbol} boxSize={4} />}
         >
