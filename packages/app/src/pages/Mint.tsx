@@ -599,7 +599,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   return (
     <>
       <ContentContainer>
-        <PageHeader back to="/create">
+        <PageHeader back to="/objects">
           <Trans>
             Mint <AtomTokenType type={tokenType} />
           </Trans>

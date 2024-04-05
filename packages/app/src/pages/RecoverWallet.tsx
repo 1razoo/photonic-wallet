@@ -92,7 +92,13 @@ export default function RecoverWallet() {
   };
 
   return (
-    <Container display="flex" alignItems="center" height="100vh">
+    <Container
+      display="flex"
+      alignItems="center"
+      mt="72px"
+      py={2}
+      height={{ lg: "calc(100vh - 72px)" }}
+    >
       <Card mb={4} p={4} width="2xl">
         <Heading size="md" mb={4}>
           {t`Recover your wallet`}

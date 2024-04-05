@@ -56,8 +56,8 @@ export default function MintSuccessModal({
 
         <ModalFooter as={Flex} gap={4}>
           <Button onClick={onClose}>{t`Mint another`}</Button>
-          <Button as={RouterLink} to="/create">
-            {t`Back to dashboard`}
+          <Button as={RouterLink} to="/objects">
+            {t`Back to wallet`}
           </Button>
         </ModalFooter>
       </ModalContent>

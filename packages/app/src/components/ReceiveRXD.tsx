@@ -15,6 +15,7 @@ import { CopyIcon } from "@chakra-ui/icons";
 import { QRCodeSVG } from "qrcode.react";
 import Identifier from "./Identifier";
 import { network, wallet } from "@app/signals";
+import ActionIcon from "./ActionIcon";
 
 interface Props {
   disclosure: UseDisclosureProps;
@@ -45,7 +46,7 @@ export default function ReceiveRXD({ disclosure }: Props) {
           <Identifier>{address}</Identifier>
           <Button
             onClick={onCopy}
-            leftIcon={<CopyIcon />}
+            leftIcon={<ActionIcon as={CopyIcon} />}
             variant="ghost"
             mt={2}
           >

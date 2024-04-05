@@ -30,6 +30,7 @@ import About from "./pages/About";
 import gradient from "/gradient.svg";
 import Exit from "./pages/Exit";
 import Fungible from "./pages/Fungible";
+import SetupLayout from "./layouts/SetupLayout";
 
 dayjs.extend(localizedFormat);
 
@@ -153,7 +154,7 @@ const theme = extendTheme({
           backdropFilter: "blur(24px)",
         },
         dialog: {
-          m: { base: 4, md: 0 },
+          mx: { base: 4, md: 0 },
           bgGradient: "linear(to-b, transparent, blackAlpha.500)",
           bgColor: "#2D2D2DA0",
         },
@@ -263,12 +264,17 @@ const router = createHashRouter([
         element: <Root />,
       },
       {
-        path: "/create-wallet",
-        element: <CreateWallet />,
-      },
-      {
-        path: "/recover",
-        element: <RecoverWallet />,
+        element: <SetupLayout />,
+        children: [
+          {
+            path: "/create-wallet",
+            element: <CreateWallet />,
+          },
+          {
+            path: "/recover",
+            element: <RecoverWallet />,
+          },
+        ],
       },
       {
         element: <WalletLayout />,

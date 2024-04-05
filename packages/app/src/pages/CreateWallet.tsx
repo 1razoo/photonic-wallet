@@ -9,6 +9,7 @@ import {
   Button,
   Center,
   Container,
+  Flex,
   FormControl,
   FormLabel,
   Heading,
@@ -25,6 +26,8 @@ import db from "@app/db";
 import { PromiseExtended } from "dexie";
 import { wallet } from "@app/signals";
 import config from "@app/config.json";
+import PageHeader from "@app/components/PageHeader";
+import Logo from "@app/components/Logo";
 
 const networkKeys = Object.entries(config.networks)
   .filter(([, v]) => v.enabled)
@@ -117,8 +120,14 @@ export default function CreateWallet() {
   return (
     <>
       {licenseRead && (
-        <Container display="flex" alignItems="center" height="100vh">
-          <Card mb={4} p={4} width="2xl">
+        <Container
+          display="flex"
+          alignItems="center"
+          mt="72px"
+          py={2}
+          height={{ lg: "calc(100vh - 72px)" }}
+        >
+          <Card mt={{ base: 4, lg: 0 }} mb={{ lg: 4 }} p={4} width="2xl">
             {step === 0 ? (
               <>
                 <Heading size="md" mb={4}>

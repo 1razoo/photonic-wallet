@@ -34,7 +34,6 @@ export default function LicenseModal({
       isOpen={isOpen}
       onClose={() => undefined}
       closeOnOverlayClick={false}
-      isCentered
       size="4xl"
       autoFocus={false} // Autofocus will scroll to radio input on mobile
     >

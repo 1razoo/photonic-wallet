@@ -1,5 +1,12 @@
 import { Link } from "react-router-dom";
-import { Box, Flex, FlexProps, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  FlexProps,
+  ResponsiveValue,
+  StyleProps,
+  Text,
+} from "@chakra-ui/react";
 
 // Prefix is used so fill url(#...) ids are unique, otherwise nothing will render"
 const LogoSvg = ({ svgId, ...rest }: { svgId: string }) => {
@@ -98,22 +105,25 @@ const LogoSvg = ({ svgId, ...rest }: { svgId: string }) => {
 
 export default function Logo({
   svgId,
+  responsive = true,
   ...rest
-}: { svgId: string } & FlexProps) {
+}: { svgId: string; responsive?: boolean } & FlexProps) {
+  const r = ({ lg, ...props }: any) => (responsive ? { ...props, lg } : props);
+
   return (
     <Flex
       alignItems="center"
       justifyContent="center"
       as={Link}
       to="/objects"
-      direction={{ base: "row", lg: "column" }}
+      flexDir={r({ base: "row", lg: "column" })}
       {...rest}
     >
       <Box
         width="8"
         height="8"
-        mr={{ base: "-28px", lg: 0 }}
-        mb={{ base: 0, lg: "-28px" }}
+        mr={r({ base: "-28px", lg: 0 })}
+        mb={r({ base: 0, lg: "-28px" })}
         //bgGradient="linear(to-r, #FF00AA, #0000FF)"
         backgroundColor="blue.900"
         borderRadius="50%"
@@ -127,7 +137,7 @@ export default function Logo({
         h={6}
         zIndex={1}
         color="lightBlue.A400"
-        mr={{ base: 1, lg: 0 }}
+        mr={r({ base: 1, lg: 0 })}
         sx={{
           "& path": {
             transformOrigin: "center center",
