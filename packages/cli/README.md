@@ -14,13 +14,13 @@ pnpm install
 
 ```bash
 cd packages/cli
-pnpm turbo dev
+pnpm dev
 ```
 
 ### Build
 
 ```bash
-pnpm turbo build
+pnpm build
 ```
 
 Build will be in `packages/cli/dist/cli.js`.
@@ -47,7 +47,7 @@ Tokens are minted from `bundle.json` files. Create a new empty directory and a `
     "batchSize": 3
   },
   "reveal": {
-    "method": "send",
+    "method": "direct",
     "batchSize": 3
   },
   "template": {
@@ -146,13 +146,14 @@ The commit command creates a `reveal.json` file, allowing the user to further co
 
 ### Reveal Method
 
-There are two reveal methods `send` and `psbt`.
+There are two reveal methods:
 
-The `send` method uses `SIGHASH_ALL` and sends tokens directly to an address. The `psbt` method is used to create partially signed transactions using `SIGHASH_SINGLE|ANYONECANPAY` which can be used by token marketplaces.
+* `direct`: Uses `SIGHASH_ALL` and sends tokens directly to an address.
+* `psbt`: Used to create partially signed transactions using `SIGHASH_SINGLE|ANYONECANPAY` which can be used by token marketplaces.
 
 Once the `reveal.json` file is ready, the reveal transactions are generated using the `bundle:reveal` command.
 
-For the `send` method, `reveal.batchSize` may be configured to batch multiple token reveals into each transaction. To reveal each token in a separate transaction set `batchSize` to 1.
+For the `direct` method, `reveal.batchSize` may be configured to batch multiple token reveals into each transaction. To reveal each token in a separate transaction set `batchSize` to 1.
 
 ### Related Tokens
 

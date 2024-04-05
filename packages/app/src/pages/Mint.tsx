@@ -47,11 +47,10 @@ import useElectrum from "@app/electrum/useElectrum";
 import { mintToken } from "@lib/mint";
 import { encodeCid, upload } from "@lib/ipfs";
 import { photonsToRXD } from "@lib/format";
-import AtomType from "@app/components/AtomType";
+import AtomTokenType from "@app/components/AtomTokenType";
 import ContentContainer from "@app/components/ContentContainer";
 import PageHeader from "@app/components/PageHeader";
 import HashStamp from "@app/components/HashStamp";
-import FormField from "@app/components/FormField";
 import Identifier from "@app/components/Identifier";
 import FormSection from "@app/components/FormSection";
 import MintSuccessModal from "@app/components/MintSuccessModal";
@@ -64,7 +63,7 @@ import {
 } from "@app/signals";
 import { AtomFile, AtomPayload, AtomRemoteFile, Utxo } from "@lib/types";
 
-const MAX_BYTES = 10240000;
+const MAX_BYTES = 20000;
 
 type ContentMode = "file" | "text" | "url";
 
@@ -127,7 +126,7 @@ function TargetBox({
               {t`Upload file`}
             </Text>
             <Text color="gray.300" fontSize="md">
-              {t`Files over 2KB will be stored in IPFS`}
+              {t`Files over 10KB will be stored in IPFS`}
             </Text>
           </>
         )}
@@ -143,7 +142,7 @@ type FileUpload = {
   data: ArrayBuffer;
 };
 
-type TokenType = "object" | "container" | "user";
+type TokenType = "object" | "container" | "user" | "fungible";
 
 const formReducer = (
   state: { [key: string]: string },
@@ -240,13 +239,12 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   );
   const isConnected = electrumStatus.value === ElectrumStatus.CONNECTED;
   const users = useLiveQuery(
-    async () => await db.atomNft.where({ type: "user", spent: 0 }).toArray(),
+    async () => await db.atom.where({ type: "user", spent: 0 }).toArray(),
     [],
     []
   );
   const containers = useLiveQuery(
-    async () =>
-      await db.atomNft.where({ type: "container", spent: 0 }).toArray(),
+    async () => await db.atom.where({ type: "container", spent: 0 }).toArray(),
     [],
     []
   );
@@ -274,8 +272,16 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   };
   const img = useRef<HTMLImageElement>(null);
 
-  const preview = () => submit(true);
-  const mint = () => submit(false);
+  const preview = (event: React.FormEvent) => {
+    event.preventDefault();
+    submit(true);
+    return false;
+  };
+  const mint = (event: React.FormEvent) => {
+    event.preventDefault();
+    submit(false);
+    return false;
+  };
 
   const submit = async (dryRun: boolean) => {
     if (fileState.ipfs && !apiKey) {
@@ -287,7 +293,10 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     }
 
     if (wallet.value.locked) {
-      openModal.value = { modal: "unlock" };
+      openModal.value = {
+        modal: "unlock",
+        onClose: (success) => success && submit(dryRun),
+      };
       return;
     }
 
@@ -298,6 +307,8 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       url,
       urlFileType = "html",
       immutable,
+      ticker,
+      supply,
       ...fields
     } = formData;
 
@@ -305,6 +316,15 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       toast({
         status: "error",
         title: t`Unrecognized URL file type`,
+      });
+      return;
+    }
+
+    const outputValue = tokenType === "fungible" ? parseInt(supply, 10) : 1;
+    if (outputValue < 0 || outputValue > 1000000000000) {
+      toast({
+        status: "error",
+        title: t`Token supply is too high`,
       });
       return;
     }
@@ -323,7 +343,13 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       urlFileType
     );
     // Default for immutable is true so only add args.i if creating a mutable token
-    const args = immutable === "0" ? { i: false } : undefined;
+    const args: { [key: string]: unknown } = {};
+    if (immutable === "0") {
+      args.i = false;
+    }
+    if (tokenType === "fungible") {
+      args.ticker = ticker;
+    }
 
     if (content && enableHashstamp && hashStamp) {
       (content as AtomRemoteFile).hs = new Uint8Array(hashStamp);
@@ -372,7 +398,12 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     const meta = Object.fromEntries(
       [
         ["name", fields.name],
-        ["type", tokenType === "object" ? undefined : tokenType],
+        [
+          "type",
+          tokenType === "object" || tokenType === "fungible"
+            ? undefined
+            : tokenType,
+        ],
         ["license", fields.license],
         ["desc", fields.desc],
         [
@@ -401,7 +432,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         : undefined;
 
     const payload: AtomPayload = {
-      ...(args && { args }),
+      ...(Object.keys(args).length ? { args } : undefined),
       ...meta,
       ...fileObj,
     };
@@ -409,7 +440,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     try {
       if (fileState.ipfs && fileState.file?.data) {
         // FIXME does this throw an error when unsuccessful?
-        const finalCid = await upload(
+        await upload(
           fileState.file?.data,
           fileState.cid,
           dryRun,
@@ -422,6 +453,8 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       if (containerInput) relInputs.push(containerInput);
 
       const { commitTx, revealTx, fees, ref, size } = mintToken(
+        tokenType === "fungible" ? "ft" : "nft",
+        tokenType === "fungible" ? parseInt(supply, 10) : 1,
         wallet.value.address,
         wallet.value.wif as string,
         coins,
@@ -522,7 +555,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
 
       newState.hash = sha256(typedArray);
 
-      if (size > 2000) {
+      if (size > 10000) {
         newState.ipfs = true;
         newState.cid = await encodeCid(reader.result as ArrayBuffer);
       }
@@ -568,300 +601,323 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       <ContentContainer>
         <PageHeader back to="/create">
           <Trans>
-            Mint <AtomType type={tokenType} lower />
+            Mint <AtomTokenType type={tokenType} />
           </Trans>
         </PageHeader>
 
-        <Container
-          as={Grid}
-          maxW="container.lg"
-          gap={4}
-          mb={16}
-          pt={8}
-          mt={-4}
-          {...rootProps}
-        >
-          {apiKey === "" && (
-            <Alert status="info">
-              <AlertIcon />
-              <span>
-                <Trans>
-                  No NFT.Storage API key has been provided. To upload large
-                  files, please go to{" "}
-                  <Text
-                    as={Link}
-                    to="/settings/ipfs"
-                    textDecoration="underline"
-                  >
-                    IPFS Settings
-                  </Text>{" "}
-                  and enter your key.
-                </Trans>
-              </span>
-            </Alert>
-          )}
-          {tokenType !== "user" && (
-            <FormSection>
-              <FormControl>
-                <FormLabel>{t`Author`}</FormLabel>
-                <Select name="authorId" onChange={onFormChange}>
-                  <option value="">{t`None`}</option>
-                  {users.map((u, index) => (
-                    <option key={u.ref} value={index}>
-                      {u.name} [{Outpoint.fromString(u.ref).shortRef()}]
-                    </option>
-                  ))}
-                </Select>
-                <FormHelperText>
-                  {t`Assigning an author is recommended for authentication of tokens.`}
-                </FormHelperText>
-              </FormControl>
-            </FormSection>
-          )}
-          {tokenType === "object" && (
-            <FormSection>
-              <FormControl>
-                <FormLabel>{t`Container`}</FormLabel>
-                <Select name="containerId" onChange={onFormChange}>
-                  <option value="">None</option>
-                  {containers.map((c, index) => (
-                    <option key={c.ref} value={index}>
-                      {c.name} [{Outpoint.fromString(c.ref).shortRef()}]
-                    </option>
-                  ))}
-                </Select>
-                <FormHelperText>
-                  {t`Containers can be used to create token collections`}
-                </FormHelperText>
-              </FormControl>
-            </FormSection>
-          )}
-          <FormSection>
-            <FormControl>
-              <FormLabel>{t`What data do you want to store?`}</FormLabel>
-              <RadioGroup defaultValue="file" onChange={changeMode}>
-                <Stack spacing={5} direction="row">
-                  <Radio value="file">{t`File`}</Radio>
-                  <Radio value="url">{t`URL`}</Radio>
-                  <Radio value="text">{t`Text`}</Radio>
-                </Stack>
-              </RadioGroup>
-            </FormControl>
-            <Divider />
-
-            {mode === "file" && (
-              <>
-                {/* Not sure why z-index fixes glow box */}
-                <FormControl zIndex={0}>
-                  <FormLabel>{t`File`}</FormLabel>
-                  <FormHelperText mb={4}>
-                    {t`Upload an image, text file or other content`}
-                  </FormHelperText>
-                  {fileState.file?.data ? (
-                    <Flex
-                      height={{ base: "150px", md: "200px" }}
-                      p={4}
-                      alignItems="center"
-                      justifyContent="space-between"
-                      flexDir="row"
-                      gap={4}
-                      bg="blackAlpha.500"
-                      borderRadius="md"
-                    >
-                      {fileState.imgSrc && (
-                        <Image
-                          ref={img}
-                          src={`data:${fileState.file.type};base64, ${fileState.imgSrc}`}
-                          objectFit="contain"
-                          height="100%"
-                          maxW={{ base: "160px", md: "230px" }}
-                          //sx={{ imageRendering: "pixelated" }} // TODO find a way to apply this to pixel art
-                        />
-                      )}
-                      <Box flexGrow={1}>
-                        <div>{fileState.file.name}</div>
-                        <Text color="gray.400">
-                          {fileState.file.type || "text/plain"}
-                        </Text>
-                        <Text color="gray.400">
-                          {filesize(fileState.file.size || 0) as string}
-                        </Text>
-                      </Box>
-                      <IconButton
-                        icon={<DeleteIcon />}
-                        onClick={() => delImg()}
-                        isDisabled={!fileState.file?.data}
-                        aria-label="delete"
-                        mx={4}
-                      />
-                    </Flex>
-                  ) : (
-                    <Flex
-                      justifyContent="center"
-                      alignItems="center"
-                      gap={6}
-                      height="200px"
-                    >
-                      <TargetBox
-                        getInputProps={getInputProps}
-                        isDragActive={isDragActive}
-                        onClick={onClick}
-                      />
-                    </Flex>
-                  )}
-                </FormControl>
-              </>
-            )}
-            {mode === "file" && fileState.file?.data && !fileState.ipfs && (
-              <Alert status="info">
-                <AlertIcon /> {t`Your file will be stored on-chain.`}
-              </Alert>
-            )}
-            {mode === "file" && fileState.file?.data && fileState.ipfs && (
+        <form onSubmit={clean ? mint : preview}>
+          <Container
+            as={Grid}
+            maxW="container.lg"
+            gap={4}
+            mb={16}
+            pt={8}
+            mt={-4}
+            {...rootProps}
+          >
+            {apiKey === "" && (
               <Alert status="info">
                 <AlertIcon />
-                {t`Your file will be stored in IPFS.`}{" "}
-                {fileState.stampSupported &&
-                  t`A HashStamp image may be stored on-chain.`}
+                <span>
+                  <Trans>
+                    No NFT.Storage API key has been provided. To upload large
+                    files, please go to{" "}
+                    <Text
+                      as={Link}
+                      to="/settings/ipfs"
+                      textDecoration="underline"
+                    >
+                      IPFS Settings
+                    </Text>{" "}
+                    and enter your key.
+                  </Trans>
+                </span>
               </Alert>
             )}
-            {mode === "file" && fileState.file?.data && fileState.ipfs && (
-              <>
-                <Divider />
-                {fileState.cid && (
-                  <FormControl>
-                    <FormLabel>{t`IPFS`}</FormLabel>
-                    <Trans>
-                      <FormHelperText mb={4}>
-                        Your uploaded file will have the following URL
-                      </FormHelperText>
-                      <Identifier overflowWrap="anywhere">
-                        ipfs://{fileState.cid}
-                      </Identifier>
-                    </Trans>
-                  </FormControl>
-                )}
-                {fileState.stampSupported && (
-                  <>
-                    <Divider />
-                    <FormControl>
-                      <FormLabel>{t`HashStamp`}</FormLabel>
-                      <RadioGroup
-                        defaultValue="1"
-                        onChange={(value) => setEnableHashstamp(!!value)}
-                      >
-                        <Stack spacing={5} direction="row">
-                          <Radio value="1">{t`Store HashStamp on-chain`}</Radio>
-                          <Radio value="">{t`No HashStamp`}</Radio>
-                        </Stack>
-                      </RadioGroup>
-                      <FormHelperText mb={4}>
-                        {t`A compressed copy of the token image stored on-chain`}
-                      </FormHelperText>
-                      {enableHashstamp && (
-                        <>
-                          <div />
-                          <Flex
-                            p={4}
-                            alignItems="top"
-                            flexDir="row"
-                            gap={4}
-                            bg="blackAlpha.500"
-                            borderRadius="md"
-                          >
-                            {fileState.file && (
-                              <HashStamp
-                                img={fileState.file.data}
-                                onRender={(hashStampData) =>
-                                  setHashstamp(hashStampData)
-                                }
-                              />
-                            )}
-                          </Flex>
-                        </>
-                      )}
-                    </FormControl>
-                  </>
-                )}
-              </>
-            )}
-            {mode === "text" && (
-              <>
-                <FormField heading="Text" />
-                <Textarea
-                  name="text"
-                  bgColor="whiteAlpha.50"
-                  borderColor="transparent"
-                  onChange={onFormChange}
-                />
-              </>
-            )}
-            {mode === "url" && (
-              <>
+            {tokenType !== "user" && (
+              <FormSection>
                 <FormControl>
-                  <FormLabel>URL</FormLabel>
-                  <Input name="url" onChange={onFormChange} />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>File type</FormLabel>
-                  <Input
-                    placeholder="html"
-                    name="urlFileType"
-                    onChange={onFormChange}
-                  />
+                  <FormLabel>{t`Author`}</FormLabel>
+                  <Select name="authorId" onChange={onFormChange}>
+                    <option value="">{t`None`}</option>
+                    {users.map((u, index) => (
+                      <option key={u.ref} value={index}>
+                        {u.name} [{Outpoint.fromString(u.ref).shortRef()}]
+                      </option>
+                    ))}
+                  </Select>
                   <FormHelperText>
-                    {t`Type of content the URL links. Leave empty for a website link.`}
+                    {t`Assigning an author is recommended for authentication of tokens.`}
                   </FormHelperText>
                 </FormControl>
+              </FormSection>
+            )}
+            {tokenType === "object" && (
+              <FormSection>
+                <FormControl>
+                  <FormLabel>{t`Container`}</FormLabel>
+                  <Select name="containerId" onChange={onFormChange}>
+                    <option value="">None</option>
+                    {containers.map((c, index) => (
+                      <option key={c.ref} value={index}>
+                        {c.name} [{Outpoint.fromString(c.ref).shortRef()}]
+                      </option>
+                    ))}
+                  </Select>
+                  <FormHelperText>
+                    {t`Containers can be used to create token collections`}
+                  </FormHelperText>
+                </FormControl>
+              </FormSection>
+            )}
+            <FormSection>
+              <FormControl>
+                <FormLabel>{t`What data do you want to store?`}</FormLabel>
+                <RadioGroup defaultValue="file" onChange={changeMode}>
+                  <Stack spacing={5} direction="row">
+                    <Radio value="file">{t`File`}</Radio>
+                    <Radio value="url">{t`URL`}</Radio>
+                    <Radio value="text">{t`Text`}</Radio>
+                  </Stack>
+                </RadioGroup>
+              </FormControl>
+              <Divider />
+
+              {mode === "file" && (
+                <>
+                  {/* Not sure why z-index fixes glow box */}
+                  <FormControl zIndex={0}>
+                    <FormLabel>{t`File`}</FormLabel>
+                    <FormHelperText mb={4}>
+                      {t`Upload an image, text file or other content`}
+                    </FormHelperText>
+                    {fileState.file?.data ? (
+                      <Flex
+                        height={{ base: "150px", md: "200px" }}
+                        p={4}
+                        alignItems="center"
+                        justifyContent="space-between"
+                        flexDir="row"
+                        gap={4}
+                        bg="blackAlpha.500"
+                        borderRadius="md"
+                      >
+                        {fileState.imgSrc && (
+                          <Image
+                            ref={img}
+                            src={`data:${fileState.file.type};base64, ${fileState.imgSrc}`}
+                            objectFit="contain"
+                            height="100%"
+                            maxW={{ base: "160px", md: "230px" }}
+                            //sx={{ imageRendering: "pixelated" }} // TODO find a way to apply this to pixel art
+                          />
+                        )}
+                        <Box flexGrow={1}>
+                          <div>{fileState.file.name}</div>
+                          <Text color="gray.400">
+                            {fileState.file.type || "text/plain"}
+                          </Text>
+                          <Text color="gray.400">
+                            {filesize(fileState.file.size || 0) as string}
+                          </Text>
+                        </Box>
+                        <IconButton
+                          icon={<DeleteIcon />}
+                          onClick={() => delImg()}
+                          isDisabled={!fileState.file?.data}
+                          aria-label="delete"
+                          mx={4}
+                        />
+                      </Flex>
+                    ) : (
+                      <Flex
+                        justifyContent="center"
+                        alignItems="center"
+                        gap={6}
+                        height="200px"
+                      >
+                        <TargetBox
+                          getInputProps={getInputProps}
+                          isDragActive={isDragActive}
+                          onClick={onClick}
+                        />
+                      </Flex>
+                    )}
+                  </FormControl>
+                </>
+              )}
+              {mode === "file" && fileState.file?.data && !fileState.ipfs && (
+                <Alert status="info">
+                  <AlertIcon /> {t`Your file will be stored on-chain.`}
+                </Alert>
+              )}
+              {mode === "file" && fileState.file?.data && fileState.ipfs && (
+                <Alert status="info">
+                  <AlertIcon />
+                  {t`Your file will be stored in IPFS.`}{" "}
+                  {fileState.stampSupported &&
+                    t`A HashStamp image may be stored on-chain.`}
+                </Alert>
+              )}
+              {mode === "file" && fileState.file?.data && fileState.ipfs && (
+                <>
+                  <Divider />
+                  {fileState.cid && (
+                    <FormControl>
+                      <FormLabel>{t`IPFS`}</FormLabel>
+                      <Trans>
+                        <FormHelperText mb={4}>
+                          Your uploaded file will have the following URL
+                        </FormHelperText>
+                        <Identifier overflowWrap="anywhere">
+                          ipfs://{fileState.cid}
+                        </Identifier>
+                      </Trans>
+                    </FormControl>
+                  )}
+                  {fileState.stampSupported && (
+                    <>
+                      <Divider />
+                      <FormControl>
+                        <FormLabel>{t`HashStamp`}</FormLabel>
+                        <RadioGroup
+                          defaultValue="1"
+                          onChange={(value) => setEnableHashstamp(!!value)}
+                        >
+                          <Stack spacing={5} direction="row">
+                            <Radio value="1">{t`Store HashStamp on-chain`}</Radio>
+                            <Radio value="">{t`No HashStamp`}</Radio>
+                          </Stack>
+                        </RadioGroup>
+                        <FormHelperText mb={4}>
+                          {t`A compressed copy of the token image stored on-chain`}
+                        </FormHelperText>
+                        {enableHashstamp && (
+                          <>
+                            <div />
+                            <Flex
+                              p={4}
+                              alignItems="top"
+                              flexDir="row"
+                              gap={4}
+                              bg="blackAlpha.500"
+                              borderRadius="md"
+                            >
+                              {fileState.file && (
+                                <HashStamp
+                                  img={fileState.file.data}
+                                  onRender={(hashStampData) =>
+                                    setHashstamp(hashStampData)
+                                  }
+                                />
+                              )}
+                            </Flex>
+                          </>
+                        )}
+                      </FormControl>
+                    </>
+                  )}
+                </>
+              )}
+              {mode === "text" && (
+                <>
+                  <FormControl>
+                    <FormLabel>Text</FormLabel>
+                    <Textarea
+                      name="text"
+                      bgColor="whiteAlpha.50"
+                      borderColor="transparent"
+                      onChange={onFormChange}
+                    />
+                  </FormControl>
+                </>
+              )}
+              {mode === "url" && (
+                <>
+                  <FormControl>
+                    <FormLabel>URL</FormLabel>
+                    <Input name="url" onChange={onFormChange} />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>File type</FormLabel>
+                    <Input
+                      placeholder="html"
+                      name="urlFileType"
+                      onChange={onFormChange}
+                    />
+                    <FormHelperText>
+                      {t`Type of content the URL links. Leave empty for a website link.`}
+                    </FormHelperText>
+                  </FormControl>
+                </>
+              )}
+            </FormSection>
+            {tokenType === "fungible" && (
+              <>
+                <FormSection>
+                  <FormControl>
+                    <FormLabel>{t`Ticker`}</FormLabel>
+                    <Input
+                      placeholder="Ticker"
+                      name="ticker"
+                      onChange={onFormChange}
+                      required
+                    />
+                  </FormControl>
+                </FormSection>
+                <FormSection>
+                  <FormControl>
+                    <FormLabel>{t`Photon Supply`}</FormLabel>
+                    <Input
+                      placeholder=""
+                      name="supply"
+                      type="number"
+                      onChange={onFormChange}
+                      required
+                      min={1}
+                    />
+                    <FormHelperText>
+                      Token supply requires an equal amount of RXD photons
+                    </FormHelperText>
+                  </FormControl>
+                </FormSection>
               </>
             )}
-          </FormSection>
-          {/*
-        {tokenType === "ft" && (
-          <>
-            <FormField heading="Ticker" />
-            <Input placeholder="Ticker" name="ticker" onChange={onFormChange} />
-            <FormField heading="Supply" />
-            <Input placeholder="Supply" name="supply" onChange={onFormChange} />
-            <Divider />
-          </>
-        )}
-        */}
-          <FormSection>
-            <FormControl>
-              <FormLabel>{t`Name`}</FormLabel>
-              <Input
-                placeholder={t`Name`}
-                name="name"
-                onChange={onFormChange}
-              />
-            </FormControl>
-          </FormSection>
-          <FormSection>
-            <FormControl>
-              <FormLabel>{t`Description`}</FormLabel>
-              <Input
-                placeholder={t`Description`}
-                name="desc"
-                onChange={onFormChange}
-              />
-            </FormControl>
-          </FormSection>
-          <FormSection>
-            <FormControl>
-              <FormLabel>{t`License`}</FormLabel>
-              <Input
-                placeholder={t`License`}
-                name="license"
-                onChange={onFormChange}
-              />
-            </FormControl>
-          </FormSection>
-          <FormSection>
-            <FormControl>
-              <FormLabel>{t`Attributes`}</FormLabel>
-              <Box>
-                <form onSubmit={addAttr}>
+            <FormSection>
+              <FormControl>
+                <FormLabel>{t`Name`}</FormLabel>
+                <Input
+                  placeholder={t`Name`}
+                  name="name"
+                  onChange={onFormChange}
+                  required
+                />
+              </FormControl>
+            </FormSection>
+            <FormSection>
+              <FormControl>
+                <FormLabel>{t`Description`}</FormLabel>
+                <Input
+                  placeholder={t`Description`}
+                  name="desc"
+                  onChange={onFormChange}
+                />
+              </FormControl>
+            </FormSection>
+            <FormSection>
+              <FormControl>
+                <FormLabel>{t`License`}</FormLabel>
+                <Input
+                  placeholder={t`License`}
+                  name="license"
+                  onChange={onFormChange}
+                />
+              </FormControl>
+            </FormSection>
+            <FormSection>
+              <FormControl>
+                <FormLabel>{t`Attributes`}</FormLabel>
+                <Box>
                   <Flex gap={4}>
                     <Input placeholder={t`Name`} ref={attrName} />
                     <Input
@@ -870,120 +926,122 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                       ref={attrValue}
                     />
                   </Flex>
-                </form>
-                <FormHelperText>
-                  {t`Properties that describe your asset`}
-                </FormHelperText>
-                {attrs.length > 0 && (
-                  <Flex gap={4} flexWrap="wrap" mt={4}>
-                    {attrs.map(([name, value], index) => (
-                      <Tag size="lg" key={`${name}-${value}-${index}`}>
-                        <TagLabel>
-                          <b>{name}:</b> {value}
-                        </TagLabel>
-                        <TagCloseButton onClick={() => delAttr(index)} />
-                      </Tag>
-                    ))}
-                  </Flex>
-                )}
-              </Box>
-            </FormControl>
-          </FormSection>
-          <FormSection>
-            <FormControl>
-              <FormLabel>{t`Immutable`}</FormLabel>
-              <RadioGroup
-                name="immutable"
-                defaultValue={tokenType === "object" ? "1" : "0"}
-              >
-                <Stack spacing={5} direction="row">
-                  <Radio value="1" onChange={onFormChange}>
-                    {t`Yes`}
-                  </Radio>
-                  <Radio value="0" onChange={onFormChange}>
-                    {t`No, allow token owner to modify`}
-                  </Radio>
-                </Stack>
-              </RadioGroup>
-              {["user", "container"].includes(tokenType) && (
-                <FormHelperText mb={4}>
-                  {t`Mutable tokens are recommended for user and container tokens`}
-                </FormHelperText>
-              )}
-            </FormControl>
-          </FormSection>
-          {formData.immutable !== "1" && (
-            <Alert status="info">
-              <AlertIcon />
-              {t`Mutable tokens are not yet fully supported by Photonic Wallet, however a mutable contract containing 1 photon will be created.`}
-            </Alert>
-          )}
-          {clean && (
-            <FormSection>
-              <FormControl>
-                <FormLabel>{t`Summary`}</FormLabel>
-                <SimpleGrid
-                  templateColumns="max-content max-content"
-                  columnGap={8}
-                  rowGap={2}
-                  py={2}
-                >
-                  <Box>{t`Transaction size`}</Box>
-                  <Box>{filesize(stats.size) as string}</Box>
-                  <Box>{t`Fee`}</Box>
-                  <Box>
-                    {photonsToRXD(stats.fee)} {network.value.ticker}
-                  </Box>
-                </SimpleGrid>
+                  <FormHelperText>
+                    {t`Properties that describe your asset`}
+                  </FormHelperText>
+                  {attrs.length > 0 && (
+                    <Flex gap={4} flexWrap="wrap" mt={4}>
+                      {attrs.map(([name, value], index) => (
+                        <Tag size="lg" key={`${name}-${value}-${index}`}>
+                          <TagLabel>
+                            <b>{name}:</b> {value}
+                          </TagLabel>
+                          <TagCloseButton onClick={() => delAttr(index)} />
+                        </Tag>
+                      ))}
+                    </Flex>
+                  )}
+                </Box>
               </FormControl>
             </FormSection>
-          )}
-          <div />
-          {clean ? (
-            <>
-              {isConnected ? (
-                <Alert status="success">
-                  <AlertIcon />
-                  {t`Your token is ready to mint. Please review all data and the transaction fee before proceeding.`}
-                </Alert>
-              ) : (
-                <Alert status="warning">
-                  <AlertIcon />
-                  {t`Please reconnect to mint your token`}
-                </Alert>
-              )}
+            {tokenType !== "fungible" && (
+              <FormSection>
+                <FormControl>
+                  <FormLabel>{t`Immutable`}</FormLabel>
+                  <RadioGroup
+                    name="immutable"
+                    defaultValue={tokenType === "object" ? "1" : "0"}
+                  >
+                    <Stack spacing={5} direction="row">
+                      <Radio value="1" onChange={onFormChange}>
+                        {t`Yes`}
+                      </Radio>
+                      <Radio value="0" onChange={onFormChange}>
+                        {t`No, allow token owner to modify`}
+                      </Radio>
+                    </Stack>
+                  </RadioGroup>
+                  {["user", "container"].includes(tokenType) && (
+                    <FormHelperText mb={4}>
+                      {t`Mutable tokens are recommended for user and container tokens`}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              </FormSection>
+            )}
+            {formData.immutable !== "1" && (
+              <Alert status="info">
+                <AlertIcon />
+                {t`Mutable tokens are not yet fully supported by Photonic Wallet, however a mutable contract containing 1 photon will be created.`}
+              </Alert>
+            )}
+            {clean && (
+              <FormSection>
+                <FormControl>
+                  <FormLabel>{t`Summary`}</FormLabel>
+                  <SimpleGrid
+                    templateColumns="max-content max-content"
+                    columnGap={8}
+                    rowGap={2}
+                    py={2}
+                  >
+                    <Box>{t`Transaction size`}</Box>
+                    <Box>{filesize(stats.size) as string}</Box>
+                    <Box>{t`Fee`}</Box>
+                    <Box>
+                      {photonsToRXD(stats.fee)} {network.value.ticker}
+                    </Box>
+                  </SimpleGrid>
+                </FormControl>
+              </FormSection>
+            )}
+            <div />
+            {clean ? (
+              <>
+                {isConnected ? (
+                  <Alert status="success">
+                    <AlertIcon />
+                    {t`Your token is ready to mint. Please review all data and the transaction fee before proceeding.`}
+                  </Alert>
+                ) : (
+                  <Alert status="warning">
+                    <AlertIcon />
+                    {t`Please reconnect to mint your token`}
+                  </Alert>
+                )}
+                <Flex justifyContent="center" py={8} mb={16}>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    w="240px"
+                    maxW="100%"
+                    isLoading={loading}
+                    loadingText="Minting"
+                    shadow="dark-md"
+                    isDisabled={!isConnected}
+                  >
+                    {t`Mint`}
+                  </Button>
+                </Flex>
+              </>
+            ) : (
               <Flex justifyContent="center" py={8} mb={16}>
                 <Button
-                  variant="primary"
+                  type="submit"
                   size="lg"
                   w="240px"
                   maxW="100%"
-                  onClick={mint}
                   isLoading={loading}
-                  loadingText="Minting"
+                  loadingText="Calculating"
                   shadow="dark-md"
-                  isDisabled={!isConnected}
                 >
-                  {t`Mint`}
+                  {t`Calculate Fee`}
                 </Button>
               </Flex>
-            </>
-          ) : (
-            <Flex justifyContent="center" py={8} mb={16}>
-              <Button
-                size="lg"
-                w="240px"
-                maxW="100%"
-                onClick={preview}
-                isLoading={loading}
-                loadingText="Calculating"
-                shadow="dark-md"
-              >
-                {t`Calculate Fee`}
-              </Button>
-            </Flex>
-          )}
-        </Container>
+            )}
+          </Container>
+        </form>
       </ContentContainer>
       <MintSuccessModal
         isOpen={isSuccessModalOpen}

@@ -4,6 +4,7 @@ import { Flex, FlexProps, Heading, IconButton, Spacer } from "@chakra-ui/react";
 import { PropsWithChildren } from "react";
 import { openMenu } from "@app/signals";
 import Logo from "./Logo";
+import { t } from "@lingui/macro";
 
 export default function PageHeader({
   back = false,
@@ -22,12 +23,29 @@ export default function PageHeader({
 }> &
   FlexProps) {
   const navigate = useNavigate();
+  const backButton = (
+    <IconButton
+      aria-label="Back"
+      variant="ghost"
+      icon={back ? <ArrowBackIcon /> : <CloseIcon />}
+      {...(to
+        ? {
+            as: NavLink,
+            to,
+          }
+        : {
+            onClick: () => navigate(-1),
+          })}
+    />
+  );
+
   return (
     <Flex
-      px={6}
+      pl={{ base: 2, lg: 4 }}
+      pr={4}
       alignItems="center"
       justifyContent="space-between"
-      height="72px"
+      height={{ base: "60px", lg: "72px" }}
       position="sticky"
       top="0"
       bgColor="bg.100"
@@ -35,22 +53,17 @@ export default function PageHeader({
       zIndex={10}
       {...rest}
     >
-      {(back || close) && (
+      {back || close ? (
+        backButton
+      ) : (
         <IconButton
-          isRound
-          aria-label="Back"
+          icon={<HamburgerIcon />}
+          display={{ base: "flex", lg: "none" }}
+          aria-label={t`Open menu`}
           variant="ghost"
-          icon={back ? <ArrowBackIcon /> : <CloseIcon />}
-          ml={-2}
-          mr={1}
-          {...(to
-            ? {
-                as: NavLink,
-                to,
-              }
-            : {
-                onClick: () => navigate(-1),
-              })}
+          onClick={() => {
+            openMenu.value = true;
+          }}
         />
       )}
       {showLogo ? (
@@ -58,6 +71,7 @@ export default function PageHeader({
       ) : (
         <Heading
           size="md"
+          ml={2}
           fontWeight="medium"
           display="flex"
           alignItems="center"
@@ -67,15 +81,6 @@ export default function PageHeader({
       )}
       <Spacer />
       {toolbar}
-      <IconButton
-        icon={<HamburgerIcon />}
-        display={{ base: "flex", lg: "none" }}
-        aria-label="Open menu"
-        ml={4}
-        onClick={() => {
-          openMenu.value = true;
-        }}
-      />
     </Flex>
   );
 }

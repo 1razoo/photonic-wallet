@@ -45,10 +45,10 @@ program
   )
   .action(bundlePrepare);
 
-program
+/*program
   .command("bundle:preview [bundleDir]")
   .description("preview prepared tokens in your browser")
-  .action(bundlePrepare);
+  .action(bundlePrepare);*/
 
 program
   .command("bundle:commit [bundleDir]")

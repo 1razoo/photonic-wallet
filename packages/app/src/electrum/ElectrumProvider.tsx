@@ -12,10 +12,12 @@ import {
 import { electrumStatus, wallet } from "@app/signals";
 import { useToast } from "@chakra-ui/react";
 import { ElectrumStatus } from "@app/types";
+import { FTSubscription } from "@app/subscriptions/FT";
 
 const electrum = new ElectrumManager();
 const rxd = new RXDSubscription(electrum);
 const nft = new NFTSubscription(electrum);
+const ft = new FTSubscription(electrum);
 // Disable until SPV is implemented
 //const headers = new HeadersSubscription(electrum);
 
@@ -42,6 +44,7 @@ export default function ElectrumProvider({ children }: PropsWithChildren) {
     if (!wallet.value.address) return;
     rxd.register(wallet.value.address, toast);
     nft.register(wallet.value.address, toast);
+    ft.register(wallet.value.address, toast);
     //headers.register();
   };
 

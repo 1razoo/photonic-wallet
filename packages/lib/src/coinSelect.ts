@@ -26,7 +26,7 @@ export function coinSelect(
   }[],
   changeScript: string,
   feeRate: number
-) {
+): { inputs: SelectableInput[]; outputs: UnfinalizedInput[]; fee: number } {
   const inputs = utxos.map((u) => ({
     address,
     txid: u.txid,
@@ -34,14 +34,25 @@ export function coinSelect(
     value: u.value,
     // height:  // FIXME
     required: u.required || false,
-    script: u.script,
+    // Coinselect uses script as scriptSig, but for Utxo it's scriptPubKey
+    script: u.scriptSig,
+    // scriptPubKey is not used by coinselect, but will be swapped back to the script property later
+    scriptPubKey: u.script,
   }));
 
-  return bsvCoinSelect(inputs, target, feeRate, changeScript);
+  const selected = bsvCoinSelect(inputs, target, feeRate, changeScript);
+  selected.inputs = (selected.inputs as { scriptPubKey: string }[]).map(
+    ({ scriptPubKey, ...rest }) => ({
+      ...rest,
+      script: scriptPubKey,
+    })
+  );
+  return selected;
 }
 
 /**
  * Select coins to fund a transaction
+ * This is used to create a separate funding transaction which will be used to fund the next transaction
  * Returns:
  * - Funding UTXOs
  * - Unspent outputs with funding UTXOs removed
@@ -104,6 +115,21 @@ export function updateUnspent(
   changeVoutStart: number
 ) {
   return [...remaining, ...targetToUtxo(change, changeTxid, changeVoutStart)];
+}
+
+export function accumulateInputs(utxos: SelectableInput[], amount: number) {
+  let sum = 0;
+  let index = 0;
+  const inputs: SelectableInput[] = [];
+
+  while (sum < amount && index < utxos.length) {
+    const utxo = utxos[index];
+    sum += utxo.value;
+    inputs.push({ ...utxo, required: true });
+    index++;
+  }
+
+  return { inputs, sum };
 }
 
 export default coinSelect;

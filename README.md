@@ -40,25 +40,24 @@ Photonic Wallet is built upon the Atomicals protocol, a powerful and flexible pr
 pnpm install
 ```
 
-### Run development server
+### Run web development server
 
 ```bash
-cd packages/app
-pnpm turbo dev
+pnpm dev
 ```
 
-### Build for web
+### Build web app and CLI
 
 ```bash
-pnpm turbo build
+pnpm build
 ```
 
-Build will be in `packages/app/dist`. This can be served as a static site.
+Builds will be in `packages/app/dist` and `packages/cli/dist`. Web app can be served as a static site.
 
 ### Build for Windows, Linux or macOS
 
 ```bash
-pnpm -F app tauri build
+pnpm build:tauri
 ```
 
 Executables will be in `pacakges/app/src-tauri/target/release`.

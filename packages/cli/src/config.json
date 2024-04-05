@@ -17,5 +17,5 @@
       "servers": ["wss://electrumx-testnet.radiant4people.com:53002"]
     }
   },
-  "maxFileSize": 2000
+  "maxFileSize": 10000
 }

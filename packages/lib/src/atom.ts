@@ -19,13 +19,13 @@ export const atomBuffer = Buffer.from(atomHex, "hex");
 const toObject = (obj: unknown) =>
   typeof obj === "object" ? (obj as { [key: string]: unknown }) : {};
 
-export function decodeAtom(script: Script):
-  | undefined
-  | {
-      operation?: string;
-      payload: AtomPayload;
-      files: { [key: string]: AtomFile };
-    } {
+export type DecodedAtom = {
+  operation: string;
+  payload: AtomPayload;
+  files: { [key: string]: AtomFile };
+};
+
+export function decodeAtom(script: Script): undefined | DecodedAtom {
   let result: { operation?: string; payload: object } = {
     operation: undefined,
     payload: {},
@@ -47,7 +47,11 @@ export function decodeAtom(script: Script):
 
     const operation = script.chunks[index + 1];
     const payload = script.chunks[index + 2];
-    if (operation.opcodenum !== 3 || !operation.buf || !payload.buf) {
+    if (
+      (operation.opcodenum !== 2 && operation.opcodenum !== 3) ||
+      !operation.buf ||
+      !payload.buf
+    ) {
       return false;
     }
     const decoded = decode(Buffer.from(payload.buf));
@@ -62,9 +66,10 @@ export function decodeAtom(script: Script):
     return true;
   });
 
-  if (!result.operation) return undefined;
+  if (!result.operation || !["nft", "ft", "dat"].includes(result.operation))
+    return undefined;
 
-  const { args, ctx, ...rest } = result.payload as {
+  const { args, ctx, attrs, ...rest } = result.payload as {
     [key: string]: unknown;
   };
 
@@ -85,6 +90,7 @@ export function decodeAtom(script: Script):
     payload: {
       args: toObject(args),
       ctx: toObject(ctx),
+      attrs: toObject(attrs),
       ...Object.fromEntries(meta),
     },
     files: Object.fromEntries(files) as { [key: string]: AtomFile },
@@ -94,9 +100,10 @@ export function decodeAtom(script: Script):
 export function encodeAtom(
   operation: string,
   payload: unknown
-): { script: string; payloadHash: string } {
+): { operation: string; script: string; payloadHash: string } {
   const encodedPayload = encode(payload);
   return {
+    operation,
     script: new Script()
       .add(atomBuffer)
       .add(Buffer.from(operation))
@@ -133,4 +140,27 @@ export function encodeAtomMutable(
 export function isImmutableToken(payload: AtomPayload) {
   // Default to immutable if arg.i isn't given
   return payload.args?.i !== undefined ? payload.args.i === true : true;
+}
+
+// Filter for attr objects
+export function filterAttrs(obj: object) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(
+      ([, value]) =>
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+    )
+  );
+}
+
+function filterByKey(obj: object, allowedKeys: string[]) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key]) => allowedKeys.includes(key))
+  );
+}
+
+// Supported arg values
+export function filterArgs(args: object) {
+  return filterByKey(args, ["ticker"]);
 }

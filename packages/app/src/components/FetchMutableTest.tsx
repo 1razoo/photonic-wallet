@@ -1,6 +1,5 @@
 import useElectrum from "@app/electrum/useElectrum";
-import { wallet } from "@app/signals";
-import { AtomNft, TxO } from "@app/types";
+import { Atom } from "@app/types";
 import { DownloadIcon } from "@chakra-ui/icons";
 import { GridItem, Button } from "@chakra-ui/react";
 import Outpoint from "@lib/Outpoint";
@@ -53,7 +52,7 @@ async function fetchAtomData(
   }
 }
 
-export default function FetchTokenTest({ token }: { token: AtomNft }) {
+export default function FetchTokenTest({ token }: { token: Atom }) {
   const client = useElectrum();
   const fetchToken = async () => {
     const nftRef = Outpoint.fromString(token.ref);

@@ -9,16 +9,16 @@ export type Wallet = {
   address: string;
 };
 
-export type TokenSendParams = {
+export type RevealDirectParams = {
   address: string;
 };
 
-export type TokenPsbtParams = {
+export type RevealPsbtParams = {
   photons: number;
   address: string;
 };
 
-export type TokenRevealParams = TokenSendParams | TokenPsbtParams;
+export type TokenRevealParams = RevealDirectParams | RevealPsbtParams;
 
 export type AtomPayload = {
   args: {
@@ -29,6 +29,9 @@ export type AtomPayload = {
   };
   in?: Uint8Array[];
   by?: Uint8Array[];
+  attrs: {
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
 };
 
@@ -40,10 +43,13 @@ export type AtomRemoteFile = {
 
 export type AtomFile = Uint8Array | AtomRemoteFile;
 
+export type CommitOperation = "nft" | "dat" | "ft";
+
 // Unsigned inputs are used for fee calcualtion and do not yet have a script sig
 // Maybe there is a better name for this...
 export type UnfinalizedInput = Utxo & {
   scriptSigSize?: number;
+  scriptSig?: string;
 };
 
 // Unsigned outputs are used for fee calcualtion and do not yet contain a txid and vout
@@ -102,7 +108,8 @@ export type TokenCommitData = {
     value: number;
   };
   immutable: boolean;
-  atom: { script: string; payloadHash: string };
+  outputValue: number;
+  atom: { operation: string; script: string; payloadHash: string };
 };
 
 export default {};

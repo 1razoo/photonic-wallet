@@ -4,16 +4,16 @@ import { sha256 } from "@noble/hashes/sha256";
 import { Buffer } from "buffer";
 import { atomBuffer, atomHex } from "./atom";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
+import { CommitOperation } from "./types";
 
 const { Address, Opcode, Script } = rjs;
 
 // NOTE: All ref inputs for script functions must be little-endian
 
 // Size of scripts (not including length VarInt)
-export const commitScriptSize = 81;
-export const commitScriptWithDelegateSize = commitScriptSize + 36;
 export const p2pkhScriptSize = 25;
 export const nftScriptSize = 63;
+export const ftScriptSize = 75;
 export const delegateTokenScriptSize = 63;
 export const delegateBurnScriptSize = 38;
 export const p2pkhScriptSigSize = 107;
@@ -77,7 +77,19 @@ export function txSize(
 }
 
 export function revealScriptSigSize(atomLen: number) {
-  return p2pkhScriptSigSize + pushDataSize(atomLen) + atomLen;
+  return p2pkhScriptSigSize + atomLen;
+}
+
+export function commitScriptSize(
+  operation: CommitOperation,
+  hasDelegate: boolean
+) {
+  const opSize = {
+    ft: 9,
+    nft: 10,
+    dat: 0,
+  };
+  return 71 + opSize[operation] + (hasDelegate ? 52 : 0);
 }
 
 export function scriptHash(hex: string): string {
@@ -98,6 +110,58 @@ export function p2pkhScriptHash(address: string): string {
   return scriptHash(p2pkhScript(address));
 }
 
+// Delegate ref is used for assigning related refs to the token
+// The delegate burn code script hash must be in an output. This output will prove the delegate ref exists in an input.
+function addDelegateRefScript(
+  script: rjs.Script,
+  delegateRef: string
+): rjs.Script {
+  script.add(
+    Script.fromASM(
+      `OP_PUSHINPUTREF ${delegateRef} OP_DUP ` +
+        `OP_REFOUTPUTCOUNT_OUTPUTS OP_0 OP_NUMEQUALVERIFY ` + // Push ref disallowed
+        `d1 OP_SWAP 6a OP_CAT OP_CAT OP_HASH256 OP_CODESCRIPTHASHOUTPUTCOUNT_OUTPUTS OP_1 OP_NUMEQUALVERIFY` // Ref must be burned using REQUIREINPUTREF RETURN
+    )
+  );
+  return script;
+}
+
+export function ftCommitScript(
+  address: string,
+  payloadHash: string,
+  delegateRef: string | undefined
+) {
+  const script = new Script();
+
+  if (delegateRef) {
+    addDelegateRefScript(script, delegateRef);
+  }
+
+  // Check payload hash
+  script
+    .add(Opcode.OP_HASH256)
+    .add(Buffer.from(payloadHash, "hex"))
+    .add(Opcode.OP_EQUALVERIFY);
+  // atom ft
+  script
+    .add(Buffer.from("ft"))
+    .add(Opcode.OP_EQUALVERIFY)
+    .add(atomBuffer)
+    .add(Opcode.OP_EQUALVERIFY);
+  // Ensure normal ref for this input exists in an output
+  // TODO should supply be enforced?
+  script.add(
+    Script.fromASM(
+      "OP_INPUTINDEX OP_OUTPOINTTXHASH OP_INPUTINDEX OP_OUTPOINTINDEX OP_4 OP_NUM2BIN OP_CAT OP_REFTYPE_OUTPUT OP_1 OP_NUMEQUALVERIFY"
+    )
+  );
+
+  // P2PKH
+  script.add(Script.buildPublicKeyHashOut(Address.fromString(address)));
+
+  return script.toHex();
+}
+
 export function nftCommitScript(
   address: string,
   payloadHash: string,
@@ -105,16 +169,8 @@ export function nftCommitScript(
 ) {
   const script = new Script();
 
-  // Delegate ref is used for assigning related refs to the token
-  // The delegate burn code script hash must be in an output. This output will prove the delegate ref exists in an input.
   if (delegateRef) {
-    script.add(
-      Script.fromASM(
-        `OP_PUSHINPUTREF ${delegateRef} OP_DUP ` +
-          `OP_REFOUTPUTCOUNT_OUTPUTS OP_0 OP_NUMEQUALVERIFY ` + // Push ref disallowed
-          `d1 OP_SWAP 6a OP_CAT OP_CAT OP_HASH256 OP_CODESCRIPTHASHOUTPUTCOUNT_OUTPUTS OP_1 OP_NUMEQUALVERIFY` // Ref must be burned using REQUIREINPUTREF RETURN
-      )
-    );
+    addDelegateRefScript(script, delegateRef);
   }
 
   // Check payload hash
@@ -141,9 +197,52 @@ export function nftCommitScript(
   return script.toHex();
 }
 
+// A dat operation is used for data storage. Similar to the nft operation but no singleton is created.
+export function datCommitScript(
+  address: string,
+  payloadHash: string,
+  delegateRef: string | undefined
+) {
+  const script = new Script();
+
+  if (delegateRef) {
+    addDelegateRefScript(script, delegateRef);
+  }
+
+  // Check payload hash
+  script
+    .add(Opcode.OP_HASH256)
+    .add(Buffer.from(payloadHash, "hex"))
+    .add(Opcode.OP_EQUALVERIFY);
+  // atom dat
+  script
+    .add(Buffer.from("dat"))
+    .add(Opcode.OP_EQUALVERIFY)
+    .add(atomBuffer)
+    .add(Opcode.OP_EQUALVERIFY);
+
+  // P2PKH
+  script.add(Script.buildPublicKeyHashOut(Address.fromString(address)));
+
+  return script.toHex();
+}
+
 export function nftScript(address: string, ref: string) {
-  const script = Script.fromASM(`OP_PUSHINPUTREFSINGLETON ${ref} OP_DROP`).add(
-    Script.buildPublicKeyHashOut(address)
+  try {
+    const script = Script.fromASM(
+      `OP_PUSHINPUTREFSINGLETON ${ref} OP_DROP`
+    ).add(Script.buildPublicKeyHashOut(address));
+    return script.toHex();
+  } catch {
+    return "";
+  }
+}
+
+export function ftScript(address: string, ref: string) {
+  const script = Script.buildPublicKeyHashOut(address).add(
+    Script.fromASM(
+      `OP_STATESEPARATOR OP_PUSHINPUTREF ${ref} OP_REFOUTPUTCOUNT_OUTPUTS OP_INPUTINDEX OP_CODESCRIPTBYTECODE_UTXO OP_HASH256 OP_DUP OP_CODESCRIPTHASHVALUESUM_UTXOS OP_OVER OP_CODESCRIPTHASHVALUESUM_OUTPUTS OP_GREATERTHANOREQUAL OP_VERIFY OP_CODESCRIPTHASHOUTPUTCOUNT_OUTPUTS OP_NUMEQUALVERIFY`
+    )
   );
   return script.toHex();
 }
@@ -200,6 +299,10 @@ export function nftScriptHash(address: string) {
   return scriptHash(nftScript(address, zeroRef));
 }
 
+export function ftScriptHash(address: string) {
+  return scriptHash(ftScript(address, zeroRef));
+}
+
 export function parseCommitScript(script: string): string[] {
   const pattern =
     /^((d1[0-9a-f]{72}75)+)aa20[0-9a-f]{64}88036e667488047370723588c0c8c0c954807eda529d.*/; // Don't need to match p2pkh
@@ -231,6 +334,16 @@ export function parseNftScript(script: string): {
 } {
   const pattern = /^d8([0-9a-f]{72})7576a914([0-9a-f]{40})88ac$/;
   const [, ref, address] = script.match(pattern) || [];
+  return { ref, address };
+}
+
+export function parseFtScript(script: string): {
+  ref?: string;
+  address?: string;
+} {
+  const pattern =
+    /^76a914([0-9a-f]{40})88acbdd0([0-9a-f]{72})dec0e9aa76e378e4a269e69d$/;
+  const [, address, ref] = script.match(pattern) || [];
   return { ref, address };
 }
 

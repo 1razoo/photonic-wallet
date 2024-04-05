@@ -30,6 +30,13 @@ export const balance = signal<BalanceState>({
     unconfirmed: 0,
   },
 });
+type FtBalanceState = {
+  [key: string]: {
+    confirmed: number;
+    unconfirmed: number;
+  };
+};
+export const ftBalance = signal<FtBalanceState>({});
 export const electrumStatus = signal<ElectrumStatus>(ElectrumStatus.LOADING);
 export const electrumServer = signal("");
 export const totalBalance = computed(

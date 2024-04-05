@@ -99,3 +99,7 @@ export default class Outpoint {
     };
   }
 }
+
+export function reverseRef(ref: string) {
+  return Outpoint.fromString(ref).reverse().toString();
+}

@@ -2,13 +2,13 @@ import Joi from "joi";
 
 const refString = Joi.string().hex().length(72);
 
-const tokenSchema = Joi.object({
+const tokenBaseSchema = Joi.object({
   // Reveal object isn't required in the bundle but can be used to prepopulate the generated reveal.json file
   // Why doesn't ...reveal.method work here?
   reveal: Joi.when("$method", {
     switch: [
       {
-        is: "send",
+        is: "direct",
         then: Joi.object({
           address: Joi.string(),
         }),
@@ -41,21 +41,43 @@ const tokenSchema = Joi.object({
   attrs: Joi.object().pattern(Joi.string(), Joi.any()),
 });
 
+const nftSchema = tokenBaseSchema.append({
+  operation: Joi.valid("nft", "dat").when("$prepared", {
+    is: true,
+    then: Joi.required(),
+  }),
+});
+
+const ftSchema = tokenBaseSchema.append({
+  operation: Joi.valid("ft").when("$prepared", {
+    is: true,
+    then: Joi.required(),
+  }),
+  ticker: Joi.string().when("$prepared", {
+    is: true,
+    then: Joi.required(),
+  }),
+  supply: Joi.number().positive().greater(0).when("$prepared", {
+    is: true,
+    then: Joi.required(),
+  }),
+});
+
 export const bundleFileSchema = Joi.object({
   commit: Joi.object({ batchSize: Joi.number().required() }).required(),
   reveal: Joi.object({
-    method: Joi.valid("send", "psbt"),
+    method: Joi.valid("direct", "psbt"),
     batchSize: Joi.when("method", {
       is: "broadcast",
       then: Joi.number(),
     }),
   }).required(),
-  template: tokenSchema.optional(),
-  tokens: Joi.array().items(tokenSchema).min(1).required(),
+  template: [nftSchema, ftSchema],
+  tokens: Joi.array().items(nftSchema, ftSchema).min(1).required(),
 });
 
 export const revealFileSchema = Joi.object({
-  method: Joi.valid("send", "psbt").required(),
+  method: Joi.valid("direct", "psbt").required(),
   batchSize: Joi.when("method", {
     is: "broadcast",
     then: Joi.number().required(),
@@ -63,7 +85,7 @@ export const revealFileSchema = Joi.object({
   template: Joi.when("$method", {
     switch: [
       {
-        is: "send",
+        is: "direct",
         then: Joi.object({
           address: Joi.string(),
         }),
@@ -84,7 +106,7 @@ export const revealFileSchema = Joi.object({
       Joi.when("$method", {
         switch: [
           {
-            is: "send",
+            is: "direct",
             then: Joi.object({
               address: Joi.string().required(),
             }),

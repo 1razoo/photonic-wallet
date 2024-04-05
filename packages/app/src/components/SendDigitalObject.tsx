@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { t } from "@lingui/macro";
+import { PrivateKey } from "@radiantblockchain/radiantjs";
+import coinSelect, { SelectableInput } from "@lib/coinSelect";
 import {
   Modal,
   ModalOverlay,
@@ -8,24 +10,25 @@ import {
   ModalBody,
   ModalFooter,
   Button,
+  FormControl,
+  FormLabel,
+  Input,
   ModalCloseButton,
   UseDisclosureProps,
-  useToast,
-  Flex,
   Alert,
   AlertDescription,
   AlertIcon,
 } from "@chakra-ui/react";
-import { ContractType, TxO } from "@app/types";
-import useElectrum from "@app/electrum/useElectrum";
-import { WarningIcon } from "@chakra-ui/icons";
-import coinSelect, { SelectableInput } from "@lib/coinSelect";
-import { p2pkhScript } from "@lib/script";
-import { buildTx } from "@lib/tx";
-import { PrivateKey } from "@radiantblockchain/radiantjs";
+import { photonsToRXD } from "@lib/format";
 import { useLiveQuery } from "dexie-react-hooks";
-import db from "../db";
-import { feeRate, wallet } from "@app/signals";
+import db from "@app/db";
+import { ContractType, TxO } from "@app/types";
+import { p2pkhScript, nftScript } from "@lib/script";
+import { buildTx } from "@lib/tx";
+import Identifier from "./Identifier";
+import Outpoint from "@lib/Outpoint";
+import useElectrum from "@app/electrum/useElectrum";
+import { feeRate, network, wallet } from "@app/signals";
 
 interface Props {
   asset: TxO;
@@ -33,13 +36,18 @@ interface Props {
   disclosure: UseDisclosureProps;
 }
 
-export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
+export default function SendDigitalObject({
+  asset,
+  onSuccess,
+  disclosure,
+}: Props) {
   const client = useElectrum();
   const { isOpen, onClose } = disclosure;
+  const toAddress = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const toast = useToast();
+  const ref = Outpoint.fromString(asset.script.substring(2, 74));
 
   const rxd = useLiveQuery(
     () => db.txo.where({ contractType: ContractType.RXD, spent: 0 }).toArray(),
@@ -52,22 +60,38 @@ export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
     setLoading(false);
   }, [isOpen]);
 
-  if (!isOpen || !onClose) return null;
-
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSuccess(true);
     setLoading(true);
 
-    const required: SelectableInput = { ...asset, required: true };
-    const coins: SelectableInput[] = [required, ...rxd.slice()];
+    let fail = false;
+    if (!toAddress.current?.value) {
+      // TODO validate address
+      fail = true;
+      setErrorMessage(t`Invalid address`);
+    }
+
+    if (fail) {
+      setSuccess(false);
+      setLoading(false);
+      return;
+    }
+
+    // Set script to "" so P2PKH scriptSig is used for fee calculation
+    const required: SelectableInput = { ...asset, required: true, script: "" };
+    const inputs: SelectableInput[] = [required, ...rxd.slice()];
 
     const changeScript = p2pkhScript(wallet.value.address);
+    const script = nftScript(
+      toAddress.current?.value as string,
+      ref.toString()
+    );
 
     const selected = coinSelect(
       wallet.value.address,
-      coins,
-      [],
+      inputs,
+      [{ script, value: asset.value }],
       changeScript,
       feeRate.value
     );
@@ -95,7 +119,6 @@ export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
         rawTx
       )) as string;
       onSuccess && onSuccess(txid);
-      toast({ status: "success", title: t`Token melted` });
     } catch (error) {
       setErrorMessage(t`Transaction rejected`);
       setSuccess(false);
@@ -103,32 +126,49 @@ export default function MeltAsset({ asset, onSuccess, disclosure }: Props) {
     }
   };
 
+  if (!isOpen || !onClose) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      initialFocusRef={toAddress}
+      isCentered
+    >
       <form onSubmit={submit}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{t`Melt token`}</ModalHeader>
+          <ModalHeader>{t`Send Digital Object`}</ModalHeader>
           <ModalCloseButton />
-          <ModalBody pb={6} gap={4} as={Flex} flexDirection="row">
+          <ModalBody pb={6} gap={4}>
             {success || (
               <Alert status="error" mb={4}>
                 <AlertIcon />
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>
             )}
-            <WarningIcon fontSize="2xl" />
-            {t`This will destroy your token! Are you sure?`}
+            <FormControl>
+              <FormLabel>To</FormLabel>
+              <Input
+                ref={toAddress}
+                type="text"
+                placeholder={t`${network.value.name} address`}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>{t`Digital Object`}</FormLabel>
+              <Identifier>{ref.reverse().atom()}</Identifier>
+            </FormControl>
+            <FormControl>
+              <FormLabel>{t`Amount`}</FormLabel>
+              <Identifier>{`${photonsToRXD(asset.value)} ${
+                network.value.ticker
+              }`}</Identifier>
+            </FormControl>
           </ModalBody>
           <ModalFooter>
-            <Button
-              type="submit"
-              bgColor="red.600"
-              _hover={{ bg: "red.500" }}
-              isLoading={loading}
-              mr={4}
-            >
-              {t`Melt`}
+            <Button type="submit" variant="primary" isLoading={loading} mr={4}>
+              {t`Send`}
             </Button>
             <Button onClick={onClose}>{t`Cancel`}</Button>
           </ModalFooter>

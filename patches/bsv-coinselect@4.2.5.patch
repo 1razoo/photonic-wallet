@@ -1,24 +1,40 @@
 diff --git a/utils.js b/utils.js
-index 73dfb5ff7fb6ca62383f01b319f263a8f5073ba6..705204076208322eefc5205ac0c31397240ef1df 100644
+index 73dfb5ff7fb6ca62383f01b319f263a8f5073ba6..a2de3a40d47ae3c10d38ca12bcd4a819076328f8 100644
 --- a/utils.js
 +++ b/utils.js
-@@ -1,9 +1,10 @@
+@@ -1,10 +1,25 @@
  // baseline estimates, used to improve performance
 -var TX_EMPTY_SIZE = (4 + 1 + 1 + 4) * 2 // Added buffer of 400 just in case
 -var TX_INPUT_BASE = (32 + 4 + 1 + 4) * 2 // Multiple by 2 to correctly account for bytes
 -var TX_INPUT_PUBKEYHASH = (107) * 2
 -var TX_OUTPUT_BASE = (8 + 1) * 2
 -var TX_OUTPUT_PUBKEYHASH = (25) * 2
+-var TX_DUST_THRESHOLD = 546
 +// FIXME input and output script length varints are hard coded to 5 bytes
-+var TX_EMPTY_SIZE = 4 + 1 + 1 + 4
-+var TX_INPUT_BASE = 32 + 4 + 5 + 4
++var TX_EMPTY_SIZE = 4 + 4
++var TX_INPUT_BASE = 32 + 4 + 4
 +var TX_INPUT_PUBKEYHASH = 107
-+var TX_OUTPUT_BASE = 8 + 5
++var TX_OUTPUT_BASE = 8
 +var TX_OUTPUT_PUBKEYHASH = 25
- var TX_DUST_THRESHOLD = 546
++var TX_DUST_THRESHOLD = 1
++
++function varIntSize(n) {
++  if (n < 253) {
++    return 1;
++  } else if (n <= 65535) {
++    return 3;
++  } else if (n <= 4294967295) {
++    return 5;
++  } else if (n <= 18446744073709551615n) {
++    return 9;
++  } else {
++    throw new Error("Invalid VarInt");
++  }
++}
  
  /**
-@@ -12,9 +13,9 @@ var TX_DUST_THRESHOLD = 546
+  * Take care to check string or Script length
+@@ -12,13 +27,13 @@ var TX_DUST_THRESHOLD = 546
  function inputBytes (input) {
    var scriptLen = 0
    if (input.script && input.script.toHex) {
@@ -30,7 +46,30 @@ index 73dfb5ff7fb6ca62383f01b319f263a8f5073ba6..705204076208322eefc5205ac0c31397
    } else {
      scriptLen = TX_INPUT_PUBKEYHASH
    }
-@@ -119,8 +120,8 @@ function finalize (inputs, outputs, feeRate, changeScript) {
+-  return TX_INPUT_BASE + scriptLen
++  return TX_INPUT_BASE + varIntSize(scriptLen) + scriptLen
+ }
+ 
+ /**
+@@ -33,7 +48,7 @@ function outputBytes (output) {
+   } else {
+     scriptLen = TX_OUTPUT_PUBKEYHASH
+   }
+-  return TX_OUTPUT_BASE + scriptLen
++  return TX_OUTPUT_BASE + varIntSize(scriptLen) + scriptLen
+ }
+ 
+ function dustThreshold (output, feeRate) {
+@@ -49,7 +64,7 @@ function transactionBytes (inputs, outputs) {
+   if (isNaN(inSum) || isNaN(outSum)) {
+     throw new Error('Input outputs isNaN')
+   }
+-  return TX_EMPTY_SIZE + inSum + outSum
++  return TX_EMPTY_SIZE + varIntSize(inputs.length) + inSum + varIntSize(outputs.length) + outSum
+ }
+ 
+ function uintOrNaN (v) {
+@@ -119,8 +134,8 @@ function finalize (inputs, outputs, feeRate, changeScript) {
      return { fee: innerFee }
    }
  

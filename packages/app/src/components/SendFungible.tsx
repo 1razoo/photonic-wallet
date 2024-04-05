@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { t } from "@lingui/macro";
 import { PrivateKey } from "@radiantblockchain/radiantjs";
-import Big from "big.js";
-import coinSelect, { SelectableInput } from "@lib/coinSelect";
+import coinSelect, { SelectableInput, accumulateInputs } from "@lib/coinSelect";
 import {
   Modal,
   ModalOverlay,
@@ -26,21 +25,24 @@ import {
   VStack,
   useToast,
 } from "@chakra-ui/react";
-import { photonsToRXD } from "@lib/format";
 import { useLiveQuery } from "dexie-react-hooks";
 import db from "@app/db";
-import { ContractType } from "@app/types";
-import { p2pkhScript } from "@lib/script";
+import { Atom, ContractType } from "@app/types";
+import { ftScript, p2pkhScript } from "@lib/script";
 import { buildTx } from "@lib/tx";
 import useElectrum from "@app/electrum/useElectrum";
-import { feeRate, network, totalBalance, wallet } from "@app/signals";
+import { feeRate, ftBalance, network, wallet } from "@app/signals";
+import { reverseRef } from "@lib/Outpoint";
+import TokenContent from "./TokenContent";
+import { RiQuestionFill } from "react-icons/ri";
 
 interface Props {
+  atom: Atom;
   onSuccess?: (txid: string) => void;
   disclosure: UseDisclosureProps;
 }
 
-export default function SendRXD({ onSuccess, disclosure }: Props) {
+export default function SendFungible({ atom, onSuccess, disclosure }: Props) {
   const client = useElectrum();
   const { isOpen, onClose } = disclosure;
   const amount = useRef<HTMLInputElement>(null);
@@ -56,62 +58,70 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
     []
   );
 
+  const setFailure = (reason: string) => {
+    setErrorMessage(reason);
+    setSuccess(false);
+    setLoading(false);
+  };
+
   useEffect(() => {
     setSuccess(true);
     setLoading(false);
   }, [isOpen]);
+
+  const ticker = (atom.args.ticker as string) || atom.name || "???";
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSuccess(true);
     setLoading(true);
 
-    let fail = false;
     if (!amount.current?.value) {
-      fail = true;
-      setErrorMessage(t`Invalid amount`);
+      return setFailure(t`Invalid amount`);
     }
 
     if (!toAddress.current?.value) {
-      fail = true;
-      setErrorMessage(t`Invalid address`);
+      return setFailure(t`Invalid address`);
     }
 
-    if (fail) {
-      setSuccess(false);
-      setLoading(false);
-      return;
-    }
-
-    const value = Big(amount.current?.value || 0)
-      .times(100000000)
-      .toNumber();
+    const value = parseInt(amount.current?.value, 10);
+    const refLE = reverseRef(atom.ref);
+    const fromScript = ftScript(wallet.value.address, refLE);
+    const tokens = await db.txo
+      .where({ script: fromScript, spent: 0 })
+      .toArray();
 
     const coins: SelectableInput[] = rxd.slice();
     try {
       const changeScript = p2pkhScript(wallet.value.address);
-      const script = p2pkhScript(toAddress.current?.value as string);
+      const toScript = ftScript(toAddress.current?.value as string, refLE);
 
-      if (!script) {
-        setErrorMessage(t`Invalid address`);
-        setSuccess(false);
-        setLoading(false);
-        return;
+      if (!toScript) {
+        return setFailure(t`Invalid address`);
+      }
+
+      const accum = accumulateInputs(tokens, value);
+
+      if (accum.sum < value) {
+        return setFailure(t`Insufficient token balance`);
+      }
+
+      const outputs = [{ script: toScript, value }];
+      if (accum.sum > value) {
+        outputs.push({ script: fromScript, value: accum.sum - value });
       }
 
       const selected = coinSelect(
         wallet.value.address,
-        coins,
-        [{ script, value }],
+        // FIXME check script is using scriptSig not scriptPubKey
+        [...accum.inputs, ...coins],
+        outputs,
         changeScript,
         feeRate.value
       );
 
       if (!selected.inputs?.length) {
-        setErrorMessage(t`Insufficient funds`);
-        setSuccess(false);
-        setLoading(false);
-        return;
+        return setFailure(t`Insufficient funds`);
       }
 
       const privKey = PrivateKey.fromString(wallet.value.wif as string);
@@ -130,7 +140,7 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
       )) as string;
       console.debug("Result", txid);
       toast({
-        title: t`Sent ${photonsToRXD(value)} ${network.value.ticker}`,
+        title: t`Sent ${value} ${ticker}`,
         status: "success",
       });
 
@@ -156,13 +166,22 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
       <form onSubmit={submit}>
         <ModalOverlay />
         <ModalContent m={4}>
-          <ModalHeader>{t`Send ${network.value.ticker}`}</ModalHeader>
+          <ModalHeader>{t`Send ${atom.name || ticker}`}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6} gap={4}>
             <VStack>
+              <Box w="48px" h="48px">
+                <TokenContent
+                  atom={atom}
+                  defaultIcon={RiQuestionFill}
+                  thumbnail
+                />
+              </Box>
               <Heading size="sm">{t`Balance`}</Heading>
               <Box>
-                {photonsToRXD(totalBalance.value)} {network.value.ticker}
+                {ftBalance.value[atom.ref]?.confirmed +
+                  ftBalance.value[atom.ref]?.unconfirmed}{" "}
+                {ticker}
               </Box>
             </VStack>
             {success || (
@@ -182,16 +201,8 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
             <FormControl>
               <FormLabel>{t`Amount`}</FormLabel>
               <InputGroup>
-                <Input
-                  ref={amount}
-                  type="number"
-                  step="0.00000001"
-                  placeholder="0"
-                />
-                <InputRightAddon
-                  children={network.value.ticker}
-                  userSelect="none"
-                />
+                <Input ref={amount} type="number" placeholder="0" />
+                <InputRightAddon children={ticker} userSelect="none" />
               </InputGroup>
             </FormControl>
           </ModalBody>

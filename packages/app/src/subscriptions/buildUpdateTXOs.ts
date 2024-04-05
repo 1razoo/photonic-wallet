@@ -21,7 +21,7 @@ export const buildUpdateTXOs =
     added: TxO[];
     confs: Map<number, ElectrumUtxo>;
     newTxs?: ElectrumTxMap;
-    spent: { id: number; value: number }[];
+    spent: { id: number; value: number; script: string }[];
   }> => {
     // Check if status has changed
     const currentStatus = await db.subscriptionStatus
@@ -65,7 +65,7 @@ export const buildUpdateTXOs =
     // Update spent UTXOs
     const spent = (await db.txo.where({ contractType, spent: 0 }).toArray())
       .filter(({ txid, vout }) => !outpoints.includes(`${txid}${vout}`))
-      .map(({ id, value }) => ({ id: id as number, value }));
+      .map(({ id, value, script }) => ({ id: id as number, value, script }));
     await db.transaction("rw", db.txo, async () => {
       for (const { id } of spent) {
         await db.txo.update(id, {

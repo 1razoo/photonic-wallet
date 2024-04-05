@@ -18,14 +18,14 @@ import {
 } from "../utils";
 import type {
   BundlePsbtParams,
-  BundleSendParams,
+  BundleDirectParams,
   CommitFile,
   RevealFile,
-  SendMintFile,
+  DirectMintFile,
   StateFile,
 } from "../types";
 import { p2pkhScriptHash } from "@photonic/lib/script";
-import { revealBundle, revealSighashSingle } from "@photonic/lib/mint";
+import { revealDirect, revealPsbt } from "@photonic/lib/mint";
 import { Utxo } from "@photonic/lib/types";
 import { confirm, password } from "@inquirer/prompts";
 import { loadConfig } from "../config";
@@ -153,7 +153,7 @@ export default async function bundleReveal(
             default: false,
           }));
         if (doBroadcast) {
-          const mintFile: SendMintFile = readJson(
+          const mintFile: DirectMintFile = readJson(
             fs.readFileSync(outFilename, "utf-8")
           );
           await broadcastReveals(progress, broadcast, mintFile);
@@ -173,7 +173,7 @@ export default async function bundleReveal(
 
   log(chalk("Wallet unlocked:", highlight(wallet.address)));
 
-  if (revealFile.method === "send") {
+  if (revealFile.method === "direct") {
     const connect = ora(`Connecting to ${server}`).start();
     client.on("close", (e) => {
       if (!(e as CloseEvent).wasClean) {
@@ -192,10 +192,10 @@ export default async function bundleReveal(
 
     connect.succeed(`Connected to ${server}`);
 
-    const bcRevealFile = revealFile as RevealFile<BundleSendParams>;
+    const bcRevealFile = revealFile as RevealFile<BundleDirectParams>;
     const revealData = commitFile.commits.flatMap(({ data }) => data);
 
-    const { funding, reveals, fees } = revealBundle(
+    const { funding, reveals, fees } = revealDirect(
       wallet.address,
       wallet.wif,
       unspentRxd,
@@ -205,7 +205,7 @@ export default async function bundleReveal(
       commitFile.delegate?.ref
     );
 
-    const mintFile: SendMintFile = {
+    const mintFile: DirectMintFile = {
       created: new Date().toISOString(),
       funding,
       reveals,
@@ -237,15 +237,10 @@ export default async function bundleReveal(
         "to broadcast reveal transactions"
       );
     }
-  } else {
-    const shsRevealFile = revealFile as RevealFile<BundlePsbtParams>;
+  } else if (revealFile.method === "psbt") {
+    const psbtRevealFile = revealFile as RevealFile<BundlePsbtParams>;
     const commitData = commitFile.commits.flatMap((f) => f.data);
-    const txs = revealSighashSingle(
-      wallet.address,
-      wallet.wif,
-      commitData,
-      shsRevealFile.tokens
-    );
+    const txs = revealPsbt(wallet.wif, commitData, psbtRevealFile.tokens);
     const result = {
       created: new Date().toISOString(),
       tokens: txs,
@@ -266,7 +261,7 @@ export default async function bundleReveal(
 async function broadcastReveals(
   progress: Ora,
   broadcast: (rawTx: string) => Promise<string>,
-  { funding, reveals }: SendMintFile
+  { funding, reveals }: DirectMintFile
 ) {
   const { log } = console;
   // Broadcast commit

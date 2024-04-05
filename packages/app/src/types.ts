@@ -7,11 +7,18 @@ import { CreateToastFnReturn } from "@chakra-ui/react";
 
 export type ScriptGroup = "rxd" | "ref" | "nft" | "ft";
 
+// Type of script subscribed to
 export enum ContractType {
   RXD,
-  REF,
   NFT,
   FT,
+}
+
+// Type of Atom object (mint operation)
+export enum AtomType {
+  NFT,
+  FT,
+  DAT,
 }
 
 type TxSpent = 0 | 1;
@@ -35,14 +42,14 @@ export interface BlockHeader {
   reorg: boolean;
 }
 
-export interface AtomNft {
+export interface Atom {
   id?: number;
+  atomType: AtomType;
   ref: string;
   lastTxoId?: number;
   revealOutpoint?: string;
   spent: TxSpent;
   fresh: TxSpent;
-  main?: string; // TODO It would be good to rename this
   name: string;
   type: string;
   immutable?: boolean;
@@ -50,8 +57,10 @@ export interface AtomNft {
   author: string;
   container: string;
   attrs: { [key: string]: string };
+  args: { [key: string]: unknown };
   filename?: string;
-  file?: ArrayBuffer; // TODO save multiple files?
+  fileSrc?: string;
+  file?: ArrayBuffer; // TODO save multiple files? Should this go in OPFS or reference the OPFS raw tx?
   hash?: ArrayBuffer;
   hashstamp?: ArrayBuffer;
   height?: number;
@@ -71,7 +80,7 @@ export type ElectrumStatusUpdate = (
   added: TxO[];
   confs: Map<number, ElectrumUtxo>;
   newTxs?: ElectrumTxMap;
-  spent: { id: number; value: number }[];
+  spent: { id: number; value: number; script: string }[];
 }>;
 
 export type SavedWallet = EncryptedData & { address: string; net: NetworkKey };

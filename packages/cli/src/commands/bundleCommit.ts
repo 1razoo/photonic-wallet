@@ -20,11 +20,12 @@ import {
 } from "../utils";
 import type {
   BundleFile,
-  BundleSendParams,
+  BundleDirectParams,
   CommitFile,
+  BundleTokenFt,
+  BundleTokenNft,
   RevealFile,
   StateFile,
-  Token,
 } from "../types";
 import path from "path";
 import {
@@ -158,7 +159,7 @@ export default async function bundleCommit(
     fs.readFileSync(path.join(bundleDir, ...paths));
 
   // Build token payloads
-  const payloads = bundle.tokens.map((token) => {
+  const tokens = bundle.tokens.map((token) => {
     const files =
       token.files &&
       Object.fromEntries(
@@ -183,7 +184,13 @@ export default async function bundleCommit(
     const meta = Object.fromEntries(
       [
         ...(
-          ["name", "type", "author", "license", "desc"] as (keyof Token)[]
+          [
+            "name",
+            "type",
+            "author",
+            "license",
+            "desc",
+          ] as (keyof BundleTokenNft)[]
         ).map((k) => [k, token[k]]),
         ["in", token.containerRefs?.map(refBytes)],
         ["by", token.authorRefs?.map(refBytes)],
@@ -191,11 +198,21 @@ export default async function bundleCommit(
       ].filter(([, v]) => (Array.isArray(v) ? v.length : v))
     );
 
+    const operation = token.operation;
+    const args = {
+      i: true, // TODO support mutable outputs
+      ...(operation === "ft" && { ticker: (token as BundleTokenFt).ticker }),
+    };
+
     return {
-      args: { i: true }, // TODO support mutable outputs
-      ...meta,
-      ...files,
-    } as AtomPayload;
+      operation,
+      outputValue: (token as BundleTokenFt).supply || 1,
+      payload: {
+        args,
+        ...meta,
+        ...files,
+      } as AtomPayload,
+    };
   });
 
   const connect = ora(`Connecting to ${server}`).start();
@@ -258,7 +275,7 @@ export default async function bundleCommit(
     wallet.address,
     wallet.wif,
     unspentRxd,
-    payloads,
+    tokens,
     delegate && {
       ref: delegate.ref,
       utxos: delegate.utxos,
@@ -282,11 +299,11 @@ export default async function bundleCommit(
 
   // Add payload array to commit file for human verification
   // This isn't used by the reveal command
-  fs.writeFileSync(outFilename, jsonHex({ ...commitFile, payloads }));
+  fs.writeFileSync(outFilename, jsonHex({ ...commitFile, tokens }));
 
   // Build a reveal.json file
   const revealFile: Partial<RevealFile> = {
-    ...((bundle.reveal as BundleSendParams) || {
+    ...((bundle.reveal as BundleDirectParams) || {
       method: "broadcast",
       batchSize: 100,
     }),

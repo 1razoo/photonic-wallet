@@ -44,10 +44,7 @@ export default function WalletSettings() {
     const changeLang = language.value !== newLanguage;
     const feeRateNum = parseInt(feeRateRef.current?.value || "", 10);
 
-    db.kvp.bulkPut(
-      [languageRef.current?.value, feeRateRef.current?.value],
-      keys
-    );
+    db.kvp.bulkPut([languageRef.current?.value, feeRateNum], keys);
     toast({
       title: t`Saved`,
       status: "success",

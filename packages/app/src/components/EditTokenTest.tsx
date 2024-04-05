@@ -1,7 +1,7 @@
 import db from "@app/db";
 import useElectrum from "@app/electrum/useElectrum";
 import { feeRate, wallet } from "@app/signals";
-import { AtomNft, ContractType, TxO } from "@app/types";
+import { Atom, ContractType, TxO } from "@app/types";
 import { EditIcon } from "@chakra-ui/icons";
 import { GridItem, Button } from "@chakra-ui/react";
 import Outpoint from "@lib/Outpoint";
@@ -29,7 +29,7 @@ export default function EditTokenTest({
   token,
   txo,
 }: {
-  token: AtomNft;
+  token: Atom;
   txo: TxO;
 }) {
   const client = useElectrum();

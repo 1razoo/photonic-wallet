@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
-  parseCommitScript,
   nftScriptHash,
   parseDelegateBurnScript,
   parseDelegateBaseScript,
@@ -12,12 +11,18 @@ import {
   ElectrumCallback,
   ElectrumStatusUpdate,
   TxO,
-  AtomNft,
+  Atom,
+  AtomType,
 } from "@app/types";
 import { ElectrumTxMap, buildUpdateTXOs } from "./buildUpdateTXOs";
 import db from "@app/db";
 import Outpoint from "@lib/Outpoint";
-import { decodeAtom, isImmutableToken } from "@lib/atom";
+import {
+  decodeAtom,
+  filterArgs,
+  filterAttrs,
+  isImmutableToken,
+} from "@lib/atom";
 import {
   Transaction,
   // @ts-ignore
@@ -47,12 +52,85 @@ const filterRels = (reveal: Uint8Array[], commit: string[]) =>
     .map((rel) => Outpoint.fromString(rel).reverse().ref());
 
 export class NFTSubscription implements Subscription {
-  private updateTXOs: ElectrumStatusUpdate;
-  private electrum: ElectrumManager;
+  protected updateTXOs: ElectrumStatusUpdate;
+  protected electrum: ElectrumManager;
 
   constructor(electrum: ElectrumManager) {
     this.electrum = electrum;
     this.updateTXOs = buildUpdateTXOs(this.electrum, ContractType.NFT);
+  }
+
+  async register(address: string, toast: CreateToastFnReturn) {
+    const scriptHash = nftScriptHash(address as string);
+
+    // create status record if it doesn't exist
+    if (!(await db.subscriptionStatus.get(scriptHash))) {
+      db.subscriptionStatus.put({ scriptHash, status: "" });
+    }
+
+    this.electrum.client?.subscribe(
+      "blockchain.scripthash",
+      (async (scriptHash: string, newStatus: string) => {
+        const { added, confs, newTxs, spent } = await this.updateTXOs(
+          scriptHash,
+          newStatus
+        );
+
+        const refs = added
+          .map((txo) => {
+            const { ref } = parseNftScript(txo.script);
+            return (
+              ref && {
+                ref: Outpoint.fromString(ref).reverse().ref(),
+                txo,
+              }
+            );
+          })
+          .filter(Boolean) as { ref: string; txo: TxO }[];
+
+        const { received, related } = await this.addTokens(refs, newTxs || {});
+        this.addRelated(related);
+
+        // Update any NFTs that have been transferred
+        await db.transaction("rw", db.atom, async () => {
+          for (const lastTxo of spent) {
+            await db.atom.where({ lastTxoId: lastTxo.id }).modify({ spent: 1 });
+          }
+        });
+
+        // Update heights
+        await db.transaction("rw", db.atom, async () => {
+          for (const [lastTxoId, conf] of confs) {
+            await db.atom
+              .where({ lastTxoId })
+              .modify({ height: conf.height || Infinity });
+          }
+        });
+
+        const limited = received.length > 11 ? received.slice(0, 10) : received;
+        limited.forEach(({ atom }) => {
+          toast({
+            title: t`Received token: ${
+              atom.name || Outpoint.fromString(atom.ref).shortAtom()
+            }`,
+          });
+        });
+
+        if (received.length > 11) {
+          toast({
+            title: t`Received ${received.length - 10} more digital objects`,
+          });
+        }
+
+        // TODO is this needed?
+        const balance = await this.electrum.client?.request(
+          "blockchain.scripthash.get_balance",
+          scriptHash
+        );
+        db.subscriptionStatus.update(scriptHash, { balance });
+      }) as ElectrumCallback,
+      scriptHash
+    );
   }
 
   // TODO this needs to be refactored to use a queue that can be resumed after failure
@@ -129,7 +207,7 @@ export class NFTSubscription implements Subscription {
               delegates.length && console.debug(`Found delegates`, delegates);
               delegates.forEach(foundDelegates.add, foundDelegates);
 
-              // Also save delegates so we don't need to look for them again later in saveNft
+              // Also save delegates so we don't need to look for them again later in saveAtom
               return [revealTxId, { tx, delegates }];
             }
 
@@ -148,8 +226,8 @@ export class NFTSubscription implements Subscription {
           Array.from(foundDelegates).map(async (delegateRef) => {
             // Check if it's cached
             // FIXME should this use txid instead of ref?
-            let hex = await opfs.getTx(delegateRef);
             const refBE = Outpoint.fromString(delegateRef).reverse();
+            let hex = await opfs.getTx(refBE.toString());
 
             // Fetch
             if (!hex) {
@@ -158,7 +236,7 @@ export class NFTSubscription implements Subscription {
                 refBE.getTxid()
               )) as string;
               // Store in cache
-              hex && (await opfs.putTx(delegateRef, hex));
+              hex && (await opfs.putTx(refBE.toString(), hex));
             }
 
             if (hex) {
@@ -180,20 +258,20 @@ export class NFTSubscription implements Subscription {
     Object.keys(delegateRefMap).length &&
       console.debug("Delegate refs", delegateRefMap);
 
-    const received: [string, string][] = [];
+    const received: { atom: Atom; value: number }[] = [];
     const relatedArrs = await Promise.all(
       refs.map(async ({ ref, txo }) => {
         const delegatedRefs = revealTxs[refReveals[ref]].delegates.flatMap(
           (r) => delegateRefMap[r]
         );
-        const { related, valid, name } = await this.saveNft(
+        const { related, valid, atom } = await this.saveAtom(
           ref,
           txo,
           revealTxs[refReveals[ref]].tx,
           delegatedRefs,
           fresh.includes(ref)
         );
-        if (valid) received.push([ref, name || ""]);
+        if (valid && txo && atom) received.push({ atom, value: txo.value });
         return related;
       })
     );
@@ -202,92 +280,6 @@ export class NFTSubscription implements Subscription {
     const related = Array.from(new Set(relatedArrs.flat()));
 
     return { received, related };
-  }
-
-  async register(address: string, toast: CreateToastFnReturn) {
-    const scriptHash = nftScriptHash(address as string);
-
-    // create status record if it doesn't exist
-    if (!(await db.subscriptionStatus.get(scriptHash))) {
-      db.subscriptionStatus.put({ scriptHash, status: "" });
-    }
-
-    this.electrum.client?.subscribe(
-      "blockchain.scripthash",
-      (async (scriptHash: string, newStatus: string) => {
-        const { added, confs, newTxs, spent } = await this.updateTXOs(
-          scriptHash,
-          newStatus
-        );
-
-        const refs = added.map((txo) => ({
-          ref: Outpoint.fromString(txo.script.substring(2, 74)).reverse().ref(),
-          txo,
-        }));
-
-        const { received, related } = await this.addTokens(refs, newTxs || {});
-
-        // Check if there are any new related tokens to fetch
-        const newRelated = (
-          await Promise.all(
-            related.map(async (ref) =>
-              (await db.atomNft.get({ ref })) ? undefined : ref
-            )
-          )
-        ).filter(Boolean) as string[];
-
-        // Fetch containers and authors
-        if (newRelated.length > 0) {
-          console.debug("Fetching related", newRelated);
-          console.debug(
-            `Existing related: ${related.length - newRelated.length}`
-          );
-
-          // Fetch new related tokens. A TxO is not needed for these since they are not owned by this user
-          // Only an atom record is needed for displaying the author and container names
-          const relatedRefs = newRelated.map((ref) => ({ ref }));
-
-          await this.addTokens(relatedRefs);
-        }
-
-        // Update any NFTs that have been transferred
-        await db.transaction("rw", db.atomNft, async () => {
-          for (const lastTxo of spent) {
-            await db.atomNft
-              .where({ lastTxoId: lastTxo.id })
-              .modify({ spent: 1 });
-          }
-        });
-
-        // Update heights
-        await db.transaction("rw", db.atomNft, async () => {
-          for (const [lastTxoId, conf] of confs) {
-            await db.atomNft
-              .where({ lastTxoId })
-              .modify({ height: conf.height || Infinity });
-          }
-        });
-
-        if (received.length === 1) {
-          const [tokenRef, tokenName] = received[0];
-          toast({
-            title: t`Received token: ${tokenName || tokenRef}`,
-          });
-        } else if (received.length > 1) {
-          toast({
-            title: t`Received ${received.length} tokens`,
-          });
-        }
-
-        // TODO is this needed?
-        const balance = await this.electrum.client?.request(
-          "blockchain.scripthash.get_balance",
-          scriptHash
-        );
-        db.subscriptionStatus.update(scriptHash, { balance });
-      }) as ElectrumCallback,
-      scriptHash
-    );
   }
 
   async fetchRefMint(ref: string): Promise<string> {
@@ -299,18 +291,18 @@ export class NFTSubscription implements Subscription {
     return result.length ? result[0].tx_hash : "";
   }
 
-  // Decode an NFT and save to the database. Return the name so the user can be notified
-  async saveNft(
+  // Decode an Atom token and save to the database. Return the name so the user can be notified
+  async saveAtom(
     ref: string,
     receivedTxo: TxO | undefined, // Received txo can be undefined when token is an author or container dependency
     reveal: Transaction,
     delegatedRefs: string[],
     fresh: boolean
-  ): Promise<{ related: string[]; valid?: boolean; name?: string }> {
+  ): Promise<{ related: string[]; valid?: boolean; atom?: Atom }> {
     const refTxId = ref.substring(0, 64);
     const refVout = parseInt(ref.substring(64), 10);
 
-    // Find NFT script in the reveal tx
+    // Find token script in the reveal tx
     const revealIndex = reveal.inputs.findIndex((input) => {
       return (
         input.prevTxId.toString("hex") === refTxId &&
@@ -329,14 +321,16 @@ export class NFTSubscription implements Subscription {
     }
 
     const related: string[] = [];
-    const { payload, files } = atom;
+    const { payload, files, operation } = atom;
     const { in: containers, by: authors } = payload;
+    // Map atom operation (ft, nft, dat) to enum
+    const atomType = AtomType[operation.toUpperCase() as keyof typeof AtomType];
 
     console.debug("Atom payload", payload);
 
     // Look for related tokens in outputs
     const outputTokens = reveal.outputs
-      .map((o) => parseNftScript(o.script.toHex()).ref)
+      .map((o) => parseNftScript(o.script.toHex()).ref) // TODO handle FT, dat
       .filter(Boolean) as string[];
     // Validate any author and container properties
     const allRefs = [...delegatedRefs, ...outputTokens];
@@ -344,8 +338,6 @@ export class NFTSubscription implements Subscription {
     const container = containers ? filterRels(containers, allRefs)[0] : "";
     const author = authors ? filterRels(authors, allRefs)[0] : "";
 
-    const attrs =
-      typeof payload.attrs === "object" ? (payload.attrs as object) : {};
     const type = toString(payload.type) || "object";
     const immutable = isImmutableToken(payload);
 
@@ -367,13 +359,14 @@ export class NFTSubscription implements Subscription {
     console.debug(`Author ${author}`);
 
     // Check if token already exists
-    const existing = await db.atomNft.get({ ref });
+    const existing = await db.atom.get({ ref });
 
     // Will replace if ref exists
     // TODO keep modify history
     const name = toString(payload.name);
-    const record: AtomNft = {
+    const record: Atom = {
       ref,
+      atomType,
       lastTxoId: receivedTxo?.id,
       revealOutpoint: Outpoint.fromUTXO(reveal.id, revealIndex).toString(),
       spent: 0,
@@ -384,12 +377,9 @@ export class NFTSubscription implements Subscription {
       description: toString(payload.desc),
       author,
       container,
-      attrs: Object.fromEntries(
-        Object.entries(attrs).filter(
-          ([, value]) => typeof value === "string" || typeof value === "number"
-        )
-      ),
-      main: fileSrc || undefined,
+      attrs: filterAttrs(payload.attrs),
+      args: filterArgs(payload.args),
+      fileSrc: fileSrc || undefined,
       // TODO store files in OPFS instead of IndexedDB
       file:
         file instanceof Uint8Array && file.length < fileSizeLimit
@@ -403,12 +393,39 @@ export class NFTSubscription implements Subscription {
 
     if (existing?.id) {
       console.log(`Updated ${ref}`);
-      db.atomNft.update(existing.id, record);
+      db.atom.update(existing.id, record);
     } else {
       console.log(`Put ${ref}`);
-      db.atomNft.put(record);
+      db.atom.put(record);
     }
 
-    return { related, valid: true, name };
+    return {
+      related,
+      valid: true,
+      atom: record,
+    };
+  }
+
+  async addRelated(related: string[]) {
+    // Check if there are any new related tokens to fetch
+    const newRelated = (
+      await Promise.all(
+        related.map(async (ref) =>
+          (await db.atom.get({ ref })) ? undefined : ref
+        )
+      )
+    ).filter(Boolean) as string[];
+
+    // Fetch containers and authors
+    if (newRelated.length > 0) {
+      console.debug("Fetching related", newRelated);
+      console.debug(`Existing related: ${related.length - newRelated.length}`);
+
+      // Fetch new related tokens. A TxO is not needed for these since they are not owned by this user
+      // Only an atom record is needed for displaying the author and container names
+      const relatedRefs = newRelated.map((ref) => ({ ref }));
+
+      await this.addTokens(relatedRefs);
+    }
   }
 }

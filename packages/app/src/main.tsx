@@ -13,7 +13,6 @@ import Servers from "./pages/Servers";
 import WalletSettings from "./pages/WalletSettings";
 import CreateWallet from "./pages/CreateWallet";
 import Root from "./pages/Root";
-import Dashboard from "./pages/Dashboard";
 import RecoverWallet from "./pages/RecoverWallet";
 import SettingsLayout from "./layouts/SettingsLayout";
 import Mint from "./pages/Mint";
@@ -30,6 +29,7 @@ import IpfsSettings from "./pages/IpfsSettings";
 import About from "./pages/About";
 import gradient from "/gradient.svg";
 import Exit from "./pages/Exit";
+import Fungible from "./pages/Fungible";
 
 dayjs.extend(localizedFormat);
 
@@ -286,7 +286,11 @@ const router = createHashRouter([
           },
           {
             path: "/fungible",
-            element: <Placeholder />,
+            element: <Fungible />,
+          },
+          {
+            path: "/fungible/atom/:sref",
+            element: <Fungible />,
           },
           {
             path: "/coins",
@@ -295,30 +299,6 @@ const router = createHashRouter([
           {
             path: "/history",
             element: <Placeholder />,
-          },
-          {
-            path: "/create/object/atom/:sref",
-            element: <Dashboard type="object" />,
-          },
-          {
-            path: "/create/container/atom/:sref",
-            element: <Dashboard type="container" />,
-          },
-          {
-            path: "/create/user/atom/:sref",
-            element: <Dashboard type="user" />,
-          },
-          {
-            path: "/create/object/:page?/:lastId?",
-            element: <Dashboard type="object" />,
-          },
-          {
-            path: "/create/container/:page?/:lastId?",
-            element: <Dashboard type="container" />,
-          },
-          {
-            path: "/create/user/:page?/:lastId?",
-            element: <Dashboard type="user" />,
           },
           {
             path: "/mint/user",
@@ -333,14 +313,13 @@ const router = createHashRouter([
             element: <Mint tokenType="object" />,
           },
           {
-            path: "/create",
-            element: <Dashboard />,
+            path: "/mint/fungible",
+            element: <Mint tokenType="fungible" />,
           },
-        ],
-      },
-      {
-        element: <WalletLayout />,
-        children: [
+          {
+            path: "/names",
+            element: <Placeholder />,
+          },
           {
             element: <SettingsLayout />,
             children: [

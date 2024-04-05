@@ -10,8 +10,9 @@
   "license": "MIT",
   "scripts": {
     "build": "turbo run build",
+    "build:tauri": "pnpm -F app run tauri build",
     "clean": "turbo run clean",
-    "dev": "turbo run dev",
+    "dev": "turbo run -F app dev",
     "cli": "node packages/cli/dist/cli.js"
   },
   "devDependencies": {

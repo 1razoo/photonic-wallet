@@ -3,7 +3,7 @@ import path from "path";
 import { confirm, input, select } from "@inquirer/prompts";
 import { Command } from "commander";
 import { errorMessage, g, resolveDir } from "../utils";
-import { BundleFile, Token } from "../types";
+import { BundleFile, BundleTokenNft } from "../types";
 
 const { log } = console;
 
@@ -16,7 +16,7 @@ export default async function bundleInit(this: Command, inputDir: string) {
     this.error(errorMessage("bundle.json already exists"));
   }
 
-  const token: Partial<Token> = {};
+  const token: Partial<BundleTokenNft> = {};
   const type = await select({
     message: "Type",
     choices: [
@@ -79,7 +79,7 @@ export default async function bundleInit(this: Command, inputDir: string) {
     };
   }
 
-  bundle.tokens = [token as Token];
+  bundle.tokens = [token as BundleTokenNft];
 
   fs.writeFileSync(filename, JSON.stringify(bundle, undefined, 2));
 

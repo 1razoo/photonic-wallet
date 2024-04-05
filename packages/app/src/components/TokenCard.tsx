@@ -1,24 +1,29 @@
 import { Box, Flex, Icon, Text } from "@chakra-ui/react";
 import Outpoint from "@lib/Outpoint";
-import { AtomNft, TxO } from "@app/types";
+import { Atom } from "@app/types";
 import { Link } from "react-router-dom";
 import Identifier from "@app/components/Identifier";
 import Photons from "@app/components/Photons";
 import TokenContent from "@app/components/TokenContent";
 import { TbBox, TbUserCircle } from "react-icons/tb";
+import { IconType } from "react-icons/lib";
 
 export default function TokenCard({
-  token: { txo, atom },
+  atom,
+  value,
   to,
   size = "md",
+  defaultIcon,
 }: {
-  token: { txo: TxO; atom?: AtomNft };
+  atom?: Atom;
+  value: number;
   to: string;
   size?: "sm" | "md";
+  defaultIcon?: IconType;
 }) {
-  const ref = Outpoint.fromString(txo.script.substring(2, 74)).reverse();
+  const ref = Outpoint.fromString(atom?.ref || "");
 
-  const shortAtom = ref.shortAtom();
+  const shortAtom = ref.shortInput();
   return (
     <Box borderRadius="md" overflow="hidden" as={Link} to={to}>
       <Box
@@ -29,7 +34,7 @@ export default function TokenCard({
         justifyContent="center"
         p={2}
       >
-        <TokenContent nft={atom} thumbnail />
+        <TokenContent atom={atom} defaultIcon={defaultIcon} thumbnail />
       </Box>
       <Flex
         p={2}
@@ -59,7 +64,7 @@ export default function TokenCard({
           )}
         </Flex>
         <Text whiteSpace="nowrap" fontFamily="mono">
-          <Photons value={txo.value} />
+          <Photons value={value} />
         </Text>
       </Flex>
     </Box>

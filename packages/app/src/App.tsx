@@ -15,6 +15,8 @@ import config from "./config.json";
 import useLanguageDetect from "./hooks/useLanguageDetect";
 import ReloadPrompt from "./components/ReloadPrompt";
 import { NetworkKey } from "@lib/types";
+import { updateTokenBalances } from "./updateTokenBalances";
+import { ViewPanelProvider } from "./layouts/ViewPanelLayout";
 
 // Sync wallet balance signals with database
 // TODO move this somewhere else
@@ -47,6 +49,10 @@ function WalletSync() {
     };
   }, [rxd, nft]);
 
+  useEffect(() => {
+    updateTokenBalances();
+  }, []);
+
   return null;
 }
 
@@ -58,7 +64,9 @@ function Main() {
       <WalletSync />
       {/* <ScrollRestoration /> Disabled for now, causing issues with some buttons  */}
       <ElectrumProvider>
-        <Outlet />
+        <ViewPanelProvider>
+          <Outlet />
+        </ViewPanelProvider>
         {exists && (
           <>
             <Unlock />

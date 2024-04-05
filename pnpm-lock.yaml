@@ -9,7 +9,7 @@ patchedDependencies:
     hash: 2y46zdpsvhyserag6o7lrxxf5e
     path: patches/@radiantblockchain__radiantjs@1.9.4.patch
   bsv-coinselect@4.2.5:
-    hash: vml3ccvcvln3pxfvicsd2rpx6e
+    hash: ptxf4vh4yz76zpgebjpycangwy
     path: patches/bsv-coinselect@4.2.5.patch
   ws-electrumx-client@1.0.5:
     hash: ls5z5iyjs5tr4pb7sgc7cgiev4
@@ -182,6 +182,9 @@ importers:
       react-router-dom:
         specifier: ^6.10.0
         version: 6.21.3(react-dom@18.2.0)(react@18.2.0)
+      react-swipeable:
+        specifier: ^7.0.1
+        version: 7.0.1(react@18.2.0)
       sort-by:
         specifier: ^1.2.0
         version: 1.2.0
@@ -350,7 +353,7 @@ importers:
         version: 6.2.1
       bsv-coinselect:
         specifier: ^4.2.5
-        version: 4.2.5(patch_hash=vml3ccvcvln3pxfvicsd2rpx6e)
+        version: 4.2.5(patch_hash=ptxf4vh4yz76zpgebjpycangwy)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -4999,7 +5002,7 @@ packages:
       base-x: 3.0.9
     dev: false
 
-  /bsv-coinselect@4.2.5(patch_hash=vml3ccvcvln3pxfvicsd2rpx6e):
+  /bsv-coinselect@4.2.5(patch_hash=ptxf4vh4yz76zpgebjpycangwy):
     resolution: {integrity: sha512-WGfliK+a3yvIGLwL1/krMptrOBQqrJy1cyMwtalc4qB38+eRmoMhenwKL/bQ2Z2XwE367srB5ePHAVSxsscFiA==}
     dev: false
     patched: true
@@ -8083,6 +8086,14 @@ packages:
       invariant: 2.2.4
       react: 18.2.0
       tslib: 2.6.2
+    dev: false
+
+  /react-swipeable@7.0.1(react@18.2.0):
+    resolution: {integrity: sha512-RKB17JdQzvECfnVj9yDZsiYn3vH0eyva/ZbrCZXZR0qp66PBRhtg4F9yJcJTWYT5Adadi+x4NoG53BxKHwIYLQ==}
+    peerDependencies:
+      react: ^16.8.3 || ^17 || ^18
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /react@18.2.0:

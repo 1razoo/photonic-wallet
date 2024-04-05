@@ -1,5 +1,5 @@
 import Dexie, { Table } from "dexie";
-import { AtomNft, TxO, BlockHeader } from "./types";
+import { Atom, TxO, BlockHeader } from "./types";
 import config from "@app/config.json";
 
 export type KeyValuePairs = unknown;
@@ -12,7 +12,7 @@ export interface SubscriptionStatus {
 
 export class Database extends Dexie {
   txo!: Table<TxO>;
-  atomNft!: Table<AtomNft>;
+  atom!: Table<Atom>;
   subscriptionStatus!: Table<SubscriptionStatus>;
   kvp!: Table<KeyValuePairs>;
   header!: Table<BlockHeader>;
@@ -20,10 +20,9 @@ export class Database extends Dexie {
   constructor() {
     super("photonic");
     this.version(1).stores({
-      txo: "++id, &[txid+vout], contractType, [contractType+spent], height",
+      txo: "++id, &[txid+vout], contractType, [contractType+spent], [script+spent], height",
       subscriptionStatus: "scriptHash",
-      atomNft:
-        "++id, &ref, [type+spent], [type+spent+fresh], lastTxoId, height",
+      atom: "++id, &ref, [type+spent], [type+spent+fresh], lastTxoId, height",
       kvp: "",
       header: "hash, height",
     });

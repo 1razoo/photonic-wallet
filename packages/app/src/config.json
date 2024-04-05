@@ -11,7 +11,7 @@
       "explorer": {
         "tx": "https://explorer.radiantblockchain.org/tx/{txid}"
       },
-      "enabled": false
+      "enabled": true
     },
     "testnet": {
       "name": "Radiant Testnet",

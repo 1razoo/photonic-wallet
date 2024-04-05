@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "tauri": "tauri",
+    "tauri:build": "tauri build",
     "i18n:extract": "lingui extract",
     "i18n:compile": "lingui compile",
     "generate-pwa-icons": "pwa-assets-generator",
@@ -14,7 +15,7 @@
     "prettier": "prettier . --check --ignore-path=../../.prettierignore",
     "prettier:fix": "prettier . --write --ignore-path=../../.prettierignore",
     "check-types": "tsc --noEmit",
-    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "clean": "rm -rf .turbo node_modules dist src-tauri/target",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -64,6 +65,7 @@
     "react-icons": "^4.11.0",
     "react-resizable-panels": "^0.0.63",
     "react-router-dom": "^6.10.0",
+    "react-swipeable": "^7.0.1",
     "sort-by": "^1.2.0",
     "tiny-secp256k1": "^2.2.1",
     "vite-plugin-pwa": "^0.17.4",

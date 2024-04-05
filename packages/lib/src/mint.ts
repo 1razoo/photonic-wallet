@@ -1,12 +1,14 @@
 import { encodeAtom, isImmutableToken } from "./atom";
 import {
   commitScriptSize,
-  commitScriptWithDelegateSize,
+  datCommitScript,
   delegateBaseScript,
   delegateBurnScript,
   delegateBurnScriptSize,
   delegateTokenScript,
-  delegateTokenScriptSize,
+  ftCommitScript,
+  ftScript,
+  ftScriptSize,
   mutableNftScript,
   mutableNftScriptSize,
   nftCommitScript,
@@ -21,10 +23,11 @@ import {
 } from "./script";
 import {
   AtomPayload,
+  CommitOperation,
   TokenCommitData,
-  TokenPsbtParams,
+  RevealDirectParams,
+  RevealPsbtParams,
   TokenRevealParams,
-  TokenSendParams,
   UnfinalizedInput,
   UnfinalizedOutput,
   Utxo,
@@ -41,7 +44,11 @@ export function commitBundle(
   address: string,
   wif: string,
   utxos: Utxo[],
-  payloads: AtomPayload[],
+  tokens: {
+    operation: CommitOperation;
+    outputValue: number;
+    payload: AtomPayload;
+  }[],
   delegate:
     | {
         ref: string;
@@ -52,22 +59,24 @@ export function commitBundle(
   onProgress?: (k: string) => void
 ) {
   const p2pkh = p2pkhScript(address);
-  const batches = new Array(Math.ceil(payloads.length / batchSize))
+  const batches = new Array(Math.ceil(tokens.length / batchSize))
     .fill(null)
-    .map((_, i) => payloads.slice(i * batchSize, (i + 1) * batchSize));
+    .map((_, i) => tokens.slice(i * batchSize, (i + 1) * batchSize));
 
   // Create funding outputs for each batch
   const target = batches.map((batch) => ({
     script: p2pkh,
     value:
       txSize(
-        [p2pkhScriptSigSize].concat(delegate ? [delegateTokenScriptSize] : []),
-        batch.flatMap((payload) => {
-          const hasRelated = payload.by?.length || payload.in?.length;
-          const immutable = isImmutableToken(payload);
-          return [
-            hasRelated ? commitScriptWithDelegateSize : commitScriptSize,
-          ].concat(immutable ? [] : [p2pkhScriptSize]);
+        [p2pkhScriptSigSize].concat(delegate ? [p2pkhScriptSigSize] : []),
+        batch.flatMap((token) => {
+          const hasDelegate = !!(
+            token.payload.by?.length || token.payload.in?.length
+          );
+          const immutable = isImmutableToken(token.payload);
+          return [commitScriptSize(token.operation, hasDelegate)].concat(
+            immutable ? [] : [p2pkhScriptSize]
+          );
         })
       ) * defaultFeeRate,
   }));
@@ -84,6 +93,7 @@ export function commitBundle(
   onProgress && onProgress("sign");
   const outputs = target.concat(change?.length ? change : []);
   const funding = buildTx(address, wif, inputs, outputs, false);
+
   const commits = batches.map((batch, vout) =>
     commitBatch(
       address,
@@ -107,6 +117,7 @@ export function commitBundle(
 }
 
 export function createCommitOutputs(
+  operation: CommitOperation,
   address: string,
   payload: AtomPayload,
   delegate?: {
@@ -116,12 +127,17 @@ export function createCommitOutputs(
 ) {
   const p2pkh = p2pkhScript(address);
   const immutable = isImmutableToken(payload);
-  const atom = encodeAtom("nft", payload);
-  const script = nftCommitScript(address, atom.payloadHash, delegate?.ref);
+  const atom = encodeAtom(operation, payload);
+  const scriptFn = {
+    nft: nftCommitScript,
+    ft: ftCommitScript,
+    dat: datCommitScript,
+  }[operation];
+  const script = scriptFn(address, atom.payloadHash, delegate?.ref);
   const outputs: UnfinalizedOutput[] = [];
 
   outputs.push({ script, value: 1 });
-  if (!immutable) {
+  if (operation === "nft" && !immutable) {
     // Prepare a ref for the mutable contract. This will be token ref + 1.
     outputs.push({ script: p2pkh, value: 1 });
   }
@@ -140,7 +156,11 @@ export function createCommitOutputs(
 export function commitBatch(
   address: string,
   wif: string,
-  payloads: AtomPayload[],
+  ops: {
+    operation: CommitOperation;
+    outputValue: number;
+    payload: AtomPayload;
+  }[],
   funding: Utxo,
   delegate?: {
     ref: string;
@@ -149,8 +169,9 @@ export function commitBatch(
 ) {
   const outputs: UnfinalizedOutput[] = [];
   let vout = 0;
-  const reveals = payloads.map((payload) => {
+  const reveals = ops.map(({ operation, outputValue, payload }) => {
     const { outputs: commitOutputs, ...rest } = createCommitOutputs(
+      operation,
       address,
       payload,
       delegate
@@ -163,6 +184,7 @@ export function commitBatch(
         vout,
         ...rest.utxo,
       },
+      outputValue,
     };
 
     vout += obj.immutable ? 1 : 2;
@@ -187,7 +209,7 @@ export function commitBatch(
   return { txid: tx.id, tx: tx.toString(), data: withTxid };
 }
 
-export function revealBundle(
+export function revealDirect(
   address: string,
   wif: string,
   utxos: Utxo[],
@@ -206,20 +228,36 @@ export function revealBundle(
     script: p2pkh,
     value:
       txSize(
-        batch.flatMap((t) =>
-          // FIXME size might already include atom header
-          [revealScriptSigSize(t.atom.script.length / 2)].concat(
-            t.immutable ? [] : [mutableNftScriptSize]
-          )
-        ),
         batch
           .flatMap((t) =>
-            [nftScriptSize].concat(t.immutable ? [] : [mutableNftScriptSize])
+            [revealScriptSigSize(t.atom.script.length / 2)].concat(
+              t.immutable ? [] : [p2pkhScriptSigSize]
+            )
           )
-          .concat(delegateRef ? [delegateBurnScriptSize] : [])
+          .concat(p2pkhScriptSigSize),
+        // Output script sizes for fee calculation
+        batch
+          .flatMap((t) =>
+            ([] as number[])
+              .concat(t.atom.operation === "nft" ? [nftScriptSize] : [])
+              .concat(t.atom.operation === "ft" ? [ftScriptSize] : [])
+              .concat(
+                t.atom.operation === "nft" && !t.immutable
+                  ? [mutableNftScriptSize]
+                  : []
+              )
+          )
+          .concat(delegateRef ? delegateBurnScriptSize : [])
       ) *
         defaultFeeRate +
-      batch.reduce((a, t) => a + 1 + (t.immutable ? 0 : 1), 0), // 1 photon per output
+      // Output values
+      batch.reduce(
+        (a, t) =>
+          a +
+          (["nft", "ft"].includes(t.atom.operation) ? t.outputValue : 0) +
+          (t.atom.operation === "nft" && !t.immutable ? 1 : 0), // 1 photon mutable output
+        0
+      ),
   }));
 
   const {
@@ -254,23 +292,36 @@ export function revealBundle(
   };
 }
 
+// Create outputs for a single token reveal
 export function createRevealOutputs(
   address: string,
-  { atom, immutable, utxo }: TokenCommitData,
-  params: TokenSendParams
+  { atom, outputValue, immutable, utxo }: TokenCommitData,
+  params: RevealDirectParams | RevealPsbtParams
 ) {
   const p2pkh = p2pkhScript(address);
-  const nftRef = Outpoint.fromObject(utxo).reverse().toString();
+  const tokenRef = Outpoint.fromObject(utxo).reverse().toString();
   const inputs: UnfinalizedInput[] = [];
   const outputs: UnfinalizedOutput[] = [];
 
-  const script = nftScript(params.address, nftRef);
-  outputs.push({ script, value: 1 });
-  console.debug("Added token output", {
-    address: params.address,
-    nftRef,
-    script,
-  });
+  if (atom.operation === "nft") {
+    outputs.push({
+      script: nftScript(params.address, tokenRef),
+      value: outputValue,
+    });
+    console.debug("Added NFT output", {
+      address: params.address,
+      tokenRef,
+    });
+  } else if (atom.operation === "ft") {
+    outputs.push({
+      script: ftScript(params.address, tokenRef),
+      value: outputValue,
+    });
+    console.debug("Added FT output", {
+      address: params.address,
+      tokenRef,
+    });
+  }
 
   inputs.push({
     ...utxo,
@@ -279,7 +330,7 @@ export function createRevealOutputs(
     scriptSigSize: revealScriptSigSize(atom.script.length / 2),
   });
 
-  if (!immutable) {
+  if (atom.operation === "nft" && !immutable) {
     const mutableRef = Outpoint.fromUTXO(utxo.txid, utxo.vout + 1)
       .reverse()
       .ref();
@@ -295,12 +346,13 @@ export function createRevealOutputs(
     });
     console.debug("Added mutable contract output", {
       mutableRef,
-      nftRef,
+      tokenRef,
     });
   }
 
   return { inputs, outputs };
 }
+
 export function revealBatch(
   address: string,
   wif: string,
@@ -323,7 +375,9 @@ export function revealBatch(
     const { atom, utxo } = token;
     tokenScriptSigs[inputs.length] = atom.script;
     const outpoint = Outpoint.fromObject(utxo);
-    const params = revealParams[outpoint.toString()] as TokenSendParams;
+    const params = revealParams[outpoint.toString()] as
+      | RevealDirectParams
+      | RevealPsbtParams;
     const revealTxos = createRevealOutputs(address, token, params);
     inputs.push(...revealTxos.inputs);
     outputs.push(...revealTxos.outputs);
@@ -425,11 +479,10 @@ export function createDelegateTokens(
   };
 }
 
-export function revealSighashSingle(
-  address: string,
+export function revealPsbt(
   wif: string,
   tokens: TokenCommitData[],
-  revealParams: { [key: string]: TokenPsbtParams }
+  revealParams: { [key: string]: RevealPsbtParams }
 ) {
   const txs: { reveal: string; mutable?: string }[] = [];
   const outpointTokenMap = Object.fromEntries(
@@ -487,6 +540,8 @@ export function revealSighashSingle(
 
 // Mint a single token
 export function mintToken(
+  operation: CommitOperation,
+  value: number,
   address: string,
   wif: string,
   utxos: Utxo[],
@@ -497,6 +552,7 @@ export function mintToken(
   let unspentRxd = utxos;
   const fees: number[] = [];
   const { outputs, ...partialCommitData } = createCommitOutputs(
+    operation,
     address,
     payload
   );
@@ -514,13 +570,14 @@ export function mintToken(
 
   unspentRxd = updateUnspent(commitFund, commitTx.id, outputs.length);
 
-  const commitData = {
+  const commitData: TokenCommitData = {
     ...partialCommitData,
     utxo: {
       txid: commitTx.id,
       vout: 0,
       ...partialCommitData.utxo,
     },
+    outputValue: value,
   };
 
   const revealTarget = createRevealOutputs(address, commitData, { address });

@@ -1,56 +1,96 @@
-import { Grid } from "@chakra-ui/react";
+import { useState } from "react";
+import {
+  Button,
+  Grid,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuItemOption,
+  MenuList,
+  MenuOptionGroup,
+  Spacer,
+} from "@chakra-ui/react";
 import { useLocation, useParams } from "react-router-dom";
 import { t } from "@lingui/macro";
 import NoContent from "@app/components/NoContent";
 import useRestoreScroll from "@app/hooks/useRestoreScroll";
 import TokenCard from "@app/components/TokenCard";
-import useTokenQuery from "@app/hooks/useTokenQuery";
+import useNftQuery from "@app/hooks/useNftQuery";
 import Pagination from "@app/components/Pagination";
 import PageHeader from "@app/components/PageHeader";
 import ViewPanelLayout from "@app/layouts/ViewPanelLayout";
 import useQueryString from "@app/hooks/useQueryString";
+import ViewDigitalObject from "@app/components/ViewDigitalObject";
+import { ChevronDownIcon } from "@chakra-ui/icons";
+import MintMenu from "@app/components/MintMenu";
 
 const pageSize = 60;
 
 export default function Wallet() {
   const { sref } = useParams();
+
   return (
-    <ViewPanelLayout sref={sref} context={`/objects`}>
+    <ViewPanelLayout>
       <TokenGrid open={!!sref} />
+      {sref && <ViewDigitalObject sref={sref} context="/objects" />}
     </ViewPanelLayout>
   );
 }
 
 function TokenGrid({ open }: { open: boolean }) {
+  const allTypes = ["object", "container", "user"];
   const { pathname } = useLocation();
   const { p: pageParam } = useQueryString();
   const page = parseInt(pageParam || "0", 10);
-  const nft = useTokenQuery(
-    (atom) => atom.type === "object" && atom.spent === 0 && atom.fresh === 0, // Freshly minted tokens are in the create module
+  const [filterType, setFilterType] = useState<string[]>(allTypes);
+  const nft = useNftQuery(
+    (atom) =>
+      atom.spent === 0 &&
+      (filterType.length ? filterType.includes(atom.type) : true),
     pageSize,
-    page
+    page,
+    [filterType]
   );
 
   useRestoreScroll();
 
   return (
     <>
-      <PageHeader
-        toolbar={
-          <Pagination
-            page={page}
-            startUrl={pathname}
-            prevUrl={`${pathname}${page > 1 ? `?p=${page - 1}` : ""}`}
-            nextUrl={
-              nft.length == pageSize + 1
-                ? `${pathname}?p=${page + 1}`
-                : undefined
-            }
-          />
-        }
-      >
-        {t`Digital Objects`}
-      </PageHeader>
+      <PageHeader toolbar={<MintMenu />}>{t`Digital Objects`}</PageHeader>
+
+      <HStack height="42px" gap={4} mb={2} mx={4} alignItems="start">
+        <Menu closeOnSelect={false}>
+          <MenuButton
+            as={Button}
+            size="sm"
+            aria-label={t`Filter`}
+            rightIcon={<ChevronDownIcon />}
+          >
+            Filter
+          </MenuButton>
+          <MenuList minWidth="240px">
+            <MenuOptionGroup
+              title="Type"
+              type="checkbox"
+              onChange={(types) => setFilterType(types as string[])}
+            >
+              <MenuItemOption value="object">{t`Object`}</MenuItemOption>
+              <MenuItemOption value="container">{t`Container`}</MenuItemOption>
+              <MenuItemOption value="user">{t`User`}</MenuItemOption>
+            </MenuOptionGroup>
+          </MenuList>
+        </Menu>
+        <Spacer />
+        <Pagination
+          size="sm"
+          page={page}
+          startUrl={pathname}
+          prevUrl={`${pathname}${page > 1 ? `?p=${page - 1}` : ""}`}
+          nextUrl={
+            nft.length == pageSize + 1 ? `${pathname}?p=${page + 1}` : undefined
+          }
+        />
+      </HStack>
 
       {nft.length === 0 ? (
         <NoContent>{t`No assets`}</NoContent>
@@ -71,7 +111,8 @@ function TokenGrid({ open }: { open: boolean }) {
               (token) =>
                 token && (
                   <TokenCard
-                    token={token}
+                    atom={token.atom}
+                    value={token.txo.value}
                     key={token.txo.id}
                     to={`/objects/atom/${token.atom.ref}${
                       page > 0 ? `?p=${page}` : ""

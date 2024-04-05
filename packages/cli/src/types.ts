@@ -1,8 +1,9 @@
 import {
+  CommitOperation,
   NetworkKey,
   TokenCommitData,
-  TokenPsbtParams,
-  TokenSendParams,
+  RevealPsbtParams,
+  RevealDirectParams,
   Utxo,
 } from "@photonic/lib/types";
 
@@ -12,8 +13,8 @@ export type RemoteTokenFile = {
   stamp?: boolean;
 };
 
-export type Token = {
-  reveal: TokenSendParams | TokenPsbtParams;
+type BundleTokenBase = {
+  reveal: RevealDirectParams | RevealPsbtParams;
   name: string;
   type?: string;
   author?: string;
@@ -27,8 +28,18 @@ export type Token = {
   attrs?: { [key: string]: unknown };
 };
 
-export type BundleSendParams = {
-  method: "send";
+export type BundleTokenNft = BundleTokenBase & {
+  operation: Extract<CommitOperation, "nft" | "dat">;
+};
+
+export type BundleTokenFt = BundleTokenBase & {
+  operation: Extract<CommitOperation, "ft">;
+  ticker: string;
+  supply: number;
+};
+
+export type BundleDirectParams = {
+  method: "direct";
   batchSize: number;
 };
 
@@ -38,9 +49,9 @@ export type BundlePsbtParams = {
 
 export type BundleFile = {
   commit: { batchSize: number };
-  reveal: BundleSendParams | BundlePsbtParams;
-  template?: Partial<Token>;
-  tokens: Token[];
+  reveal: BundleDirectParams | BundlePsbtParams;
+  template?: Partial<BundleTokenNft | BundleTokenFt>;
+  tokens: (BundleTokenNft | BundleTokenFt)[];
 };
 
 export type StateFile = {
@@ -51,17 +62,17 @@ export type StateFile = {
 };
 
 export type RevealFile<
-  T extends BundleSendParams | BundlePsbtParams =
-    | BundleSendParams
+  T extends BundleDirectParams | BundlePsbtParams =
+    | BundleDirectParams
     | BundlePsbtParams
 > = T & {
   template?: Partial<
-    T extends BundleSendParams ? TokenSendParams : TokenPsbtParams
+    T extends BundleDirectParams ? RevealDirectParams : RevealPsbtParams
   >;
   tokens: {
-    [key: string]: T extends BundleSendParams
-      ? TokenSendParams
-      : TokenPsbtParams;
+    [key: string]: T extends BundleDirectParams
+      ? RevealDirectParams
+      : RevealPsbtParams;
   };
 };
 
@@ -74,7 +85,7 @@ export type CommitFile = {
   commits: { txid: string; tx: string; data: TokenCommitData[] }[];
 };
 
-export type SendMintFile = {
+export type DirectMintFile = {
   created: string;
   funding: string;
   reveals: { txid: string; tx: string; refs: string[] }[];

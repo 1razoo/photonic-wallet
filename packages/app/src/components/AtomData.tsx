@@ -1,42 +1,44 @@
+import { useEffect, useRef, useState } from "react";
 import { Transaction } from "@radiantblockchain/radiantjs";
-import db from "@app/db";
 import opfs from "@app/opfs";
 import Outpoint from "@lib/Outpoint";
-import { useLiveQuery } from "dexie-react-hooks";
 import { Box } from "@chakra-ui/react";
-import { decodeAtom } from "@lib/atom";
+import { DecodedAtom, decodeAtom } from "@lib/atom";
 import { jsonHex } from "@lib/util";
 import DownloadLink from "./DownloadLink";
-import { PropertyCard } from "./ViewAsset";
+import { PropertyCard } from "./ViewDigitalObject";
 import AtomIcon from "./AtomIcon";
 import { t } from "@lingui/macro";
+import { Atom } from "@app/types";
 
-export default function AtomData({ sref }: { sref: string }) {
-  const [atom, op, tx] = useLiveQuery(
-    async () => {
-      const atom = await db.atomNft.get({ ref: sref });
-      if (!atom || !atom.revealOutpoint) return [undefined, undefined];
-      const op = Outpoint.fromString(atom.revealOutpoint);
-      return [atom, op, op && (await opfs.getTx(op.getTxid()))];
-    },
-    [sref],
-    [null, null, null]
+export default function AtomData({ atom }: { atom: Atom }) {
+  const reveal = useRef(
+    atom.revealOutpoint && Outpoint.fromString(atom.revealOutpoint)
   );
+  const [{ tx, decoded }, setData] = useState<{
+    tx?: string;
+    decoded?: DecodedAtom;
+  }>({
+    tx: undefined,
+    decoded: undefined,
+  });
 
-  if (atom === null) {
-    return null;
-  }
+  useEffect(() => {
+    (async () => {
+      if (reveal.current) {
+        const tx = await opfs.getTx(reveal.current.getTxid());
 
-  const script = tx
-    ? new Transaction(tx).inputs[op.getVout()].script
-    : undefined;
-  const decoded = (script && decodeAtom(script)) || {
-    files: undefined,
-    operation: undefined,
-    payload: undefined,
-  };
+        const script = tx
+          ? new Transaction(tx).inputs[reveal.current.getVout()].script
+          : undefined;
+        const decoded = (script && decodeAtom(script)) || undefined;
 
-  return atom === undefined || (atom && !tx) ? (
+        setData({ tx, decoded });
+      }
+    })();
+  }, [reveal]);
+
+  return !reveal.current || !decoded || !tx ? (
     <Box mx={4}>{t`Data not found`}</Box>
   ) : (
     <>
@@ -44,8 +46,8 @@ export default function AtomData({ sref }: { sref: string }) {
         heading={
           <>
             <AtomIcon
-              fill="#fff"
               mr={2}
+              color="white"
               bgColor="blackAlpha.400"
               p={1}
               fontSize="2xl"
@@ -71,9 +73,19 @@ export default function AtomData({ sref }: { sref: string }) {
         <DownloadLink
           data={new TextEncoder().encode(tx)}
           mimeType="application/octet-stream"
-          filename={`${op.getTxid()}.txt`}
+          filename={`${reveal.current.getTxid()}.txt`}
         >
           {t`Download Transaction`}
+        </DownloadLink>
+      )}
+      {atom.file && (
+        <DownloadLink
+          mimeType="application/octet-stream"
+          data={atom.file}
+          filename={atom.filename || "file"}
+          ml={4}
+        >
+          {t`Download main file`}
         </DownloadLink>
       )}
     </>

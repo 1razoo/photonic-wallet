@@ -1,7 +1,7 @@
 import { Box, Icon, Image } from "@chakra-ui/react";
 import mime from "mime";
 import { QRCodeSVG } from "qrcode.react";
-import { AtomNft } from "@app/types";
+import { Atom } from "@app/types";
 import { TbLink } from "react-icons/tb";
 import {
   BsFileEarmarkFill,
@@ -11,8 +11,8 @@ import {
 } from "react-icons/bs";
 import Identifier from "./Identifier";
 import useIpfsUrl from "@app/hooks/useIpfsUrl";
-import { t } from "@lingui/macro";
 import UnsafeImage from "./UnsafeImage";
+import { IconBaseProps, IconType } from "react-icons/lib";
 
 const ContentMessage = ({ message = "No content" }: { message?: string }) => (
   <Box
@@ -30,20 +30,22 @@ const ContentMessage = ({ message = "No content" }: { message?: string }) => (
 );
 
 export default function TokenContent({
-  nft,
+  atom,
   thumbnail = false,
+  defaultIcon = BsFillFileXFill,
 }: {
-  nft?: AtomNft;
+  atom?: Atom;
   thumbnail?: boolean;
+  defaultIcon?: ((props: IconBaseProps) => JSX.Element) | IconType;
 }) {
-  const { main, file, filename } = nft || {};
+  const { fileSrc, file, filename } = atom || {};
   const maxLen = 1000;
   const type = filename && mime.getType(filename);
   const isImage = type?.startsWith("image/");
 
-  if (isImage && main) {
-    const isIpfs = main?.match(/^ipfs:\/\//);
-    const url = isIpfs ? useIpfsUrl(main) : main;
+  if (isImage && fileSrc) {
+    const isIpfs = fileSrc?.match(/^ipfs:\/\//);
+    const url = isIpfs ? useIpfsUrl(fileSrc) : fileSrc;
     if (isIpfs) {
       return (
         <Image
@@ -58,7 +60,12 @@ export default function TokenContent({
     } else {
       if (thumbnail) {
         return (
-          <Icon as={BsFillFileImageFill} fontSize="9xl" color="gray.500" />
+          <Icon
+            as={BsFillFileImageFill}
+            width="100%"
+            height="100%"
+            color="gray.500"
+          />
         );
       } else {
         return <UnsafeImage src={url} />;
@@ -67,21 +74,21 @@ export default function TokenContent({
   }
 
   // Non-image URL
-  if (main) {
+  if (fileSrc) {
     if (thumbnail) {
-      return <Icon as={TbLink} fontSize="9xl" color="gray.500" />;
+      return <Icon as={TbLink} width="100%" height="100%" color="gray.500" />;
     }
     return (
       <>
         {thumbnail || (
           <Box borderRadius="md" overflow="hidden" mb={4}>
-            <QRCodeSVG size={256} value={main as string} includeMargin />
+            <QRCodeSVG size={256} value={fileSrc as string} includeMargin />
           </Box>
         )}
         <div>
-          <Identifier copyValue={main} showCopy>
-            {(main as string).substring(0, 200)}
-            {(main as string).length > 200 && "..."}
+          <Identifier copyValue={fileSrc} showCopy>
+            {(fileSrc as string).substring(0, 200)}
+            {(fileSrc as string).length > 200 && "..."}
           </Identifier>
         </div>
       </>
@@ -93,7 +100,14 @@ export default function TokenContent({
     if (type?.startsWith("text/plain")) {
       const text = new TextDecoder("utf-8").decode(file);
       if (thumbnail) {
-        return <Icon as={BsFillFileTextFill} fontSize="9xl" color="gray.500" />;
+        return (
+          <Icon
+            as={BsFillFileTextFill}
+            width="100%"
+            height="100%"
+            color="gray.500"
+          />
+        );
       }
 
       return (
@@ -122,24 +136,45 @@ export default function TokenContent({
 
     // Unknown file
     if (thumbnail) {
-      return <Icon as={BsFileEarmarkFill} fontSize="9xl" color="gray.500" />;
+      return (
+        <Icon
+          as={BsFileEarmarkFill}
+          width="100%"
+          height="100%"
+          color="gray.500"
+        />
+      );
     }
 
     return (
       <>
-        <Icon as={BsFileEarmarkFill} fontSize="9xl" color="gray.500" mb={2} />
+        <Icon
+          as={BsFileEarmarkFill}
+          width="100%"
+          height="100%"
+          color="gray.500"
+          mb={2}
+        />
         <ContentMessage message={filename} />
       </>
     );
   }
 
   if (thumbnail) {
-    return <Icon as={BsFillFileXFill} fontSize="9xl" color="gray.500" />;
+    return (
+      <Icon as={defaultIcon} width="100%" height="100%" color="gray.500" />
+    );
   }
 
   return (
     <>
-      <Icon as={BsFillFileXFill} fontSize="9xl" color="gray.500" mb={2} />
+      <Icon
+        as={defaultIcon}
+        width="100%"
+        height="100%"
+        color="gray.500"
+        mb={2}
+      />
       <ContentMessage />
     </>
   );
