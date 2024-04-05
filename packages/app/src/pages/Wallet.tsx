@@ -23,6 +23,8 @@ import useQueryString from "@app/hooks/useQueryString";
 import ViewDigitalObject from "@app/components/ViewDigitalObject";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import MintMenu from "@app/components/MintMenu";
+import ActionIcon from "@app/components/ActionIcon";
+import { MdFilterAlt } from "react-icons/md";
 
 const pageSize = 60;
 
@@ -64,9 +66,10 @@ function TokenGrid({ open }: { open: boolean }) {
             as={Button}
             size="sm"
             aria-label={t`Filter`}
+            leftIcon={<ActionIcon as={MdFilterAlt} />}
             rightIcon={<ChevronDownIcon />}
           >
-            Filter
+            {t`Filter`}
           </MenuButton>
           <MenuList minWidth="240px">
             <MenuOptionGroup

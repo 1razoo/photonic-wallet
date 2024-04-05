@@ -148,8 +148,8 @@ The commit command creates a `reveal.json` file, allowing the user to further co
 
 There are two reveal methods:
 
-* `direct`: Uses `SIGHASH_ALL` and sends tokens directly to an address.
-* `psbt`: Used to create partially signed transactions using `SIGHASH_SINGLE|ANYONECANPAY` which can be used by token marketplaces.
+- `direct`: Uses `SIGHASH_ALL` and sends tokens directly to an address.
+- `psbt`: Used to create partially signed transactions using `SIGHASH_SINGLE|ANYONECANPAY` which can be used by token marketplaces.
 
 Once the `reveal.json` file is ready, the reveal transactions are generated using the `bundle:reveal` command.
 

@@ -59,12 +59,12 @@ function DeviceSelect({ children }: PropsWithChildren) {
         left="-100%"
         right="0"
         width="100%"
-        bg="blackAlpha.400"
+        bg="blackAlpha.600"
         zIndex={15}
         transform={
           isSwiping.value || swipeFraction.value === 1
             ? "translate3d(100%, 0, 0)"
-            : ""
+            : "initial"
         }
         opacity={swipeFraction.value}
         transition="opacity 0.2s"
@@ -127,6 +127,7 @@ export default function WalletLayout() {
         <SideBar />
       </DeviceSelect>
       <Box
+        minHeight="100vh"
         {...swipeHandlers}
         transform={
           swipeFraction.value === 0

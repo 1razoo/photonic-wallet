@@ -39,6 +39,9 @@ import TokenDetails from "./TokenDetails";
 import createExplorerUrl from "@app/network/createExplorerUrl";
 import { RiContractRightLine, RiExpandLeftLine } from "react-icons/ri";
 import { useViewPanelContext } from "@app/layouts/ViewPanelLayout";
+import ActionIcon from "./ActionIcon";
+import { MdDeleteForever } from "react-icons/md";
+import { TbArrowUpRight } from "react-icons/tb";
 
 export const PropertyCard = ({
   heading,
@@ -122,7 +125,7 @@ export default function ViewDigitalObject({
 
   const unlock = (fn: () => void) => {
     if (wallet.value.locked) {
-      openModal.value = { modal: "unlock" };
+      openModal.value = { modal: "unlock", onClose: fn };
     } else {
       fn();
     }
@@ -213,7 +216,7 @@ export default function ViewDigitalObject({
                   as={DownloadLink}
                   data={nft.file}
                   filename={nft.filename}
-                  leftIcon={<DownloadIcon />}
+                  leftIcon={<ActionIcon as={DownloadIcon} />}
                   colSpan={2}
                 >
                   {t`Download`}
@@ -224,7 +227,7 @@ export default function ViewDigitalObject({
                   <GridItem
                     as={Button}
                     onClick={onLinkCopy}
-                    leftIcon={<CopyIcon />}
+                    leftIcon={<ActionIcon as={CopyIcon} />}
                     colSpan={2}
                   >
                     {t`Copy URL`}
@@ -239,8 +242,14 @@ export default function ViewDigitalObject({
                 </>
               )}
               */}
-              <Button onClick={() => unlock(openSend)}>Send</Button>
               <Button
+                leftIcon={<ActionIcon as={TbArrowUpRight} />}
+                onClick={() => unlock(openSend)}
+              >
+                {t`Send`}
+              </Button>
+              <Button
+                leftIcon={<ActionIcon as={MdDeleteForever} />}
                 onClick={() => unlock(openMelt)}
                 _hover={{ bg: "red.600" }}
               >

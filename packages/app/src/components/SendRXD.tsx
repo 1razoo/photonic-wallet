@@ -155,7 +155,7 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
     >
       <form onSubmit={submit}>
         <ModalOverlay />
-        <ModalContent m={4}>
+        <ModalContent>
           <ModalHeader>{t`Send ${network.value.ticker}`}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6} gap={4}>

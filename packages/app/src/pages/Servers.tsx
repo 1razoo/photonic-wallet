@@ -104,7 +104,7 @@ export default function Servers() {
 
   return (
     <Container maxW="container.md" px={4}>
-      <Card>
+      <Card p={4}>
         <VStack spacing={2} align="stretch" divider={<Divider />}>
           <Box key="new" display="flex" alignItems="center" gap={2}>
             <Editable
@@ -139,7 +139,8 @@ export default function Servers() {
                 display="flex"
                 gap={4}
                 alignItems="center"
-                height={10}
+                minHeight={10}
+                wordBreak="break-all"
                 onSubmit={(value) => editServer(index, value)}
               >
                 <EditableControls />

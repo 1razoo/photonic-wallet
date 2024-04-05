@@ -153,6 +153,7 @@ const theme = extendTheme({
           backdropFilter: "blur(24px)",
         },
         dialog: {
+          m: { base: 4, md: 0 },
           bgGradient: "linear(to-b, transparent, blackAlpha.500)",
           bgColor: "#2D2D2DA0",
         },

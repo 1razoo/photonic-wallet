@@ -165,7 +165,7 @@ export default function SendFungible({ atom, onSuccess, disclosure }: Props) {
     >
       <form onSubmit={submit}>
         <ModalOverlay />
-        <ModalContent m={4}>
+        <ModalContent>
           <ModalHeader>{t`Send ${atom.name || ticker}`}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6} gap={4}>

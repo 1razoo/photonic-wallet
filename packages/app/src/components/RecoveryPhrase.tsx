@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { t } from "@lingui/macro";
 import RecoveryPhraseWords from "./RecoveryPhraseWords";
+import ActionIcon from "./ActionIcon";
 
 export default function RecoveryPhrase({ phrase }: { phrase: string }) {
   const { onCopy, hasCopied } = useClipboard(phrase);
@@ -23,7 +24,11 @@ export default function RecoveryPhrase({ phrase }: { phrase: string }) {
       </Alert>
       <RecoveryPhraseWords words={phrase.split(" ")} />
       <Center mb={4}>
-        <Button onClick={onCopy} leftIcon={<CopyIcon />} variant="ghost">
+        <Button
+          onClick={onCopy}
+          leftIcon={<ActionIcon as={CopyIcon} />}
+          variant="ghost"
+        >
           {hasCopied ? t`Copied!` : t`Copy to clipboard`}
         </Button>
       </Center>

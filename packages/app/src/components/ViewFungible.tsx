@@ -38,6 +38,9 @@ import TokenDetails from "./TokenDetails";
 import ValueTag from "./ValueTag";
 import SendFungible from "./SendFungible";
 import MeltFungible from "./MeltFungible";
+import { TbArrowUpRight } from "react-icons/tb";
+import { MdDeleteForever } from "react-icons/md";
+import ActionIcon from "./ActionIcon";
 
 export const PropertyCard = ({
   heading,
@@ -239,8 +242,14 @@ export default function ViewFungible({
                   </GridItem>
                 </>
               )}
-              <Button onClick={() => unlock(openSend)}>Send</Button>
               <Button
+                leftIcon={<ActionIcon as={TbArrowUpRight} />}
+                onClick={() => unlock(openSend)}
+              >
+                {t`Send`}
+              </Button>
+              <Button
+                leftIcon={<ActionIcon as={MdDeleteForever} />}
                 onClick={() => unlock(openMelt)}
                 _hover={{ bg: "red.600" }}
               >

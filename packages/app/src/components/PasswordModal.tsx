@@ -74,7 +74,7 @@ export default function PasswordModal({
     >
       <form onSubmit={submit}>
         <ModalOverlay />
-        <ModalContent m={4}>
+        <ModalContent>
           <ModalHeader>{header}</ModalHeader>
           {allowClose && <ModalCloseButton />}
           <ModalBody pb={6}>

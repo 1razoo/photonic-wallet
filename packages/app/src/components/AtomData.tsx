@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Transaction } from "@radiantblockchain/radiantjs";
 import opfs from "@app/opfs";
 import Outpoint from "@lib/Outpoint";
-import { Box } from "@chakra-ui/react";
+import { Box, SimpleGrid } from "@chakra-ui/react";
 import { DecodedAtom, decodeAtom } from "@lib/atom";
 import { jsonHex } from "@lib/util";
 import DownloadLink from "./DownloadLink";
@@ -10,6 +10,8 @@ import { PropertyCard } from "./ViewDigitalObject";
 import AtomIcon from "./AtomIcon";
 import { t } from "@lingui/macro";
 import { Atom } from "@app/types";
+import { DownloadIcon } from "@chakra-ui/icons";
+import ActionIcon from "./ActionIcon";
 
 export default function AtomData({ atom }: { atom: Atom }) {
   const reveal = useRef(
@@ -69,25 +71,28 @@ export default function AtomData({ atom }: { atom: Atom }) {
           {jsonHex({ ...decoded.payload, ...decoded.files }, 36)}
         </Box>
       </PropertyCard>
-      {tx && (
-        <DownloadLink
-          data={new TextEncoder().encode(tx)}
-          mimeType="application/octet-stream"
-          filename={`${reveal.current.getTxid()}.txt`}
-        >
-          {t`Download Transaction`}
-        </DownloadLink>
-      )}
-      {atom.file && (
-        <DownloadLink
-          mimeType="application/octet-stream"
-          data={atom.file}
-          filename={atom.filename || "file"}
-          ml={4}
-        >
-          {t`Download main file`}
-        </DownloadLink>
-      )}
+      <SimpleGrid columns={{ base: 1, lg: 2 }} gap={2}>
+        {tx && (
+          <DownloadLink
+            leftIcon={<ActionIcon as={DownloadIcon} />}
+            data={new TextEncoder().encode(tx)}
+            mimeType="application/octet-stream"
+            filename={`${reveal.current.getTxid()}.txt`}
+          >
+            {t`Download transaction`}
+          </DownloadLink>
+        )}
+        {atom.file && (
+          <DownloadLink
+            leftIcon={<ActionIcon as={DownloadIcon} />}
+            mimeType="application/octet-stream"
+            data={atom.file}
+            filename={atom.filename || "file"}
+          >
+            {t`Download main file`}
+          </DownloadLink>
+        )}
+      </SimpleGrid>
     </>
   );
 }

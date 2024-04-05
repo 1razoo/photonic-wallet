@@ -30,7 +30,7 @@ export default function ReceiveRXD({ disclosure }: Props) {
   return (
     <Modal closeOnOverlayClick isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
-      <ModalContent m={4}>
+      <ModalContent>
         <ModalHeader>{t`Receive`}</ModalHeader>
         <ModalCloseButton />
         <ModalBody alignItems="center" pb={8}>
