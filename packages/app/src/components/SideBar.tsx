@@ -24,7 +24,7 @@ export default function SideBar({ ...rest }: GridProps) {
   return (
     <Grid
       width={{ base: "75%", lg: "232px", "2xl": "284px" }}
-      height="100vh"
+      height="100svh"
       bgColor="bg.300"
       gridTemplateRows={{
         base: "72px auto 1fr",
