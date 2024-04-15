@@ -1,4 +1,4 @@
-import { p2pkhScript, p2pkhScriptHash } from "@lib/script";
+import { p2pkhScriptHash } from "@lib/script";
 import {
   Subscription,
   ContractType,

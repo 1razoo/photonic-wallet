@@ -23,14 +23,12 @@ export default function LogOut() {
     <Container maxW="container.lg">
       <Heading mb={4} size="md">{t`Log out`}</Heading>
       <Text mb={4}>
-        Logging out will remove your wallet and all saved data from your
-        browser.
+        {t`Logging out will remove your wallet and all saved data from your browser.`}
       </Text>
       <Alert status="error">
         <AlertIcon />
         <AlertDescription>
-          Ensure you have saved your recovery phrase before logging out! Your
-          recovery phrase is the only way you can recreate your wallet.
+          {t`Ensure you have saved your recovery phrase before logging out! Your recovery phrase is the only way you can recreate your wallet.`}
         </AlertDescription>
       </Alert>
       <Flex justifyContent="center" py={8} mb={16}>

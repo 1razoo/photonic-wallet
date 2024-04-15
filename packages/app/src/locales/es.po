@@ -6,6 +6,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: es\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
 
 #: src/hooks/useContractNotifier.ts:11
 #: src/hooks/useContractNotifier.ts:30
@@ -279,6 +285,10 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
+#: src/pages/LogOut.tsx:31
+msgid "Ensure you have saved your recovery phrase before logging out! Your recovery phrase is the only way you can recreate your wallet."
+msgstr ""
+
 #: src/pages/WalletSettings.tsx:96
 msgid "Enter password"
 msgstr ""
@@ -435,8 +445,12 @@ msgstr ""
 
 #: src/layouts/SettingsLayout.tsx:41
 #: src/pages/LogOut.tsx:24
-#: src/pages/LogOut.tsx:44
+#: src/pages/LogOut.tsx:42
 msgid "Log out"
+msgstr ""
+
+#: src/pages/LogOut.tsx:26
+msgid "Logging out will remove your wallet and all saved data from your browser."
 msgstr ""
 
 #: src/components/MeltDigitalObject.tsx:133

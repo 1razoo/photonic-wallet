@@ -1,12 +1,5 @@
 import { Link } from "react-router-dom";
-import {
-  Box,
-  Flex,
-  FlexProps,
-  ResponsiveValue,
-  StyleProps,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Flex, FlexProps, Text } from "@chakra-ui/react";
 
 // Prefix is used so fill url(#...) ids are unique, otherwise nothing will render"
 const LogoSvg = ({ svgId, ...rest }: { svgId: string }) => {
@@ -108,6 +101,7 @@ export default function Logo({
   responsive = true,
   ...rest
 }: { svgId: string; responsive?: boolean } & FlexProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const r = ({ lg, ...props }: any) => (responsive ? { ...props, lg } : props);
 
   return (

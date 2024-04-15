@@ -9,7 +9,6 @@ import {
   Button,
   Center,
   Container,
-  Flex,
   FormControl,
   FormLabel,
   Heading,
@@ -26,8 +25,6 @@ import db from "@app/db";
 import { PromiseExtended } from "dexie";
 import { wallet } from "@app/signals";
 import config from "@app/config.json";
-import PageHeader from "@app/components/PageHeader";
-import Logo from "@app/components/Logo";
 
 const networkKeys = Object.entries(config.networks)
   .filter(([, v]) => v.enabled)
