@@ -27,8 +27,8 @@ import { p2pkhScript, nftScript } from "@lib/script";
 import { buildTx } from "@lib/tx";
 import Identifier from "./Identifier";
 import Outpoint from "@lib/Outpoint";
-import useElectrum from "@app/electrum/useElectrum";
 import { feeRate, network, wallet } from "@app/signals";
+import { electrumWorker } from "@app/electrum/Electrum";
 
 interface Props {
   asset: TxO;
@@ -41,7 +41,6 @@ export default function SendDigitalObject({
   onSuccess,
   disclosure,
 }: Props) {
-  const client = useElectrum();
   const { isOpen, onClose } = disclosure;
   const toAddress = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
@@ -114,10 +113,7 @@ export default function SendDigitalObject({
       false
     ).toString();
     try {
-      const txid = (await client?.request(
-        "blockchain.transaction.broadcast",
-        rawTx
-      )) as string;
+      const txid = await electrumWorker.value.broadcast(rawTx);
       onSuccess && onSuccess(txid);
     } catch (error) {
       setErrorMessage(t`Transaction rejected`);

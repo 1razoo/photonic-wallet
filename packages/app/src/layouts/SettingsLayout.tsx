@@ -37,6 +37,9 @@ export default function SettingsLayout() {
         <Button as={Link} to="/settings/about">
           {t`About`}
         </Button>
+        <Button as={Link} to="/settings/logout">
+          {t`Log out`}
+        </Button>
       </HStack>
       <Outlet />
     </ContentContainer>

@@ -19,10 +19,12 @@ import { ExternalLinkIcon } from "@chakra-ui/icons";
 import createExplorerUrl from "@app/network/createExplorerUrl";
 
 export default function MintSuccessModal({
+  returnTo,
   isOpen,
   onClose,
   txid,
 }: Pick<ModalProps, "isOpen" | "onClose"> & {
+  returnTo: string;
   txid: string;
 }) {
   return (
@@ -56,7 +58,7 @@ export default function MintSuccessModal({
 
         <ModalFooter as={Flex} gap={4}>
           <Button onClick={onClose}>{t`Mint another`}</Button>
-          <Button as={RouterLink} to="/objects">
+          <Button as={RouterLink} to={returnTo}>
             {t`Back to wallet`}
           </Button>
         </ModalFooter>

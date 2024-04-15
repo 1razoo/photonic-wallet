@@ -15,7 +15,7 @@ export const p2pkhScriptSize = 25;
 export const nftScriptSize = 63;
 export const ftScriptSize = 75;
 export const delegateTokenScriptSize = 63;
-export const delegateBurnScriptSize = 38;
+export const delegateBurnScriptSize = 42;
 export const p2pkhScriptSigSize = 107;
 export const mutableNftScriptSize = 175;
 
@@ -89,7 +89,7 @@ export function commitScriptSize(
     nft: 10,
     dat: 0,
   };
-  return 71 + opSize[operation] + (hasDelegate ? 52 : 0);
+  return 71 + opSize[operation] + (hasDelegate ? 56 : 0);
 }
 
 export function scriptHash(hex: string): string {
@@ -120,7 +120,7 @@ function addDelegateRefScript(
     Script.fromASM(
       `OP_PUSHINPUTREF ${delegateRef} OP_DUP ` +
         `OP_REFOUTPUTCOUNT_OUTPUTS OP_0 OP_NUMEQUALVERIFY ` + // Push ref disallowed
-        `d1 OP_SWAP 6a OP_CAT OP_CAT OP_HASH256 OP_CODESCRIPTHASHOUTPUTCOUNT_OUTPUTS OP_1 OP_NUMEQUALVERIFY` // Ref must be burned using REQUIREINPUTREF RETURN
+        `d1 OP_SWAP 6a0364656c OP_CAT OP_CAT OP_HASH256 OP_CODESCRIPTHASHOUTPUTCOUNT_OUTPUTS OP_1 OP_NUMEQUALVERIFY` // Ref must be burned using REQUIREINPUTREF RETURN
     )
   );
   return script;
@@ -303,22 +303,6 @@ export function ftScriptHash(address: string) {
   return scriptHash(ftScript(address, zeroRef));
 }
 
-export function parseCommitScript(script: string): string[] {
-  const pattern =
-    /^((d1[0-9a-f]{72}75)+)aa20[0-9a-f]{64}88036e667488047370723588c0c8c0c954807eda529d.*/; // Don't need to match p2pkh
-  const match = script.match(pattern);
-
-  if (match) {
-    // Return required refs
-    const refs = match[1].match(/.{76}/g);
-    if (refs) {
-      return refs.map((ref) => ref.substring(2, 74));
-    }
-  }
-
-  return [];
-}
-
 export function parseMutableScript(script: string) {
   // Use RegExp so atomHex variable can be used
   const pattern = new RegExp(
@@ -364,7 +348,12 @@ export function delegateTokenScript(address: string, ref: string) {
 }
 
 export function delegateBurnScript(ref: string) {
-  return Script.fromASM(`OP_REQUIREINPUTREF ${ref} OP_RETURN`).toHex();
+  return Script.fromASM(`OP_REQUIREINPUTREF ${ref} OP_RETURN 64656c`).toHex();
+}
+
+// TODO use this when burning a *name claim contract instead of a delegate burn
+export function contractBurnScript(ref: string) {
+  return Script.fromASM(`OP_REQUIREINPUTREF ${ref} OP_RETURN 636f6e`).toHex();
 }
 
 export function parseDelegateBaseScript(script: string): string[] {
@@ -383,7 +372,13 @@ export function parseDelegateBaseScript(script: string): string[] {
 }
 
 export function parseDelegateBurnScript(script: string): string | undefined {
-  const pattern = /^d1([0-9a-f]{72})6a$/;
+  const pattern = /^d1([0-9a-f]{72})6a0364656c$/;
+  const [, ref] = script.match(pattern) || [];
+  return ref;
+}
+
+export function parseContractBurnScript(script: string): string | undefined {
+  const pattern = /^d1([0-9a-f]{72})6a03636f6e$/;
   const [, ref] = script.match(pattern) || [];
   return ref;
 }

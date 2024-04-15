@@ -43,6 +43,7 @@
     "@scure/bip39": "^1.2.0",
     "@types/crypto-js": "^4.2.0",
     "@types/hdkey": "^2.0.1",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
     "@vitejs/plugin-react": "^4.2.1",
     "big.js": "^6.2.1",
     "buffer": "^6.0.3",
@@ -88,7 +89,6 @@
     "eslint-plugin-lingui": "^0.2.2",
     "typescript": "^5.3.3",
     "vite": "^5.0.0",
-    "vite-plugin-comlink": "^3.0.5",
     "workbox-window": "^7.0.0"
   }
 }

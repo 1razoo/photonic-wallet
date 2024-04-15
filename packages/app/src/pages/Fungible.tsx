@@ -2,8 +2,7 @@ import { useParams } from "react-router-dom";
 import { t } from "@lingui/macro";
 import { Flex } from "@chakra-ui/react";
 import PageHeader from "@app/components/PageHeader";
-import { Atom } from "@app/types";
-import { ftBalance } from "@app/signals";
+import { Atom, AtomType } from "@app/types";
 import { useLiveQuery } from "dexie-react-hooks";
 import db from "@app/db";
 import TokenRow from "@app/components/TokenRow";
@@ -25,18 +24,29 @@ export default function Fungible() {
 }
 
 function TokenGrid() {
-  const atoms = useLiveQuery(
-    () => db.atom.where("ref").anyOf(Object.keys(ftBalance.value)).toArray(),
-    [ftBalance.value]
+  const [atoms, balances] = useLiveQuery(
+    async () => {
+      // Get all FT atoms
+      const atoms = await db.atom.where({ atomType: AtomType.FT }).toArray();
+
+      // Get FT balances by ref
+      const refs = atoms.map(({ ref }) => ref);
+      const balances = Object.fromEntries(
+        (await db.balance.where("id").anyOf(refs).toArray()).map((b) => [
+          b.id,
+          b,
+        ])
+      );
+      return [atoms, balances];
+    },
+    [],
+    [null, null]
   );
 
-  const getBalance = (atom: Atom) => {
-    if (!ftBalance.value[atom.ref]) return 0;
-    return (
-      ftBalance.value[atom.ref].unconfirmed +
-      ftBalance.value[atom.ref].confirmed
-    );
-  };
+  const hasBalance = (atom: Atom) =>
+    atom &&
+    balances &&
+    (balances[atom.ref].confirmed || 0 + balances[atom.ref].unconfirmed || 0);
 
   if (!atoms) {
     return null;
@@ -51,10 +61,13 @@ function TokenGrid() {
         ) : (
           atoms.map(
             (token) =>
-              token && (
+              hasBalance(token) && (
                 <TokenRow
                   atom={token}
-                  value={getBalance(token)}
+                  value={
+                    (balances[token.ref]?.confirmed || 0) +
+                    (balances[token.ref]?.unconfirmed || 0)
+                  }
                   key={token.ref}
                   to={`/fungible/atom/${token.ref}`}
                   size="sm"

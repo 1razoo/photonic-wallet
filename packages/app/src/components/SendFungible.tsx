@@ -30,11 +30,12 @@ import db from "@app/db";
 import { Atom, ContractType } from "@app/types";
 import { ftScript, p2pkhScript } from "@lib/script";
 import { buildTx } from "@lib/tx";
-import useElectrum from "@app/electrum/useElectrum";
-import { feeRate, ftBalance, network, wallet } from "@app/signals";
+import { feeRate, network, wallet } from "@app/signals";
 import { reverseRef } from "@lib/Outpoint";
 import TokenContent from "./TokenContent";
 import { RiQuestionFill } from "react-icons/ri";
+import { electrumWorker } from "@app/electrum/Electrum";
+import FtBalance from "./FtBalance";
 
 interface Props {
   atom: Atom;
@@ -43,7 +44,6 @@ interface Props {
 }
 
 export default function SendFungible({ atom, onSuccess, disclosure }: Props) {
-  const client = useElectrum();
   const { isOpen, onClose } = disclosure;
   const amount = useRef<HTMLInputElement>(null);
   const toAddress = useRef<HTMLInputElement>(null);
@@ -134,10 +134,7 @@ export default function SendFungible({ atom, onSuccess, disclosure }: Props) {
         false
       ).toString();
       console.debug("Broadcasting", rawTx);
-      const txid = (await client?.request(
-        "blockchain.transaction.broadcast",
-        rawTx
-      )) as string;
+      const txid = await electrumWorker.value.broadcast(rawTx);
       console.debug("Result", txid);
       toast({
         title: t`Sent ${value} ${ticker}`,
@@ -179,9 +176,7 @@ export default function SendFungible({ atom, onSuccess, disclosure }: Props) {
               </Box>
               <Heading size="sm">{t`Balance`}</Heading>
               <Box>
-                {ftBalance.value[atom.ref]?.confirmed +
-                  ftBalance.value[atom.ref]?.unconfirmed}{" "}
-                {ticker}
+                <FtBalance id={atom.ref} />
               </Box>
             </VStack>
             {success || (

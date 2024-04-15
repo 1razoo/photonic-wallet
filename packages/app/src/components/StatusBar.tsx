@@ -6,10 +6,10 @@ import {
   TbPlug as ConnectedIcon,
   TbPlugOff as DisconnectedIcon,
 } from "react-icons/tb";
-import { useElectrumManager } from "@app/electrum/useElectrum";
 import { electrumStatus, wallet, openModal } from "@app/signals";
 import { ElectrumStatus } from "@app/types";
 import MenuButton from "./MenuButton";
+import { electrumWorker } from "@app/electrum/Electrum";
 
 const UnlockButton = () => {
   const toast = useToast();
@@ -69,10 +69,8 @@ const ConnectButton = () => {
     [ElectrumStatus.LOADING]: t`Disconnected`,
   };
 
-  const electrum = useElectrumManager();
-
   const onClickConnect = () => {
-    if (!electrum.reconnect()) {
+    if (!electrumWorker.value.reconnect()) {
       toast({
         title: t`No servers defined`,
         status: "error",
@@ -88,7 +86,7 @@ const ConnectButton = () => {
           <Icon as={hover ? DisconnectedIcon : ConnectedIcon} boxSize={4} />
         }
         onClick={() => {
-          electrum.disconnect("user");
+          electrumWorker.value.disconnect("user");
           setHover(false);
         }}
         onMouseOver={() => setHover(true)}

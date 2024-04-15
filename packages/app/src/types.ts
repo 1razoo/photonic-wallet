@@ -21,8 +21,6 @@ export enum AtomType {
   DAT,
 }
 
-type TxSpent = 0 | 1;
-
 export interface TxO {
   id?: number;
   txid: string; // Can these be shared with Utxo type?
@@ -31,8 +29,20 @@ export interface TxO {
   value: number;
   date?: number;
   height?: number;
-  spent: TxSpent;
+  spent: 0 | 1;
+  change?: 0 | 1;
   contractType: ContractType;
+}
+
+export interface SubscriptionStatus {
+  scriptHash: string;
+  status: string;
+}
+
+export interface ContractBalance {
+  id: string;
+  confirmed: number;
+  unconfirmed: number;
 }
 
 export interface BlockHeader {
@@ -48,8 +58,8 @@ export interface Atom {
   ref: string;
   lastTxoId?: number;
   revealOutpoint?: string;
-  spent: TxSpent;
-  fresh: TxSpent;
+  spent: 0 | 1;
+  fresh: 0 | 1;
   name: string;
   type: string;
   immutable?: boolean;
@@ -92,18 +102,6 @@ export interface WalletState {
   locked: boolean;
   wif?: string;
   address: string;
-}
-
-export interface BalanceState {
-  ready: boolean;
-  coins: {
-    confirmed: number;
-    unconfirmed: number;
-  };
-  assets: {
-    confirmed: number;
-    unconfirmed: number;
-  };
 }
 
 export enum ElectrumStatus {

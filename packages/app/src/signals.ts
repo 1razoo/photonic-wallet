@@ -1,10 +1,5 @@
-import { computed, signal } from "@preact/signals-react";
-import {
-  WalletState,
-  BalanceState,
-  ElectrumStatus,
-  NetworkConfig,
-} from "./types";
+import { signal } from "@preact/signals-react";
+import { WalletState, ElectrumStatus, NetworkConfig } from "./types";
 import config from "./config.json";
 
 export const openModal = signal<{
@@ -19,29 +14,8 @@ export const wallet = signal<WalletState>({
   exists: false,
   locked: true,
 });
-export const balance = signal<BalanceState>({
-  ready: false, // Used to prevent 0 balance showing when loading
-  coins: {
-    confirmed: 0,
-    unconfirmed: 0,
-  },
-  assets: {
-    confirmed: 0,
-    unconfirmed: 0,
-  },
-});
-type FtBalanceState = {
-  [key: string]: {
-    confirmed: number;
-    unconfirmed: number;
-  };
-};
-export const ftBalance = signal<FtBalanceState>({});
 export const electrumStatus = signal<ElectrumStatus>(ElectrumStatus.LOADING);
 export const electrumServer = signal("");
-export const totalBalance = computed(
-  () => balance.value.coins.confirmed + balance.value.coins.unconfirmed
-);
 export const network = signal<NetworkConfig>(config.networks.testnet);
 export const feeRate = signal<number>(config.defaultConfig.feeRate);
 

@@ -3,7 +3,7 @@ import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfil
 import react from "@vitejs/plugin-react";
 import { lingui } from "@lingui/vite-plugin";
 import { VitePWA } from "vite-plugin-pwa";
-// import { comlink } from "vite-plugin-comlink";
+//import basicSsl from "@vitejs/plugin-basic-ssl";
 import path from "path";
 
 export default defineConfig({
@@ -55,12 +55,8 @@ export default defineConfig({
         ],
       },
     }),
-    /*, comlink()*/
+    //basicSsl(),
   ],
-  // TODO
-  /*worker: {
-    plugins: [comlink()],
-  },*/
   define: {
     APP_VERSION: JSON.stringify(process.env.npm_package_version),
   },
@@ -79,5 +75,8 @@ export default defineConfig({
       // @ts-ignore
       plugins: [NodeGlobalsPolyfillPlugin({ buffer: false })],
     },
+  },
+  worker: {
+    format: "es",
   },
 });

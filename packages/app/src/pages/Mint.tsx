@@ -43,7 +43,6 @@ import GlowBox from "@app/components/GlowBox";
 import db from "@app/db";
 import { ContractType, ElectrumStatus } from "@app/types";
 import Outpoint from "@lib/Outpoint";
-import useElectrum from "@app/electrum/useElectrum";
 import { mintToken } from "@lib/mint";
 import { encodeCid, upload } from "@lib/ipfs";
 import { photonsToRXD } from "@lib/format";
@@ -62,6 +61,7 @@ import {
   wallet,
 } from "@app/signals";
 import { AtomFile, AtomPayload, AtomRemoteFile, Utxo } from "@lib/types";
+import { electrumWorker } from "@app/electrum/Electrum";
 
 const MAX_BYTES = 20000;
 
@@ -248,7 +248,6 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     [],
     []
   );
-  const electrum = useElectrum();
 
   const apiKey = useLiveQuery(
     async () =>
@@ -464,10 +463,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       );
 
       const broadcast = async (rawTx: string) =>
-        (await electrum.request(
-          "blockchain.transaction.broadcast",
-          rawTx
-        )) as string;
+        await electrumWorker.value.broadcast(rawTx);
 
       if (!dryRun) {
         // Broadcast commit
@@ -1044,6 +1040,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         </form>
       </ContentContainer>
       <MintSuccessModal
+        returnTo={tokenType === "fungible" ? "/fungible" : "/objects"}
         isOpen={isSuccessModalOpen}
         onClose={onSuccessModalClose}
         txid={revealTxIdRef.current}

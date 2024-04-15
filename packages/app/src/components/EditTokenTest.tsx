@@ -1,5 +1,5 @@
 import db from "@app/db";
-import useElectrum from "@app/electrum/useElectrum";
+import { electrumWorker } from "@app/electrum/Electrum";
 import { feeRate, wallet } from "@app/signals";
 import { Atom, ContractType, TxO } from "@app/types";
 import { EditIcon } from "@chakra-ui/icons";
@@ -14,12 +14,7 @@ import {
   parseMutableScript,
 } from "@lib/script";
 import { buildTx, findTokenOutput } from "@lib/tx";
-import {
-  AtomPayload,
-  ElectrumRefResponse,
-  UnfinalizedInput,
-  Utxo,
-} from "@lib/types";
+import { AtomPayload, UnfinalizedInput, Utxo } from "@lib/types";
 import { t } from "@lingui/macro";
 import { Transaction } from "@radiantblockchain/radiantjs";
 
@@ -32,7 +27,6 @@ export default function EditTokenTest({
   token: Atom;
   txo: TxO;
 }) {
-  const client = useElectrum();
   const editToken = async () => {
     if (!wallet.value.wif) {
       return;
@@ -44,16 +38,13 @@ export default function EditTokenTest({
     const mutRefBE = Outpoint.fromUTXO(txid, refVout + 1);
     const mutRefLE = mutRefBE.reverse().toString();
 
-    const refResponse = (await client.request(
-      "blockchain.ref.get",
-      mutRefBE.toString()
-    )) as ElectrumRefResponse;
+    const refResponse = await electrumWorker.value.getRef(mutRefBE.toString());
     if (!refResponse.length) {
       return;
     }
     const location = refResponse[refResponse.length - 1].tx_hash;
 
-    const hex = await client.request("blockchain.transaction.get", location);
+    const hex = await electrumWorker.value.getTransaction(location);
     const refTx = new Transaction(hex);
     const { vout, output } = findTokenOutput(
       refTx,
@@ -149,15 +140,8 @@ export default function EditTokenTest({
       false
     );
 
-    console.log(
-      await client.request("blockchain.transaction.broadcast", tx.toString())
-    );
-    console.log(
-      await client.request(
-        "blockchain.transaction.broadcast",
-        revertTx.toString()
-      )
-    );
+    console.log(await electrumWorker.value.broadcast(tx.toString()));
+    console.log(await electrumWorker.value.broadcast(revertTx.toString()));
   };
   return (
     <GridItem

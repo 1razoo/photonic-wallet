@@ -6,12 +6,14 @@ import {
 import db from "@app/db";
 import { ContractType, TxO } from "@app/types";
 import ElectrumManager from "@app/electrum/ElectrumManager";
-import { ElectrumTxResponse, ElectrumUtxo } from "@lib/types";
+import { ElectrumUtxo } from "@lib/types";
+import { bytesToHex } from "@noble/hashes/utils";
 
 export type ElectrumTxMap = {
   [key: string]: { hex: string; tx: Transaction };
 };
 
+// Update txo table for a contract type
 export const buildUpdateTXOs =
   (electrum: ElectrumManager, contractType: ContractType) =>
   async (
@@ -33,6 +35,7 @@ export const buildUpdateTXOs =
       console.debug("Status unchanged", newStatus, scriptHash, contractType);
       return { added: [], confs: new Map(), newTxs: undefined, spent: [] };
     }
+    console.debug("New status", newStatus, scriptHash, contractType);
 
     // Fetch unspent outputs
     const utxos = (await electrum.client?.request(
@@ -82,7 +85,7 @@ export const buildUpdateTXOs =
           const hex = (await electrum.client?.request(
             "blockchain.transaction.get",
             txId
-          )) as ElectrumTxResponse;
+          )) as string;
 
           if (hex) {
             const tx = new Transaction(hex);
@@ -95,21 +98,35 @@ export const buildUpdateTXOs =
 
     const added = await Promise.all(
       newUtxos.map(async (utxo) => {
+        const { tx } = newTxs[utxo.tx_hash];
+        const script = tx.outputs[utxo.tx_pos].script.toHex();
+        // Check if this is our own tx. User won't be notified for these.
+        const isOwnTx = (
+          await Promise.all(
+            tx.inputs.map(
+              async ({ prevTxId, outputIndex }) =>
+                await db.txo.get({
+                  txid: bytesToHex(prevTxId),
+                  vout: outputIndex,
+                })
+            )
+          )
+        ).some((v) => v);
+
         const txo: TxO = {
           txid: utxo.tx_hash,
           vout: utxo.tx_pos,
-          script: newTxs[utxo.tx_hash].tx.outputs[utxo.tx_pos].script.toHex(),
+          script,
           value: utxo.value,
           // FIXME find a better way to store date
           // Maybe when block header subscription is finished it can be used
           // date: newTxs[utxo.tx_hash].raw.time || undefined,
           height: utxo.height || Infinity,
           spent: 0,
+          change: isOwnTx ? 1 : 0,
           contractType,
         };
-        // Awaiting ensures the id property will be set
-        // Data for related tables will need this
-        await db.txo.add(txo);
+
         return txo;
       })
     );
@@ -123,8 +140,6 @@ export const buildUpdateTXOs =
         });
       }
     });
-
-    db.subscriptionStatus.update(scriptHash, { status: newStatus });
 
     return { added, confs, newTxs, spent };
   };

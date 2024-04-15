@@ -1,14 +1,14 @@
 import Dexie, { Table } from "dexie";
-import { Atom, TxO, BlockHeader } from "./types";
+import {
+  Atom,
+  TxO,
+  BlockHeader,
+  SubscriptionStatus,
+  ContractBalance,
+} from "./types";
 import config from "@app/config.json";
 
 export type KeyValuePairs = unknown;
-
-export interface SubscriptionStatus {
-  scriptHash: string;
-  status: string;
-  balance?: { confirmed: number; unconfirmed: number };
-}
 
 export class Database extends Dexie {
   txo!: Table<TxO>;
@@ -16,15 +16,18 @@ export class Database extends Dexie {
   subscriptionStatus!: Table<SubscriptionStatus>;
   kvp!: Table<KeyValuePairs>;
   header!: Table<BlockHeader>;
+  balance!: Table<ContractBalance>;
 
   constructor() {
     super("photonic");
     this.version(1).stores({
-      txo: "++id, &[txid+vout], contractType, [contractType+spent], [script+spent], height",
+      txo: "++id, &[txid+vout], contractType, [contractType+spent], [script+spent], [change+spent]",
       subscriptionStatus: "scriptHash",
-      atom: "++id, &ref, [type+spent], [type+spent+fresh], lastTxoId, height",
+      balance: "id",
+      atom: "++id, &ref, [type+spent], [type+spent+fresh], lastTxoId, height, atomType",
       kvp: "",
       header: "hash, height",
+      txq: "txid",
     });
   }
 }

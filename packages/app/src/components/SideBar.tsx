@@ -80,6 +80,7 @@ export default function SideBar({ ...rest }: GridProps) {
         </MenuButton>
         <MenuButton
           to="/fungible"
+          match="/fungible"
           leftIcon={<Icon as={TbCircles} boxSize={4} />}
         >
           {t`Fungible Tokens`}

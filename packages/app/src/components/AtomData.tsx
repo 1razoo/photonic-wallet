@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Transaction } from "@radiantblockchain/radiantjs";
 import opfs from "@app/opfs";
 import Outpoint from "@lib/Outpoint";
@@ -14,9 +14,8 @@ import { DownloadIcon } from "@chakra-ui/icons";
 import ActionIcon from "./ActionIcon";
 
 export default function AtomData({ atom }: { atom: Atom }) {
-  const reveal = useRef(
-    atom.revealOutpoint && Outpoint.fromString(atom.revealOutpoint)
-  );
+  const reveal =
+    atom.revealOutpoint && Outpoint.fromString(atom.revealOutpoint);
   const [{ tx, decoded }, setData] = useState<{
     tx?: string;
     decoded?: DecodedAtom;
@@ -27,20 +26,21 @@ export default function AtomData({ atom }: { atom: Atom }) {
 
   useEffect(() => {
     (async () => {
-      if (reveal.current) {
-        const tx = await opfs.getTx(reveal.current.getTxid());
+      if (reveal) {
+        const txid = reveal.getTxid();
+        const tx = await opfs.getTx(txid);
 
         const script = tx
-          ? new Transaction(tx).inputs[reveal.current.getVout()].script
+          ? new Transaction(tx).inputs[reveal.getVout()].script
           : undefined;
         const decoded = (script && decodeAtom(script)) || undefined;
 
         setData({ tx, decoded });
       }
     })();
-  }, [reveal]);
+  }, []);
 
-  return !reveal.current || !decoded || !tx ? (
+  return !reveal || !decoded || !tx ? (
     <Box mx={4}>{t`Data not found`}</Box>
   ) : (
     <>
@@ -77,7 +77,7 @@ export default function AtomData({ atom }: { atom: Atom }) {
             leftIcon={<ActionIcon as={DownloadIcon} />}
             data={new TextEncoder().encode(tx)}
             mimeType="application/octet-stream"
-            filename={`${reveal.current.getTxid()}.txt`}
+            filename={`${reveal.getTxid()}.txt`}
           >
             {t`Download transaction`}
           </DownloadLink>

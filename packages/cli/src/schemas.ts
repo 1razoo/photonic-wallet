@@ -68,7 +68,7 @@ export const bundleFileSchema = Joi.object({
   reveal: Joi.object({
     method: Joi.valid("direct", "psbt"),
     batchSize: Joi.when("method", {
-      is: "broadcast",
+      is: "direct",
       then: Joi.number(),
     }),
   }).required(),
@@ -79,7 +79,7 @@ export const bundleFileSchema = Joi.object({
 export const revealFileSchema = Joi.object({
   method: Joi.valid("direct", "psbt").required(),
   batchSize: Joi.when("method", {
-    is: "broadcast",
+    is: "direct",
     then: Joi.number().required(),
   }),
   template: Joi.when("$method", {

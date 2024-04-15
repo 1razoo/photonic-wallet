@@ -12,7 +12,7 @@ import { nAsm } from "./script";
 const { Script } = rjs;
 type Script = rjs.Script;
 
-export const atomHex = "72633031";
+export const atomHex = "72633032"; // rc02
 //export const atomHex = "61746f6d"; // atom
 export const atomBuffer = Buffer.from(atomHex, "hex");
 

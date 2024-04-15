@@ -27,7 +27,7 @@ import TokenContent from "@app/components/TokenContent";
 import PageHeader from "@app/components/PageHeader";
 import TxSuccessModal from "./TxSuccessModal";
 import { Atom } from "../types";
-import { ftBalance, openModal, wallet } from "@app/signals";
+import { openModal, wallet } from "@app/signals";
 import {
   RiContractRightLine,
   RiExpandLeftLine,
@@ -41,6 +41,7 @@ import MeltFungible from "./MeltFungible";
 import { TbArrowUpRight } from "react-icons/tb";
 import { MdDeleteForever } from "react-icons/md";
 import ActionIcon from "./ActionIcon";
+import FtBalance from "./FtBalance";
 
 export const PropertyCard = ({
   heading,
@@ -217,8 +218,7 @@ export default function ViewFungible({
                     </Heading>
                   </Box>
                   <ValueTag>
-                    {(ftBalance.value[token.ref]?.confirmed || 0) +
-                      (ftBalance.value[token.ref]?.unconfirmed || 0)}
+                    <FtBalance id={sref} />
                   </ValueTag>
                 </Flex>
               </GridItem>

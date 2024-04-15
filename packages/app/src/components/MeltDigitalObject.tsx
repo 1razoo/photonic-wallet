@@ -17,7 +17,6 @@ import {
   AlertIcon,
 } from "@chakra-ui/react";
 import { ContractType, TxO } from "@app/types";
-import useElectrum from "@app/electrum/useElectrum";
 import { WarningIcon } from "@chakra-ui/icons";
 import coinSelect, { SelectableInput } from "@lib/coinSelect";
 import { p2pkhScript } from "@lib/script";
@@ -26,6 +25,7 @@ import { PrivateKey } from "@radiantblockchain/radiantjs";
 import { useLiveQuery } from "dexie-react-hooks";
 import db from "../db";
 import { feeRate, wallet } from "@app/signals";
+import { electrumWorker } from "@app/electrum/Electrum";
 
 interface Props {
   asset: TxO;
@@ -38,7 +38,6 @@ export default function MeltDigitalObject({
   onSuccess,
   disclosure,
 }: Props) {
-  const client = useElectrum();
   const { isOpen, onClose } = disclosure;
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(true);
@@ -94,10 +93,7 @@ export default function MeltDigitalObject({
       false
     ).toString();
     try {
-      const txid = (await client?.request(
-        "blockchain.transaction.broadcast",
-        rawTx
-      )) as string;
+      const txid = await electrumWorker.value.broadcast(rawTx);
       onSuccess && onSuccess(txid);
       toast({ status: "success", title: t`Token melted` });
     } catch (error) {

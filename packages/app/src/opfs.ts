@@ -24,4 +24,9 @@ export async function putTx(txid: string, hex: string) {
   return true;
 }
 
-export default { getTx, putTx };
+export async function deleteAll() {
+  const root = await navigator.storage.getDirectory();
+  root.removeEntry("tx", { recursive: true });
+}
+
+export default { getTx, putTx, deleteAll };

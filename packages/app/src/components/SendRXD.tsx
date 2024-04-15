@@ -32,8 +32,9 @@ import db from "@app/db";
 import { ContractType } from "@app/types";
 import { p2pkhScript } from "@lib/script";
 import { buildTx } from "@lib/tx";
-import useElectrum from "@app/electrum/useElectrum";
-import { feeRate, network, totalBalance, wallet } from "@app/signals";
+import { feeRate, network, wallet } from "@app/signals";
+import { electrumWorker } from "@app/electrum/Electrum";
+import Balance from "./Balance";
 
 interface Props {
   onSuccess?: (txid: string) => void;
@@ -41,7 +42,6 @@ interface Props {
 }
 
 export default function SendRXD({ onSuccess, disclosure }: Props) {
-  const client = useElectrum();
   const { isOpen, onClose } = disclosure;
   const amount = useRef<HTMLInputElement>(null);
   const toAddress = useRef<HTMLInputElement>(null);
@@ -124,10 +124,7 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
         false
       ).toString();
       console.debug("Broadcasting", rawTx);
-      const txid = (await client?.request(
-        "blockchain.transaction.broadcast",
-        rawTx
-      )) as string;
+      const txid = await electrumWorker.value.broadcast(rawTx);
       console.debug("Result", txid);
       toast({
         title: t`Sent ${photonsToRXD(value)} ${network.value.ticker}`,
@@ -162,7 +159,7 @@ export default function SendRXD({ onSuccess, disclosure }: Props) {
             <VStack>
               <Heading size="sm">{t`Balance`}</Heading>
               <Box>
-                {photonsToRXD(totalBalance.value)} {network.value.ticker}
+                <Balance />
               </Box>
             </VStack>
             {success || (

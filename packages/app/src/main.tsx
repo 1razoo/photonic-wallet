@@ -27,6 +27,7 @@ import Coins from "./pages/Coins";
 import MobileHome from "./pages/MobileHome";
 import IpfsSettings from "./pages/IpfsSettings";
 import About from "./pages/About";
+import LogOut from "./pages/LogOut";
 import gradient from "/gradient.svg";
 import Exit from "./pages/Exit";
 import Fungible from "./pages/Fungible";
@@ -345,6 +346,10 @@ const router = createHashRouter([
               {
                 path: "/settings/ipfs",
                 element: <IpfsSettings />,
+              },
+              {
+                path: "/settings/logout",
+                element: <LogOut />,
               },
             ],
           },

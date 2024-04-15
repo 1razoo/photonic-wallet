@@ -1,4 +1,4 @@
-import useElectrum from "@app/electrum/useElectrum";
+import { electrumWorker } from "@app/electrum/Electrum";
 import { Atom } from "@app/types";
 import { DownloadIcon } from "@chakra-ui/icons";
 import { GridItem, Button } from "@chakra-ui/react";
@@ -6,30 +6,21 @@ import Outpoint from "@lib/Outpoint";
 import { decodeAtom } from "@lib/atom";
 import { parseMutableScript } from "@lib/script";
 import { findTokenOutput } from "@lib/tx";
-import { ElectrumRefResponse } from "@lib/types";
 import { t } from "@lingui/macro";
 import { Transaction } from "@radiantblockchain/radiantjs";
-import { ElectrumWS } from "ws-electrumx-client";
 
 // Testing mutable tokens
 // Not used yet
 
-async function fetchAtomData(
-  client: ElectrumWS,
-  ref: Outpoint,
-  immutable: boolean
-) {
-  const refResponse = (await client.request(
-    "blockchain.ref.get",
-    ref.toString()
-  )) as ElectrumRefResponse;
+async function fetchAtomData(ref: Outpoint, immutable: boolean) {
+  const refResponse = await electrumWorker.value.getRef(ref.toString());
 
   if (!refResponse.length) {
     return;
   }
   const location = refResponse[immutable ? 0 : refResponse.length - 1].tx_hash;
 
-  const hex = await client.request("blockchain.transaction.get", location);
+  const hex = await electrumWorker.value.getTransaction(location);
   const refTx = new Transaction(hex);
   const { vout } = findTokenOutput(
     refTx,
@@ -53,14 +44,13 @@ async function fetchAtomData(
 }
 
 export default function FetchTokenTest({ token }: { token: Atom }) {
-  const client = useElectrum();
   const fetchToken = async () => {
     const nftRef = Outpoint.fromString(token.ref);
     const { txid, vout: refVout } = nftRef.toObject();
     const mutRef = Outpoint.fromUTXO(txid, refVout + 1);
 
-    fetchAtomData(client, nftRef, true);
-    fetchAtomData(client, mutRef, false);
+    fetchAtomData(nftRef, true);
+    fetchAtomData(mutRef, false);
   };
   return (
     <GridItem
