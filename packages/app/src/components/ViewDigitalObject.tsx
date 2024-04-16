@@ -125,7 +125,10 @@ export default function ViewDigitalObject({
 
   const unlock = (fn: () => void) => {
     if (wallet.value.locked) {
-      openModal.value = { modal: "unlock", onClose: fn };
+      openModal.value = {
+        modal: "unlock",
+        onClose: (success) => success && fn(),
+      };
     } else {
       fn();
     }
