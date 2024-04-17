@@ -31,6 +31,7 @@ import { bytesToHex } from "@noble/hashes/utils";
 import ElectrumManager from "@app/electrum/ElectrumManager";
 import opfs from "@app/opfs";
 import setSubscriptionStatus from "./setSubscriptionStatus";
+import { batchRequests } from "@lib/util";
 
 // 500KB size limit
 const fileSizeLimit = 500_000;
@@ -170,19 +171,27 @@ export class NFTWorker implements Subscription {
 
     // Get reveal transaction ids for all tokens
     // Reveal txids indexed by ref
-    const refReveals = Object.fromEntries(
-      await Promise.all(
-        refEntries.map(async ([ref, txo]) => {
-          // Check if an input matches the ref. This will be a mint tx.
-          if (fresh.includes(ref) && txo) {
-            console.debug(`Ref ${ref} is fresh`);
-            // Freshly minted, we already have the reveal tx
-            return [ref, txo.txid];
-          }
 
-          return [ref, await this.fetchRefMint(ref)];
-        })
-      )
+    const refReveals = await batchRequests<[string, TxO | undefined], string>(
+      refEntries,
+      3,
+      async ([ref, txo]) => {
+        // Check if an input matches the ref. This will be a mint tx.
+        if (fresh.includes(ref) && txo) {
+          console.debug(`Ref ${ref} is fresh`);
+          // Freshly minted, we already have the reveal tx
+          return [ref, txo.txid];
+        }
+
+        const result = (await this.electrum.client?.request(
+          "blockchain.ref.get",
+          ref
+        )) as SingletonGetResponse;
+        console.debug("ref.get", ref, result);
+        const a = result.length ? result[0].tx_hash : "";
+
+        return [ref, a];
+      }
     );
 
     // Dedup reveal txids
@@ -296,15 +305,6 @@ export class NFTWorker implements Subscription {
     const related = Array.from(new Set(relatedArrs.flat()));
 
     return { accepted, related };
-  }
-
-  async fetchRefMint(ref: string): Promise<string> {
-    const result = (await this.electrum.client?.request(
-      "blockchain.ref.get",
-      ref
-    )) as SingletonGetResponse;
-    console.debug("ref.get", ref, result);
-    return result.length ? result[0].tx_hash : "";
   }
 
   // Decode an Atom token and save to the database. Return the name so the user can be notified

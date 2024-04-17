@@ -1,6 +1,6 @@
 import { bytesToHex } from "@noble/hashes/utils";
 
-export const jsonHex = (obj: unknown, byteLimit = 0) => {
+export function jsonHex(obj: unknown, byteLimit = 0) {
   const tooLarge = "<data too large>";
   return JSON.stringify(
     obj,
@@ -23,4 +23,33 @@ export const jsonHex = (obj: unknown, byteLimit = 0) => {
     },
     2
   );
-};
+}
+
+export function arrayChunks<T = unknown>(arr: T[], chunkSize: number) {
+  const chunks = [];
+
+  for (let i = 0; i < arr.length; i += chunkSize) {
+    const chunk = arr.slice(i, i + chunkSize);
+    chunks.push(chunk);
+  }
+
+  return chunks;
+}
+
+export async function batchRequests<ParamType, ValueType>(
+  params: ParamType[],
+  batchSize: number,
+  callback: (param: ParamType) => Promise<[string, ValueType | undefined]>
+) {
+  const paramBatches = arrayChunks(Array.from(params), batchSize);
+  const responseBatches = [];
+  console.debug(`Fetching ${paramBatches.length} batches`);
+
+  for (const paramBatch of paramBatches) {
+    console.debug(`Fetching batch ${new Date().getTime()}`);
+    responseBatches.push(await Promise.all(paramBatch.map(callback)));
+  }
+  return Object.fromEntries(responseBatches.flat().filter(([, v]) => v)) as {
+    [key: string]: ValueType;
+  };
+}

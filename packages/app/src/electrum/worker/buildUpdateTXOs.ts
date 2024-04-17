@@ -8,6 +8,7 @@ import { ContractType, TxO } from "@app/types";
 import ElectrumManager from "@app/electrum/ElectrumManager";
 import { ElectrumUtxo } from "@lib/types";
 import { bytesToHex } from "@noble/hashes/utils";
+import { batchRequests } from "@lib/util";
 
 export type ElectrumTxMap = {
   [key: string]: { hex: string; tx: Transaction };
@@ -79,22 +80,25 @@ export const buildUpdateTXOs =
 
     // Get transactions not in the database
     // Convert to an object indexed by txid
-    const newTxs: ElectrumTxMap = Object.fromEntries(
-      await Promise.all(
-        [...newTxIds].map(async (txId) => {
-          const hex = (await electrum.client?.request(
-            "blockchain.transaction.get",
-            txId
-          )) as string;
+    // Split into batches of 3 to reduce server load
+    const newTxs: ElectrumTxMap = await batchRequests<
+      string,
+      {
+        tx: Transaction;
+        hex: string;
+      }
+    >(Array.from(newTxIds), 3, async (txid: string) => {
+      const hex = (await electrum.client?.request(
+        "blockchain.transaction.get",
+        txid
+      )) as string;
 
-          if (hex) {
-            const tx = new Transaction(hex);
-            return [txId, { tx, hex }];
-          }
-          return [undefined, undefined];
-        })
-      )
-    );
+      if (hex) {
+        const tx = new Transaction(hex);
+        return [txid, { tx, hex }];
+      }
+      return [txid, undefined];
+    });
 
     const added = await Promise.all(
       newUtxos.map(async (utxo) => {
