@@ -2,8 +2,8 @@
 // @ts-ignore
 import type { EncryptedData } from "@lib/encryption";
 import { ElectrumUtxo, NetworkKey } from "@lib/types";
-import { ElectrumTxMap } from "./subscriptions/buildUpdateTXOs";
 import { CreateToastFnReturn } from "@chakra-ui/react";
+import { ElectrumTxMap } from "./electrum/worker/buildUpdateTXOs";
 
 export type ScriptGroup = "rxd" | "ref" | "nft" | "ft";
 
