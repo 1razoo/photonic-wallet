@@ -1,7 +1,7 @@
 import React, { useCallback, useReducer, useRef, useState } from "react";
 import mime from "mime";
 import { t, Trans } from "@lingui/macro";
-import { Link } from "react-router-dom";
+//import { Link } from "react-router-dom";
 import { PromiseExtended } from "dexie";
 import {
   Alert,
@@ -44,13 +44,13 @@ import db from "@app/db";
 import { ContractType, ElectrumStatus } from "@app/types";
 import Outpoint from "@lib/Outpoint";
 import { mintToken } from "@lib/mint";
-import { encodeCid, upload } from "@lib/ipfs";
+//import { encodeCid, upload } from "@lib/ipfs";
 import { photonsToRXD } from "@lib/format";
 import AtomTokenType from "@app/components/AtomTokenType";
 import ContentContainer from "@app/components/ContentContainer";
 import PageHeader from "@app/components/PageHeader";
-import HashStamp from "@app/components/HashStamp";
-import Identifier from "@app/components/Identifier";
+//import HashStamp from "@app/components/HashStamp";
+//import Identifier from "@app/components/Identifier";
 import FormSection from "@app/components/FormSection";
 import MintSuccessModal from "@app/components/MintSuccessModal";
 import {
@@ -63,7 +63,9 @@ import {
 import { AtomFile, AtomPayload, AtomRemoteFile, Utxo } from "@lib/types";
 import { electrumWorker } from "@app/electrum/Electrum";
 
-const MAX_BYTES = 20000;
+// IPFS uploading is currently disabled until an alternative to nft.storage can be found
+
+const MAX_BYTES = 100000;
 
 type ContentMode = "file" | "text" | "url";
 
@@ -126,7 +128,7 @@ function TargetBox({
               {t`Upload file`}
             </Text>
             <Text color="gray.300" fontSize="md">
-              {t`Files over 10KB will be stored in IPFS`}
+              {t`Maximum 100kb`}
             </Text>
           </>
         )}
@@ -172,9 +174,9 @@ const encodeContent = (
   if (fileState.file) {
     const filename = `main.${mime.getExtension(fileState.file?.type)}`;
 
-    if (fileState.ipfs) {
+    /*if (fileState.ipfs) {
       return [filename, { src: `ipfs://${fileState.cid}` }];
-    }
+    }*/
 
     return [filename, new Uint8Array(fileState.file.data)];
   }
@@ -283,13 +285,13 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   };
 
   const submit = async (dryRun: boolean) => {
-    if (fileState.ipfs && !apiKey) {
+    /*if (fileState.ipfs && !apiKey) {
       toast({
         status: "error",
         title: t`No NFT.Storage API key provided`,
       });
       return;
-    }
+    }*/
 
     if (wallet.value.locked) {
       openModal.value = {
@@ -437,7 +439,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     };
 
     try {
-      if (fileState.ipfs && fileState.file?.data) {
+      /*if (fileState.ipfs && fileState.file?.data) {
         // FIXME does this throw an error when unsuccessful?
         await upload(
           fileState.file?.data,
@@ -445,7 +447,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
           dryRun,
           apiKey as string
         );
-      }
+      }*/
 
       const relInputs: Utxo[] = [];
       if (userInput) relInputs.push(userInput);
@@ -551,10 +553,10 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
 
       newState.hash = sha256(typedArray);
 
-      if (size > 10000) {
+      /*if (size > 10000) {
         newState.ipfs = true;
         newState.cid = await encodeCid(reader.result as ArrayBuffer);
-      }
+      }*/
 
       setFileState(newState);
     };
@@ -611,6 +613,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
             mt={-4}
             {...rootProps}
           >
+            {/*
             {apiKey === "" && (
               <Alert status="info">
                 <AlertIcon />
@@ -630,6 +633,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                 </span>
               </Alert>
             )}
+            */}
             {tokenType !== "user" && (
               <FormSection>
                 <FormControl>
@@ -747,6 +751,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                   <AlertIcon /> {t`Your file will be stored on-chain.`}
                 </Alert>
               )}
+              {/*
               {mode === "file" && fileState.file?.data && fileState.ipfs && (
                 <Alert status="info">
                   <AlertIcon />
@@ -815,6 +820,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                   )}
                 </>
               )}
+              */}
               {mode === "text" && (
                 <>
                   <FormControl>
