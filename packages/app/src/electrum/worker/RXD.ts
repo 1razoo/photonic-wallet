@@ -5,7 +5,7 @@ import {
   ElectrumCallback,
   ElectrumStatusUpdate,
 } from "@app/types";
-import { buildUpdateTXOs } from "./buildUpdateTXOs";
+import { buildUpdateTXOs } from "./updateTxos";
 import db from "@app/db";
 import ElectrumManager from "@app/electrum/ElectrumManager";
 import setSubscriptionStatus from "./setSubscriptionStatus";
@@ -50,7 +50,7 @@ export class RXDWorker implements Subscription {
             }
           });
 
-        setSubscriptionStatus(scriptHash, status);
+        setSubscriptionStatus(scriptHash, status, ContractType.RXD);
         db.balance.put({ id: address, confirmed, unconfirmed });
       }) as ElectrumCallback,
       scriptHash

@@ -1,6 +1,6 @@
 import { Atom, ContractType, ElectrumCallback, TxO } from "@app/types";
 import { NFTWorker } from "./NFT";
-import { buildUpdateTXOs } from "./buildUpdateTXOs";
+import { buildUpdateTXOs } from "./updateTxos";
 import ElectrumManager from "@app/electrum/ElectrumManager";
 import { ftScriptHash, parseFtScript } from "@lib/script";
 import db from "@app/db";
@@ -96,7 +96,7 @@ export class FTWorker extends NFTWorker {
             unconfirmed,
           });
         }
-        setSubscriptionStatus(scriptHash, status);
+        setSubscriptionStatus(scriptHash, status, ContractType.FT);
       }) as ElectrumCallback,
       scriptHash
     );

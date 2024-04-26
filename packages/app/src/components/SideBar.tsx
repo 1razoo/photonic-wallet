@@ -1,4 +1,5 @@
 import {
+  Box,
   CloseButton,
   Flex,
   Grid,
@@ -16,6 +17,7 @@ import { HiOutlineAtSymbol } from "react-icons/hi";
 import { MdHome } from "react-icons/md";
 import { TbTriangleSquareCircle, TbCircles, TbCoins } from "react-icons/tb";
 import MenuButton from "./MenuButton";
+import SyncBar from "./SyncBar";
 
 export default function SideBar({ ...rest }: GridProps) {
   // Trigger rerender when language changes
@@ -99,12 +101,9 @@ export default function SideBar({ ...rest }: GridProps) {
           {t`History`}
         </MenuButton>
       </SimpleGrid>
-      <SimpleGrid
-        py={4}
-        alignSelf="end"
-        borderTopWidth={1}
-        borderTopColor="whiteAlpha.100"
-      >
+      <Box />
+      <SyncBar />
+      <SimpleGrid py={4} borderTopWidth={1} borderTopColor="whiteAlpha.100">
         <StatusBar />
       </SimpleGrid>
     </Grid>

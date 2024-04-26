@@ -3,7 +3,7 @@
 import type { EncryptedData } from "@lib/encryption";
 import { ElectrumUtxo, NetworkKey } from "@lib/types";
 import { CreateToastFnReturn } from "@chakra-ui/react";
-import { ElectrumTxMap } from "./electrum/worker/buildUpdateTXOs";
+import { ElectrumTxMap } from "./electrum/worker/updateTxos";
 
 export type ScriptGroup = "rxd" | "ref" | "nft" | "ft";
 
@@ -37,6 +37,12 @@ export interface TxO {
 export interface SubscriptionStatus {
   scriptHash: string;
   status: string;
+  contractType: ContractType;
+  sync: {
+    done: boolean;
+    numSynced?: number;
+    numTotal?: number;
+  };
 }
 
 export interface ContractBalance {

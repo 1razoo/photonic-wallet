@@ -26,6 +26,19 @@ export const buildUpdateTXOs =
     newTxs?: ElectrumTxMap;
     spent: { id: number; value: number; script: string }[];
   }> => {
+    const updated = await db.subscriptionStatus.update(scriptHash, {
+      sync: { done: false },
+    });
+    if (!updated) {
+      // Won't exist yet for first sync
+      db.subscriptionStatus.put({
+        scriptHash,
+        status: "",
+        contractType,
+        sync: { done: false },
+      });
+    }
+
     // Check if status has changed
     const currentStatus = await db.subscriptionStatus
       .where({ scriptHash })
@@ -44,6 +57,10 @@ export const buildUpdateTXOs =
       scriptHash
     )) as ElectrumUtxo[];
     console.debug("Unspent", contractType, utxos);
+
+    await db.subscriptionStatus.update(scriptHash, {
+      sync: { done: false, numSynced: 0, numTotal: utxos.length },
+    });
 
     // Check tx exists in database
     // Dedup any transactions that have multiple UTXOs for this wallet
@@ -81,6 +98,12 @@ export const buildUpdateTXOs =
     // Get transactions not in the database
     // Convert to an object indexed by txid
     // Split into batches of 3 to reduce server load
+    let numSynced = 0;
+    const updateProgress = () => {
+      db.subscriptionStatus.update(scriptHash, {
+        sync: { done: false, numSynced, numTotal: utxos.length },
+      });
+    };
     const newTxs: ElectrumTxMap = await batchRequests<
       string,
       {
@@ -93,6 +116,8 @@ export const buildUpdateTXOs =
         txid
       )) as string;
 
+      numSynced++;
+      updateProgress();
       if (hex) {
         const tx = new Transaction(hex);
         return [txid, { tx, hex }];

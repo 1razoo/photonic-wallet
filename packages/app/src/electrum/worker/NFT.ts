@@ -14,7 +14,7 @@ import {
   Atom,
   AtomType,
 } from "@app/types";
-import { ElectrumTxMap, buildUpdateTXOs } from "./buildUpdateTXOs";
+import { ElectrumTxMap, buildUpdateTXOs } from "./updateTxos";
 import db from "@app/db";
 import Outpoint, { reverseRef } from "@lib/Outpoint";
 import {
@@ -136,7 +136,7 @@ export class NFTWorker implements Subscription {
           }
         });
 
-        setSubscriptionStatus(scriptHash, status);
+        setSubscriptionStatus(scriptHash, status, ContractType.NFT);
       }) as ElectrumCallback,
       scriptHash
     );

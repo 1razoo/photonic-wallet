@@ -1,12 +1,19 @@
 import db from "@app/db";
+import { ContractType } from "@app/types";
 
 let init = false;
 
 export default async function setSubscriptionStatus(
   scriptHash: string,
-  status: string
+  status: string,
+  contractType: ContractType
 ) {
-  await db.subscriptionStatus.put({ scriptHash, status });
+  await db.subscriptionStatus.put({
+    scriptHash,
+    status,
+    contractType,
+    sync: { done: true },
+  });
 
   // When restoring a wallet, wait for all subscriptions to be initialised before allowing notifications
   if (!init) {
