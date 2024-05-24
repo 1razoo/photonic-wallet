@@ -134,6 +134,8 @@ export const buildUpdateTXOs =
           await Promise.all(
             tx.inputs.map(
               async ({ prevTxId, outputIndex }) =>
+                // FIXME this doesn't work for minting where a funding tx isn't seen by the wallet
+                // Maybe we can check the scriptsig for the user's pubkey instead
                 await db.txo.get({
                   txid: bytesToHex(prevTxId),
                   vout: outputIndex,

@@ -38,6 +38,7 @@ export default function TokenRow({
       alignItems="center"
       p={2}
       pr={4}
+      mb={4}
       gap={2}
       borderRadius="md"
       overflow="hidden"

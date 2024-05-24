@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { t } from "@lingui/macro";
-import { Flex } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import PageHeader from "@app/components/PageHeader";
 import { Atom, AtomType } from "@app/types";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -46,7 +46,7 @@ function TokenGrid() {
   const hasBalance = (atom: Atom) =>
     atom &&
     balances &&
-    (balances[atom.ref].confirmed || 0 + balances[atom.ref].unconfirmed || 0);
+    (balances[atom.ref]?.confirmed || 0 + balances[atom.ref]?.unconfirmed || 0);
 
   if (!atoms) {
     return null;
@@ -55,7 +55,7 @@ function TokenGrid() {
   return (
     <>
       <PageHeader toolbar={<MintMenu />}>{t`Fungible Tokens`}</PageHeader>
-      <Flex direction="column" pb={4} px={4} gap={4}>
+      <Box px={4} overflowY="auto">
         {atoms.length === 0 ? (
           <NoContent>{t`No assets`}</NoContent>
         ) : (
@@ -76,7 +76,7 @@ function TokenGrid() {
               )
           )
         )}
-      </Flex>
+      </Box>
     </>
   );
 }
