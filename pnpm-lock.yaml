@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   '@radiantblockchain/radiantjs@1.9.4':
-    hash: 2y46zdpsvhyserag6o7lrxxf5e
+    hash: varlpfijnui3jgpszthhiy72l4
     path: patches/@radiantblockchain__radiantjs@1.9.4.patch
   bsv-coinselect@4.2.5:
     hash: ptxf4vh4yz76zpgebjpycangwy
@@ -99,8 +99,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0(@babel/core@7.23.7)(react@18.2.0)
       '@radiantblockchain/radiantjs':
-        specifier: ^1.9.4
-        version: 1.9.4(patch_hash=2y46zdpsvhyserag6o7lrxxf5e)
+        specifier: github:chainbow/radiantjs
+        version: github.com/chainbow/radiantjs/ea4720b67a09290fcf8d76f3ce565337fb9867f1
       '@rollup/plugin-inject':
         specifier: ^5.0.3
         version: 5.0.5(rollup@2.79.1)
@@ -262,8 +262,8 @@ importers:
         specifier: ^1.3.0
         version: 1.3.3
       '@radiantblockchain/radiantjs':
-        specifier: ^1.9.4
-        version: 1.9.4(patch_hash=2y46zdpsvhyserag6o7lrxxf5e)
+        specifier: github:chainbow/radiantjs
+        version: github.com/chainbow/radiantjs/ea4720b67a09290fcf8d76f3ce565337fb9867f1
       chalk:
         specifier: ^5.3.0
         version: 5.3.0
@@ -338,7 +338,7 @@ importers:
         version: 1.3.3
       '@radiantblockchain/radiantjs':
         specifier: ^1.9.4
-        version: 1.9.4(patch_hash=2y46zdpsvhyserag6o7lrxxf5e)
+        version: 1.9.4(patch_hash=varlpfijnui3jgpszthhiy72l4)
       '@scure/base':
         specifier: ^1.1.2
         version: 1.1.5
@@ -3942,7 +3942,7 @@ packages:
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
     dev: false
 
-  /@radiantblockchain/radiantjs@1.9.4(patch_hash=2y46zdpsvhyserag6o7lrxxf5e):
+  /@radiantblockchain/radiantjs@1.9.4(patch_hash=varlpfijnui3jgpszthhiy72l4):
     resolution: {integrity: sha512-d9jelxUZVSXz1l3fQtlklDj0P+AdMOLErqz9T9xQDi775RhIxayt9qEzBEcUYGP8FCFCHjVr2sHqBgjdmeD4Dw==}
     dependencies:
       aes-js: 3.1.2
@@ -9613,3 +9613,20 @@ packages:
   /yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+
+  github.com/chainbow/radiantjs/ea4720b67a09290fcf8d76f3ce565337fb9867f1:
+    resolution: {tarball: https://codeload.github.com/chainbow/radiantjs/tar.gz/ea4720b67a09290fcf8d76f3ce565337fb9867f1}
+    name: '@radiantblockchain/radiantjs'
+    version: 1.9.5
+    dependencies:
+      aes-js: 3.1.2
+      bn.js: 4.11.9
+      bs58: 4.0.1
+      buffer: 6.0.3
+      clone-deep: 4.0.1
+      elliptic: 6.5.4
+      hash.js: 1.1.7
+      inherits: 2.0.3
+      js-sha512: 0.8.0
+      unorm: 1.4.1
+    dev: false

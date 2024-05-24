@@ -227,7 +227,7 @@ index 4d78dfd78906c8f173d680649ca2a7e14a123fc6..feea0b242782d2c4d3b95cb6b9bd5a7f
      "lint": "standard",
      "lint_test": "standard && mocha",
 diff --git a/radiant.d.ts b/radiant.d.ts
-index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..0de915ec9d989382c96ecd0e6061963eeb6af84a 100644
+index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..7686db4b422ceb3b269c7af23842147856256355 100644
 --- a/radiant.d.ts
 +++ b/radiant.d.ts
 @@ -10,7 +10,7 @@
@@ -305,16 +305,17 @@ index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..0de915ec9d989382c96ecd0e6061963e
  
          set(obj: object): this;
  
-@@ -394,6 +405,8 @@ declare module 'radiantjs' {
+@@ -394,6 +405,9 @@ declare module 'radiantjs' {
          getSignatureOperationsCount(accurate: boolean): number;
  
          toAddress(network?: string): Address;
 +        static fromString(script: string): Script;
 +        static fromASM(script: string): Script;
++        static fromHex(script: string): Script;
      }
  
      export interface Util {
-@@ -423,6 +436,8 @@ declare module 'radiantjs' {
+@@ -423,6 +437,8 @@ declare module 'radiantjs' {
          readonly type: string;
  
          constructor(data: Buffer | Uint8Array | string | object, network?: Networks.Network | string, type?: string);
@@ -323,7 +324,7 @@ index 4ab8d4205c43fa6c8436aa8400f31ddb941bb1ef..0de915ec9d989382c96ecd0e6061963e
      }
  
      export class Unit {
-@@ -438,4 +453,190 @@ declare module 'radiantjs' {
+@@ -438,4 +454,190 @@ declare module 'radiantjs' {
          toBits(): number;
          toSatoshis(): number;
      }
