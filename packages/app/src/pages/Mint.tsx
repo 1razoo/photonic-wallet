@@ -2,7 +2,6 @@ import React, { useCallback, useReducer, useRef, useState } from "react";
 import mime from "mime";
 import { t, Trans } from "@lingui/macro";
 //import { Link } from "react-router-dom";
-import { PromiseExtended } from "dexie";
 import {
   Alert,
   AlertIcon,
@@ -60,7 +59,7 @@ import {
   openModal,
   wallet,
 } from "@app/signals";
-import { AtomFile, AtomPayload, AtomRemoteFile, Utxo } from "@lib/types";
+import { AtomFile, AtomPayload, Utxo } from "@lib/types";
 import { electrumWorker } from "@app/electrum/Electrum";
 
 // IPFS uploading is currently disabled until an alternative to nft.storage can be found
@@ -230,12 +229,17 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   const [attrs, setAttrs] = reset(useState<[string, string][]>([]));
   const [mode, setMode] = reset(useState<ContentMode>("file"));
   const [fileState, setFileState] = reset(useState<FileState>({ ...noFile }));
-  const [enableHashstamp, setEnableHashstamp] = reset(useState(true));
-  const [hashStamp, setHashstamp] = reset(useState<ArrayBuffer | undefined>());
+  //const [enableHashstamp, setEnableHashstamp] = reset(useState(true));
+  //const [hashStamp, setHashstamp] = reset(useState<ArrayBuffer | undefined>());
   const attrName = useRef<HTMLInputElement>(null);
   const attrValue = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = reset(
     useReducer(formReducer, {
+      deploy: "direct",
+      difficulty: "10",
+      numContracts: "1",
+      maxHeight: "100",
+      reward: "10",
       immutable: ["user", "container"].includes(tokenType) ? "0" : "1",
     })
   );
@@ -251,10 +255,10 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     []
   );
 
-  const apiKey = useLiveQuery(
+  /*const apiKey = useLiveQuery(
     async () =>
       (await (db.kvp.get("nftStorageApiKey") as PromiseExtended<string>)) || ""
-  );
+  );*/
 
   const {
     isOpen: isSuccessModalOpen,
@@ -310,6 +314,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       immutable,
       ticker,
       supply,
+      deploy,
       ...fields
     } = formData;
 
@@ -352,10 +357,10 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       args.ticker = ticker;
     }
 
-    if (content && enableHashstamp && hashStamp) {
+    /*if (content && enableHashstamp && hashStamp) {
       (content as AtomRemoteFile).hs = new Uint8Array(hashStamp);
       (content as AtomRemoteFile).h = fileState.hash;
-    }
+    }*/
 
     const userIndex =
       authorId !== "" && authorId !== undefined
@@ -453,10 +458,46 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       if (userInput) relInputs.push(userInput);
       if (containerInput) relInputs.push(containerInput);
 
-      const { commitTx, revealTx, fees, ref, size } = mintToken(
+      const buildDeployParams = () => {
+        const address = wallet.value.address;
+        if (tokenType === "fungible") {
+          if (deploy === "dmint") {
+            const { difficulty, numContracts, maxHeight, reward } = fields;
+            // Value 1 is for the dmint contracts
+            return {
+              value: 1,
+              deployMethod: "dmint" as const,
+              deployParams: {
+                difficulty: parseInt(difficulty, 10),
+                numContracts: parseInt(numContracts, 10),
+                maxHeight: parseInt(maxHeight, 10),
+                reward: parseInt(reward, 10),
+                address,
+              },
+            };
+          } else {
+            return {
+              value: parseInt(supply, 10),
+              deployMethod: "direct" as const,
+              deployParams: { address },
+            };
+          }
+        } else {
+          return {
+            value: 1,
+            deployMethod: "direct" as const,
+            deployParams: { address },
+          };
+        }
+      };
+
+      const { deployMethod, deployParams, value } = buildDeployParams();
+
+      const { commitTx, revealTx, fees, size } = mintToken(
         tokenType === "fungible" ? "ft" : "nft",
-        tokenType === "fungible" ? parseInt(supply, 10) : 1,
-        wallet.value.address,
+        deployMethod,
+        deployParams,
+        value,
         wallet.value.wif as string,
         coins,
         payload,
@@ -474,7 +515,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         await broadcast(revealTx.toString());
       }
 
-      revealTxIdRef.current = ref.toString();
+      revealTxIdRef.current = revealTx.id;
       const fee = fees.reduce((a, f) => a + f, 0);
 
       if (dryRun) {
@@ -584,7 +625,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
 
   const delImg = () => {
     setFileState({ ...noFile });
-    setHashstamp(undefined);
+    //setHashstamp(undefined);
   };
 
   const changeMode = (m: ContentMode) => {
@@ -593,6 +634,28 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     setFormData({ name: "text", value: "" });
     setFormData({ name: "url", value: "" });
   };
+
+  const calcTimeToMine = (diff: number) => {
+    // 33 bits (4 bytes + 1 bit to make the next 64 bit number unsigned)
+    const seconds = Math.round((diff * Math.pow(2, 33)) / 3000000000);
+    if (seconds > 86400) {
+      return `${Math.round(seconds / 864) / 100} days`;
+    }
+    if (seconds > 3600) {
+      return `${Math.round(seconds / 36) / 100} hours`;
+    }
+    if (seconds > 60) {
+      return `${Math.round(seconds / 0.6) / 100} minutes`;
+    }
+    return `${seconds} seconds`;
+  };
+
+  const diff = parseInt(formData.difficulty, 10);
+  const timeToMine = diff > 0 ? calcTimeToMine(diff) : "";
+  const totalDmintSupply =
+    parseInt(formData.numContracts, 10) *
+    parseInt(formData.maxHeight, 10) *
+    parseInt(formData.reward, 10);
 
   return (
     <>
@@ -650,24 +713,22 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                     {t`Assigning an author is recommended for authentication of tokens.`}
                   </FormHelperText>
                 </FormControl>
-              </FormSection>
-            )}
-            {tokenType === "object" && (
-              <FormSection>
-                <FormControl>
-                  <FormLabel>{t`Container`}</FormLabel>
-                  <Select name="containerId" onChange={onFormChange}>
-                    <option value="">None</option>
-                    {containers.map((c, index) => (
-                      <option key={c.ref} value={index}>
-                        {c.name} [{Outpoint.fromString(c.ref).shortRef()}]
-                      </option>
-                    ))}
-                  </Select>
-                  <FormHelperText>
-                    {t`Containers can be used to create token collections`}
-                  </FormHelperText>
-                </FormControl>
+                {tokenType === "object" && (
+                  <FormControl>
+                    <FormLabel>{t`Container`}</FormLabel>
+                    <Select name="containerId" onChange={onFormChange}>
+                      <option value="">None</option>
+                      {containers.map((c, index) => (
+                        <option key={c.ref} value={index}>
+                          {c.name} [{Outpoint.fromString(c.ref).shortRef()}]
+                        </option>
+                      ))}
+                    </Select>
+                    <FormHelperText>
+                      {t`Containers can be used to create token collections`}
+                    </FormHelperText>
+                  </FormControl>
+                )}
               </FormSection>
             )}
             <FormSection>
@@ -854,9 +915,9 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                 </>
               )}
             </FormSection>
-            {tokenType === "fungible" && (
-              <>
-                <FormSection>
+            <FormSection>
+              {tokenType === "fungible" && (
+                <>
                   <FormControl>
                     <FormLabel>{t`Ticker`}</FormLabel>
                     <Input
@@ -866,26 +927,8 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                       required
                     />
                   </FormControl>
-                </FormSection>
-                <FormSection>
-                  <FormControl>
-                    <FormLabel>{t`Photon Supply`}</FormLabel>
-                    <Input
-                      placeholder=""
-                      name="supply"
-                      type="number"
-                      onChange={onFormChange}
-                      required
-                      min={1}
-                    />
-                    <FormHelperText>
-                      Token supply requires an equal amount of RXD photons
-                    </FormHelperText>
-                  </FormControl>
-                </FormSection>
-              </>
-            )}
-            <FormSection>
+                </>
+              )}
               <FormControl>
                 <FormLabel>{t`Name`}</FormLabel>
                 <Input
@@ -895,8 +938,6 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                   required
                 />
               </FormControl>
-            </FormSection>
-            <FormSection>
               <FormControl>
                 <FormLabel>{t`Description`}</FormLabel>
                 <Input
@@ -905,8 +946,6 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                   onChange={onFormChange}
                 />
               </FormControl>
-            </FormSection>
-            <FormSection>
               <FormControl>
                 <FormLabel>{t`License`}</FormLabel>
                 <Input
@@ -915,8 +954,6 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                   onChange={onFormChange}
                 />
               </FormControl>
-            </FormSection>
-            <FormSection>
               <FormControl>
                 <FormLabel>{t`Attributes`}</FormLabel>
                 <Box>
@@ -945,9 +982,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                   )}
                 </Box>
               </FormControl>
-            </FormSection>
-            {tokenType !== "fungible" && (
-              <FormSection>
+              {tokenType !== "fungible" && (
                 <FormControl>
                   <FormLabel>{t`Immutable`}</FormLabel>
                   <RadioGroup
@@ -969,13 +1004,113 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                     </FormHelperText>
                   )}
                 </FormControl>
-              </FormSection>
-            )}
+              )}
+            </FormSection>
             {formData.immutable !== "1" && (
               <Alert status="info">
                 <AlertIcon />
                 {t`Mutable tokens are not yet fully supported by Photonic Wallet, however a mutable contract containing 1 photon will be created.`}
               </Alert>
+            )}
+            {tokenType === "fungible" && (
+              <>
+                <FormSection>
+                  <FormControl>
+                    <FormLabel>{t`Deployment method`}</FormLabel>
+                    <Select name="deploy" onChange={onFormChange}>
+                      <option value="direct">{t`Direct to wallet`}</option>
+                      <option value="dmint">{t`Decentralized mint`}</option>
+                    </Select>
+                  </FormControl>
+                  <Divider />
+                  {formData.deploy === "dmint" && (
+                    <>
+                      <FormControl>
+                        <FormLabel>{t`Difficulty`}</FormLabel>
+                        <Input
+                          defaultValue={formData.difficulty}
+                          placeholder="10"
+                          name="difficulty"
+                          type="number"
+                          onChange={onFormChange}
+                          min={1}
+                          max={1000000}
+                        />
+                        {timeToMine && (
+                          <FormHelperText>
+                            Approx {timeToMine} to mine on an RTX 4090
+                          </FormHelperText>
+                        )}
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>{t`Number of contracts`}</FormLabel>
+                        <Input
+                          defaultValue={formData.numContracts}
+                          placeholder=""
+                          name="numContracts"
+                          type="number"
+                          onChange={onFormChange}
+                          min={1}
+                          max={100}
+                        />
+                        <FormHelperText>
+                          {t`Multiple contracts allows parallel mining, reducing congestion for low difficulty contracts`}
+                        </FormHelperText>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>{t`Number of mints`}</FormLabel>
+                        <Input
+                          defaultValue={formData.maxHeight}
+                          placeholder=""
+                          name="maxHeight"
+                          type="number"
+                          onChange={onFormChange}
+                          min={1}
+                        />
+                        <FormHelperText>
+                          {t`Total number of mints per contract`}
+                        </FormHelperText>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>{t`Reward`}</FormLabel>
+                        <Input
+                          defaultValue={formData.reward}
+                          placeholder=""
+                          name="reward"
+                          type="number"
+                          onChange={onFormChange}
+                          min={1}
+                        />
+                        <FormHelperText>
+                          {t`Number of tokens created on each mint`}
+                        </FormHelperText>
+                      </FormControl>
+                    </>
+                  )}
+                  {formData.deploy === "direct" && (
+                    <FormControl>
+                      <FormLabel>{t`Photon Supply`}</FormLabel>
+                      <Input
+                        placeholder=""
+                        name="supply"
+                        type="number"
+                        onChange={onFormChange}
+                        required
+                        min={1}
+                      />
+                      <FormHelperText>
+                        {t`Token supply requires an equal amount of RXD photons. This must be provided on mint for "direct to wallet" deployments.`}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                </FormSection>
+                {formData.deploy === "dmint" && totalDmintSupply > 0 && (
+                  <Alert status="info">
+                    <AlertIcon />
+                    {t`Total minted supply will be ${totalDmintSupply} ${formData.ticker}`}
+                  </Alert>
+                )}
+              </>
             )}
             {clean && (
               <FormSection>
@@ -993,6 +1128,16 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                     <Box>
                       {photonsToRXD(stats.fee)} {network.value.ticker}
                     </Box>
+                    {tokenType === "fungible" &&
+                      formData.deploy === "direct" && (
+                        <>
+                          <Box>{t`FT supply funding`}</Box>
+                          <Box>
+                            {photonsToRXD(parseInt(formData.supply, 10))}{" "}
+                            {network.value.ticker}
+                          </Box>
+                        </>
+                      )}
                   </SimpleGrid>
                 </FormControl>
               </FormSection>

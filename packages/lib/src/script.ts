@@ -5,6 +5,11 @@ import { Buffer } from "buffer";
 import { atomBuffer, atomHex } from "./atom";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import { CommitOperation } from "./types";
+import {
+  bigIntToVmNumber,
+  encodeDataPush,
+  numberToBinUint32LEClamped,
+} from "@bitauth/libauth";
 
 const { Address, Opcode, Script } = rjs;
 
@@ -149,7 +154,7 @@ export function ftCommitScript(
     .add(atomBuffer)
     .add(Opcode.OP_EQUALVERIFY);
   // Ensure normal ref for this input exists in an output
-  // TODO should supply be enforced?
+  // TODO should supply be enforced? Maybe not since output can be a PoW mint contract which doesn't provide photon supply
   script.add(
     Script.fromASM(
       "OP_INPUTINDEX OP_OUTPOINTTXHASH OP_INPUTINDEX OP_OUTPOINTINDEX OP_4 OP_NUM2BIN OP_CAT OP_REFTYPE_OUTPUT OP_1 OP_NUMEQUALVERIFY"
@@ -387,16 +392,36 @@ export function codeScriptHash(script: string) {
   return bytesToHex(sha256(sha256(hexToBytes(script))));
 }
 
-// Convert number to opcode
-export function nAsm(n: number) {
-  // Use OP_0 to OP_16 to avoid "Data push larger than necessary" error
-  if (n >= 0 && n <= 16) {
-    return `OP_${n}`;
-  }
-  if (n === -1) {
-    return "OP_1NEGATE";
-  }
-  if (n === 1) return "OP_1";
-  const h = n.toString(16);
-  return h.length % 2 ? `0${h}` : h;
+// Push a positive number as a 4 bytes little endian
+export function push4bytes(n: number) {
+  return bytesToHex(encodeDataPush(numberToBinUint32LEClamped(n)));
+}
+
+// Push a number with minimal encoding
+export function pushMinimal(n: bigint | number) {
+  return bytesToHex(encodeDataPush(bigIntToVmNumber(BigInt(n))));
+}
+
+export function pushMinimalAsm(n: bigint | number) {
+  return Script.fromHex(pushMinimal(n)).toASM();
+}
+
+const MAX_TARGET = 0x7fffffffffffffffn; // Doesn't include starting 00000000
+export function dMintDiffToTarget(difficulty: number) {
+  return MAX_TARGET / BigInt(difficulty);
+}
+
+export function dMintScript(
+  height: number,
+  contractRef: string,
+  tokenRef: string,
+  maxHeight: number,
+  reward: number,
+  target: bigint
+) {
+  return `${push4bytes(height)}d8${contractRef}d0${tokenRef}${pushMinimal(
+    maxHeight
+  )}${pushMinimal(reward)}${pushMinimal(
+    target
+  )}bdc0c855797ea8597959797ea87e5a7a7eaabc01147f77587f040000000088817600a269a269577ae500a069567ae600a06901d053797e0cdec0e9aa76e378e4a269e69d7eaa76e47b9d547a818b76537a9c537ade789181547ae6939d635279cd01d853797e016a7e8867547854807ec0eb557f777e5379ec78885379eac0e9885379cc519d5279de519d75686d7551`;
 }

@@ -6,7 +6,7 @@ import { decode, encode } from "cbor-x";
 import rjs from "@radiantblockchain/radiantjs";
 import { AtomFile, AtomPayload } from "./types";
 import { bytesToHex } from "@noble/hashes/utils";
-import { nAsm } from "./script";
+import { pushMinimalAsm } from "./script";
 
 // ESM compatibility
 const { Script } = rjs;
@@ -123,9 +123,11 @@ export function encodeAtomMutable(
 ) {
   const opHex = Buffer.from(operation).toString("hex");
   const encodedPayload = encode(payload);
-  const asm = `${atomHex} ${opHex} ${encodedPayload.toString("hex")} ${nAsm(
-    contractOutputIndex
-  )} ${nAsm(refHashIndex)} ${nAsm(refIndex)} ${nAsm(tokenOutputIndex)}`;
+  const asm = `${atomHex} ${opHex} ${encodedPayload.toString(
+    "hex"
+  )} ${pushMinimalAsm(contractOutputIndex)} ${pushMinimalAsm(
+    refHashIndex
+  )} ${pushMinimalAsm(refIndex)} ${pushMinimalAsm(tokenOutputIndex)}`;
   const script = Script.fromASM(asm);
   const scriptSigHash = bytesToHex(sha256(script.toBuffer()));
   const payloadHash = bytesToHex(sha256(sha256(Buffer.from(encodedPayload))));

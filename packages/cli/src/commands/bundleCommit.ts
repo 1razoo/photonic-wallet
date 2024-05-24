@@ -272,6 +272,7 @@ export default async function bundleCommit(
   };
 
   const batches = commitBundle(
+    bundle.reveal.method,
     wallet.address,
     wallet.wif,
     unspentRxd,
@@ -303,10 +304,7 @@ export default async function bundleCommit(
 
   // Build a reveal.json file
   const revealFile: Partial<RevealFile> = {
-    ...((bundle.reveal as BundleDirectParams) || {
-      method: "broadcast",
-      batchSize: 100,
-    }),
+    ...(bundle.reveal as BundleDirectParams),
     tokens: Object.fromEntries(
       batches.commits
         .flatMap((c) => c.data.map((r) => Outpoint.fromObject(r.utxo)))

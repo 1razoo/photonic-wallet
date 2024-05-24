@@ -3,6 +3,7 @@ import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfil
 import react from "@vitejs/plugin-react";
 import { lingui } from "@lingui/vite-plugin";
 import { VitePWA } from "vite-plugin-pwa";
+import topLevelAwait from "vite-plugin-top-level-await";
 //import basicSsl from "@vitejs/plugin-basic-ssl";
 import path from "path";
 
@@ -15,6 +16,10 @@ export default defineConfig({
         // If this plugin is removed @vitejs/plugin-react-swc can be used instead of Babel and @lingui/swc-plugin instead of macros
         plugins: ["module:@preact/signals-react-transform", "macros"],
       },
+    }),
+    topLevelAwait({
+      promiseExportName: "__tla",
+      promiseImportName: (i) => `__tla_${i}`,
     }),
     lingui(),
     VitePWA({

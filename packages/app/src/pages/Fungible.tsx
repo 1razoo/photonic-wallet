@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { t } from "@lingui/macro";
-import { Box, Flex } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import PageHeader from "@app/components/PageHeader";
 import { Atom, AtomType } from "@app/types";
 import { useLiveQuery } from "dexie-react-hooks";

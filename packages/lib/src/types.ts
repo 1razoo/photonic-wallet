@@ -9,8 +9,18 @@ export type Wallet = {
   address: string;
 };
 
+export type DeployMethod = "direct" | "psbt" | "dmint";
+
 export type RevealDirectParams = {
   address: string;
+};
+
+export type RevealDmintParams = {
+  address: string;
+  difficulty: number;
+  numContracts: number;
+  maxHeight: number;
+  reward: number;
 };
 
 export type RevealPsbtParams = {
@@ -18,7 +28,10 @@ export type RevealPsbtParams = {
   address: string;
 };
 
-export type TokenRevealParams = RevealDirectParams | RevealPsbtParams;
+export type TokenRevealParams =
+  | RevealDirectParams
+  | RevealDmintParams
+  | RevealPsbtParams;
 
 export type AtomPayload = {
   args: {
