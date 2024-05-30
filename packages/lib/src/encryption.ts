@@ -1,5 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt";
-import { sha256 } from "@noble/hashes/sha256";
+import { keccak_256 } from "@noble/hashes/sha3";
+import { randomBytes, concatBytes } from "@noble/hashes/utils";
 
 const { crypto } = globalThis;
 const { subtle } = crypto;
@@ -22,8 +23,8 @@ export const encrypt = async (
   data: Uint8Array,
   password: string
 ): Promise<EncryptedData> => {
-  const salt = crypto.getRandomValues(new Uint8Array(32));
-  const iv = crypto.getRandomValues(new Uint8Array(16));
+  const salt = randomBytes(32);
+  const iv = randomBytes(16);
 
   const derivedKey = await scrypt(
     new TextEncoder().encode(password),
@@ -33,7 +34,7 @@ export const encrypt = async (
   const importedKey = await subtle.importKey(
     "raw",
     derivedKey.slice(0, 16),
-    { name: "AES-CTR", length: 128 },
+    { name: "AES-CTR" },
     false,
     ["encrypt"]
   );
@@ -41,17 +42,18 @@ export const encrypt = async (
     {
       name: "AES-CTR",
       counter: iv,
-      length: 128,
+      length: 64,
     },
     importedKey,
     data
   );
 
-  const concat = new Uint8Array(16 + ciphertext.byteLength);
-  concat.set(derivedKey.slice(16, 32), 0);
-  concat.set(new Uint8Array(ciphertext), 16);
+  const concat = concatBytes(
+    derivedKey.slice(16, 32),
+    new Uint8Array(ciphertext)
+  );
 
-  const mac = sha256(concat);
+  const mac = keccak_256(concat);
   return {
     ciphertext,
     salt,
@@ -67,11 +69,11 @@ export const decrypt = async (data: EncryptedData, password: string) => {
     scryptParams
   );
 
-  const concat = new Uint8Array(16 + data.ciphertext.byteLength);
-  concat.set(derivedKey.slice(16, 32), 0);
-  concat.set(new Uint8Array(data.ciphertext), 16);
-
-  const mac = sha256(concat);
+  const concat = concatBytes(
+    derivedKey.slice(16, 32),
+    new Uint8Array(data.ciphertext)
+  );
+  const mac = keccak_256(concat);
 
   if (Buffer.compare(Buffer.from(data.mac), Buffer.from(mac)) !== 0) {
     throw new Error("Password incorrect");
@@ -80,7 +82,7 @@ export const decrypt = async (data: EncryptedData, password: string) => {
   const importedKey = await subtle.importKey(
     "raw",
     derivedKey.slice(0, 16),
-    { name: "AES-CTR", length: 128 },
+    { name: "AES-CTR" },
     false,
     ["decrypt"]
   );
