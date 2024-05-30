@@ -15,7 +15,7 @@ import {
   Input,
   Select,
 } from "@chakra-ui/react";
-import Wallet from "@app/wallet/wallet";
+import { createKeys } from "@app/keys";
 import RecoveryPhrase from "@app/components/RecoveryPhrase";
 import Card from "@app/components/Card";
 import { NetworkKey } from "@lib/types";
@@ -23,7 +23,7 @@ import LicenseModal from "@app/components/LicenseModal";
 import { useLiveQuery } from "dexie-react-hooks";
 import db from "@app/db";
 import { PromiseExtended } from "dexie";
-import { wallet } from "@app/signals";
+import { wallet as walletSignal } from "@app/signals";
 import config from "@app/config.json";
 
 const networkKeys = Object.entries(config.networks)
@@ -80,7 +80,7 @@ export default function CreateWallet() {
     setTimeout(async () => {
       setError("");
       try {
-        const created = await Wallet.create(
+        const created = await createKeys(
           network.current?.value as NetworkKey,
           passwordValue
         );
@@ -90,8 +90,8 @@ export default function CreateWallet() {
         setPhrase(created.mnemonic);
         setStep(1);
         const { address, wif, net } = created;
-        wallet.value = {
-          ...wallet.value,
+        walletSignal.value = {
+          ...walletSignal.value,
           locked: false,
           exists: true,
           net,

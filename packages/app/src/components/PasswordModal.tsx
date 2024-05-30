@@ -17,7 +17,7 @@ import {
   ModalProps,
 } from "@chakra-ui/react";
 import { t } from "@lingui/macro";
-import Wallet from "@app/wallet/wallet";
+import { decryptKeys } from "@app/keys";
 import { wallet } from "@app/signals";
 
 interface Props {
@@ -51,7 +51,7 @@ export default function PasswordModal({
     requestAnimationFrame(async () => {
       const pwd: string = password.current?.value || "";
       try {
-        const { mnemonic, wif } = await Wallet.open(wallet.value.net, pwd);
+        const { mnemonic, wif } = await decryptKeys(wallet.value.net, pwd);
 
         onSuccess && onSuccess(mnemonic, wif);
       } catch (error) {

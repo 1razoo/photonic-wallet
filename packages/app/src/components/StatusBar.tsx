@@ -10,6 +10,7 @@ import { electrumStatus, wallet, openModal } from "@app/signals";
 import { ElectrumStatus } from "@app/types";
 import MenuButton from "./MenuButton";
 import { electrumWorker } from "@app/electrum/Electrum";
+import { lockWallet } from "@app/wallet";
 
 const UnlockButton = () => {
   const toast = useToast();
@@ -19,8 +20,8 @@ const UnlockButton = () => {
     openModal.value = { modal: "unlock" };
   };
 
-  const lockWallet = () => {
-    wallet.value = { ...wallet.value, locked: true, wif: undefined };
+  const onClickLock = () => {
+    lockWallet();
     toast({
       title: t`Wallet locked`,
       status: "success",
@@ -46,7 +47,7 @@ const UnlockButton = () => {
       as="button"
       leftIcon={hover ? <LockIcon boxSize={4} /> : <UnlockIcon boxSize={4} />}
       onClick={() => {
-        lockWallet();
+        onClickLock();
         setHover(false);
       }}
       onMouseOver={() => setHover(true)}

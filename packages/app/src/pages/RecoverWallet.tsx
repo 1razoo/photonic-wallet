@@ -15,11 +15,12 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { t } from "@lingui/macro";
-import Wallet from "@app/wallet/wallet";
+import { recoverKeys } from "@app/keys";
 import Card from "@app/components/Card";
 import { NetworkKey } from "@lib/types";
 import { wallet } from "@app/signals";
 import config from "@app/config.json";
+import { initWallet } from "@app/wallet";
 
 const networkKeys = Object.entries(config.networks)
   .filter(([, v]) => v.enabled)
@@ -55,24 +56,16 @@ export default function RecoverWallet() {
     setTimeout(async () => {
       setError("");
       try {
-        const recover = await Wallet.recover(
+        const result = await recoverKeys(
           network.current?.value as NetworkKey,
           phrase.current?.value || "",
           passwordValue
         );
-        if (!recover) {
+        if (!result) {
           return;
         }
-        const { address, wif, net } = recover;
-        wallet.value = {
-          ...wallet.value,
-          locked: false,
-          exists: true,
-          net,
-          wif,
-          address,
-        };
-
+        const { address, wif, net } = result;
+        initWallet({ net, wif, address });
         navigate("/objects");
       } catch (error) {
         console.log(error);

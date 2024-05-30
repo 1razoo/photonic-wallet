@@ -4,6 +4,7 @@ import { t } from "@lingui/macro";
 import PasswordModal from "./PasswordModal";
 import { openModal, wallet } from "@app/signals";
 import useModalSignal from "@app/hooks/useModalSignal";
+import { unlockWallet } from "@app/wallet";
 
 export default function Unlock() {
   const toast = useToast();
@@ -29,11 +30,7 @@ export default function Unlock() {
     });
 
     if (wif) {
-      wallet.value = {
-        ...wallet.value,
-        locked: false,
-        wif,
-      };
+      unlockWallet(wif);
     }
 
     disclosure.onClose();

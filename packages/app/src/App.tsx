@@ -16,8 +16,11 @@ import { NetworkKey } from "@lib/types";
 import { ViewPanelProvider } from "./layouts/ViewPanelLayout";
 import Electrum from "./electrum/Electrum";
 import WalletNotifier from "./components/WalletNotifier";
+import { loadWalletFromSaved } from "./wallet";
+import useActivityDetector from "./hooks/useActivityDetector";
 
 function Main() {
+  useActivityDetector();
   const { exists } = wallet.value;
 
   return (
@@ -54,13 +57,7 @@ export default function App() {
       const [savedWallet, savedFeeRate] = saved;
       const net = savedWallet?.net || "testnet";
       batch(() => {
-        wallet.value = {
-          ready: true,
-          address: savedWallet?.address || "",
-          exists: !!savedWallet,
-          net,
-          locked: true,
-        };
+        loadWalletFromSaved(savedWallet);
         network.value = config.networks[net as NetworkKey];
         feeRate.value = savedFeeRate;
       });
