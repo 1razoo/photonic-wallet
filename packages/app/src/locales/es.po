@@ -6,6 +6,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: es\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
 
 #: src/hooks/useContractNotifier.ts:11
 #: src/hooks/useContractNotifier.ts:30
@@ -33,6 +39,10 @@ msgstr ""
 msgid "About"
 msgstr ""
 
+#: src/pages/Mint.tsx:977
+msgid "Add attribute"
+msgstr ""
+
 #: src/pages/WalletSettings.tsx:76
 msgid "Address"
 msgstr ""
@@ -51,7 +61,7 @@ msgstr ""
 msgid "API key"
 msgstr ""
 
-#: src/pages/Mint.tsx:713
+#: src/pages/Mint.tsx:714
 msgid "Assigning an author is recommended for authentication of tokens."
 msgstr ""
 
@@ -59,12 +69,12 @@ msgstr ""
 msgid "Atomical ID"
 msgstr ""
 
-#: src/pages/Mint.tsx:958
+#: src/pages/Mint.tsx:959
 msgid "Attributes"
 msgstr ""
 
 #: src/components/TokenDetails.tsx:104
-#: src/pages/Mint.tsx:703
+#: src/pages/Mint.tsx:704
 msgid "Author"
 msgstr ""
 
@@ -81,7 +91,7 @@ msgstr ""
 msgid "Block"
 msgstr ""
 
-#: src/pages/Mint.tsx:1186
+#: src/pages/Mint.tsx:1200
 msgid "Calculate Fee"
 msgstr ""
 
@@ -93,19 +103,19 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/components/StatusBar.tsx:121
+#: src/components/StatusBar.tsx:122
 msgid "Click to connect"
 msgstr ""
 
-#: src/components/StatusBar.tsx:95
+#: src/components/StatusBar.tsx:96
 msgid "Click to disconnect"
 msgstr ""
 
-#: src/components/StatusBar.tsx:55
+#: src/components/StatusBar.tsx:56
 msgid "Click to lock"
 msgstr ""
 
-#: src/components/StatusBar.tsx:39
+#: src/components/StatusBar.tsx:40
 msgid "Click to unlock"
 msgstr ""
 
@@ -123,27 +133,27 @@ msgid "Confirm"
 msgstr ""
 
 #: src/pages/CreateWallet.tsx:149
-#: src/pages/RecoverWallet.tsx:128
+#: src/pages/RecoverWallet.tsx:121
 msgid "Confirm password"
 msgstr ""
 
-#: src/components/StatusBar.tsx:66
+#: src/components/StatusBar.tsx:67
 #: src/electrum/Electrum.tsx:50
 msgid "Connected"
 msgstr ""
 
-#: src/components/StatusBar.tsx:67
+#: src/components/StatusBar.tsx:68
 msgid "Connecting"
 msgstr ""
 
 #: src/components/MintMenu.tsx:50
 #: src/components/TokenDetails.tsx:127
-#: src/pages/Mint.tsx:718
+#: src/pages/Mint.tsx:719
 #: src/pages/Wallet.tsx:81
 msgid "Container"
 msgstr ""
 
-#: src/pages/Mint.tsx:728
+#: src/pages/Mint.tsx:729
 msgid "Containers can be used to create token collections"
 msgstr ""
 
@@ -175,15 +185,15 @@ msgstr ""
 msgid "Could not send transaction"
 msgstr ""
 
-#: src/pages/Mint.tsx:398
+#: src/pages/Mint.tsx:399
 msgid "Couldn't find container"
 msgstr ""
 
-#: src/pages/Mint.tsx:378
+#: src/pages/Mint.tsx:379
 msgid "Couldn't find user"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:154
+#: src/pages/RecoverWallet.tsx:147
 msgid "Create a new wallet"
 msgstr ""
 
@@ -203,7 +213,7 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: src/pages/Mint.tsx:1022
+#: src/pages/Mint.tsx:1036
 msgid "Decentralized mint"
 msgstr ""
 
@@ -219,13 +229,13 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: src/pages/Mint.tsx:1019
+#: src/pages/Mint.tsx:1033
 msgid "Deployment method"
 msgstr ""
 
 #: src/components/TokenDetails.tsx:58
-#: src/pages/Mint.tsx:942
-#: src/pages/Mint.tsx:944
+#: src/pages/Mint.tsx:943
+#: src/pages/Mint.tsx:945
 msgid "Description"
 msgstr ""
 
@@ -233,7 +243,7 @@ msgstr ""
 msgid "Details"
 msgstr ""
 
-#: src/pages/Mint.tsx:1029
+#: src/pages/Mint.tsx:1043
 msgid "Difficulty"
 msgstr ""
 
@@ -251,12 +261,12 @@ msgstr ""
 msgid "Digital Objects"
 msgstr ""
 
-#: src/pages/Mint.tsx:1021
+#: src/pages/Mint.tsx:1035
 msgid "Direct to wallet"
 msgstr ""
 
-#: src/components/StatusBar.tsx:68
 #: src/components/StatusBar.tsx:69
+#: src/components/StatusBar.tsx:70
 #: src/electrum/Electrum.tsx:55
 msgid "Disconnected"
 msgstr ""
@@ -274,7 +284,7 @@ msgstr ""
 msgid "Download transaction"
 msgstr ""
 
-#: src/pages/Mint.tsx:114
+#: src/pages/Mint.tsx:115
 msgid "Drop file"
 msgstr ""
 
@@ -291,15 +301,15 @@ msgstr ""
 msgid "Enter password"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:114
+#: src/pages/RecoverWallet.tsx:107
 msgid "Enter your 12 word recovery phrase"
 msgstr ""
 
-#: src/pages/Mint.tsx:534
+#: src/pages/Mint.tsx:535
 msgid "Error"
 msgstr ""
 
-#: src/pages/Mint.tsx:1127
+#: src/pages/Mint.tsx:1141
 msgid "Fee"
 msgstr ""
 
@@ -311,12 +321,12 @@ msgstr ""
 msgid "Fetch"
 msgstr ""
 
-#: src/pages/Mint.tsx:739
-#: src/pages/Mint.tsx:751
+#: src/pages/Mint.tsx:740
+#: src/pages/Mint.tsx:752
 msgid "File"
 msgstr ""
 
-#: src/pages/Mint.tsx:549
+#: src/pages/Mint.tsx:550
 msgid "File is too large"
 msgstr ""
 
@@ -330,7 +340,7 @@ msgstr ""
 msgid "Filter"
 msgstr ""
 
-#: src/pages/Mint.tsx:1134
+#: src/pages/Mint.tsx:1148
 msgid "FT supply funding"
 msgstr ""
 
@@ -363,7 +373,7 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: src/pages/Mint.tsx:987
+#: src/pages/Mint.tsx:1001
 msgid "Immutable"
 msgstr ""
 
@@ -400,7 +410,7 @@ msgstr ""
 msgid "Invalid amount"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:81
+#: src/pages/RecoverWallet.tsx:74
 msgid "Invalid recovery phrase"
 msgstr ""
 
@@ -425,8 +435,8 @@ msgid "Language"
 msgstr ""
 
 #: src/pages/About.tsx:12
-#: src/pages/Mint.tsx:950
-#: src/pages/Mint.tsx:952
+#: src/pages/Mint.tsx:951
+#: src/pages/Mint.tsx:953
 msgid "License"
 msgstr ""
 
@@ -434,7 +444,7 @@ msgstr ""
 msgid "Location"
 msgstr ""
 
-#: src/components/StatusBar.tsx:39
+#: src/components/StatusBar.tsx:40
 msgid "Locked"
 msgstr ""
 
@@ -448,7 +458,7 @@ msgstr ""
 msgid "Logging out will remove your wallet and all saved data from your browser."
 msgstr ""
 
-#: src/pages/Mint.tsx:130
+#: src/pages/Mint.tsx:131
 msgid "Maximum 100kb"
 msgstr ""
 
@@ -473,11 +483,11 @@ msgstr ""
 
 #: src/components/MintMenu.tsx:28
 #: src/components/TokenDetails.tsx:86
-#: src/pages/Mint.tsx:1171
+#: src/pages/Mint.tsx:1185
 msgid "Mint"
 msgstr ""
 
-#: src/pages/Mint.tsx:664
+#: src/pages/Mint.tsx:665
 msgid "Mint <0/>"
 msgstr ""
 
@@ -489,7 +499,7 @@ msgstr ""
 msgid "Mint successful"
 msgstr ""
 
-#: src/pages/Mint.tsx:527
+#: src/pages/Mint.tsx:528
 msgid "Minted. Fee {0} {1}"
 msgstr ""
 
@@ -501,26 +511,26 @@ msgstr ""
 msgid "Move up"
 msgstr ""
 
-#: src/pages/Mint.tsx:1057
+#: src/pages/Mint.tsx:1071
 msgid "Multiple contracts allows parallel mining, reducing congestion for low difficulty contracts"
 msgstr ""
 
-#: src/pages/Mint.tsx:1012
+#: src/pages/Mint.tsx:1026
 msgid "Mutable tokens are not yet fully supported by Photonic Wallet, however a mutable contract containing 1 photon will be created."
 msgstr ""
 
-#: src/pages/Mint.tsx:1003
+#: src/pages/Mint.tsx:1017
 msgid "Mutable tokens are recommended for user and container tokens"
 msgstr ""
 
-#: src/pages/Mint.tsx:933
-#: src/pages/Mint.tsx:935
-#: src/pages/Mint.tsx:961
+#: src/pages/Mint.tsx:934
+#: src/pages/Mint.tsx:936
+#: src/pages/Mint.tsx:963
 msgid "Name"
 msgstr ""
 
 #: src/pages/CreateWallet.tsx:157
-#: src/pages/RecoverWallet.tsx:132
+#: src/pages/RecoverWallet.tsx:125
 msgid "Network"
 msgstr ""
 
@@ -528,7 +538,7 @@ msgstr ""
 msgid "New"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:124
+#: src/pages/RecoverWallet.tsx:117
 msgid "New password"
 msgstr ""
 
@@ -545,27 +555,27 @@ msgstr ""
 msgid "No assets"
 msgstr ""
 
-#: src/components/StatusBar.tsx:75
+#: src/components/StatusBar.tsx:76
 msgid "No servers defined"
 msgstr ""
 
-#: src/pages/Mint.tsx:997
+#: src/pages/Mint.tsx:1011
 msgid "No, allow token owner to modify"
 msgstr ""
 
-#: src/pages/Mint.tsx:705
+#: src/pages/Mint.tsx:706
 msgid "None"
 msgstr ""
 
-#: src/pages/Mint.tsx:1046
+#: src/pages/Mint.tsx:1060
 msgid "Number of contracts"
 msgstr ""
 
-#: src/pages/Mint.tsx:1061
+#: src/pages/Mint.tsx:1075
 msgid "Number of mints"
 msgstr ""
 
-#: src/pages/Mint.tsx:1085
+#: src/pages/Mint.tsx:1099
 msgid "Number of tokens created on each mint"
 msgstr ""
 
@@ -596,11 +606,11 @@ msgid "Password"
 msgstr ""
 
 #: src/pages/CreateWallet.tsx:68
-#: src/pages/RecoverWallet.tsx:43
+#: src/pages/RecoverWallet.tsx:44
 msgid "Passwords do not match"
 msgstr ""
 
-#: src/pages/Mint.tsx:1092
+#: src/pages/Mint.tsx:1106
 msgid "Photon Supply"
 msgstr ""
 
@@ -608,11 +618,11 @@ msgstr ""
 msgid "Please close the window"
 msgstr ""
 
-#: src/pages/Mint.tsx:1156
+#: src/pages/Mint.tsx:1170
 msgid "Please reconnect to mint your token"
 msgstr ""
 
-#: src/pages/Mint.tsx:969
+#: src/pages/Mint.tsx:983
 msgid "Properties that describe your asset"
 msgstr ""
 
@@ -626,20 +636,20 @@ msgstr ""
 msgid "Recover my wallet"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:104
+#: src/pages/RecoverWallet.tsx:97
 msgid "Recover your wallet"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:145
+#: src/pages/RecoverWallet.tsx:138
 msgid "Recovering"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:117
+#: src/pages/RecoverWallet.tsx:110
 #: src/pages/WalletSettings.tsx:84
 msgid "Recovery phrase"
 msgstr ""
 
-#: src/pages/Mint.tsx:1075
+#: src/pages/Mint.tsx:1089
 msgid "Reward"
 msgstr ""
 
@@ -654,7 +664,7 @@ msgid "Saved"
 msgstr ""
 
 #: src/pages/CreateWallet.tsx:73
-#: src/pages/RecoverWallet.tsx:48
+#: src/pages/RecoverWallet.tsx:49
 msgid "Select a valid network"
 msgstr ""
 
@@ -694,7 +704,7 @@ msgstr ""
 msgid "Servers"
 msgstr ""
 
-#: src/components/StatusBar.tsx:136
+#: src/components/StatusBar.tsx:137
 #: src/layouts/SettingsLayout.tsx:25
 msgid "Settings"
 msgstr ""
@@ -703,11 +713,11 @@ msgstr ""
 msgid "Show recovery phrase"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:147
+#: src/pages/RecoverWallet.tsx:140
 msgid "Submit"
 msgstr ""
 
-#: src/pages/Mint.tsx:1118
+#: src/pages/Mint.tsx:1132
 msgid "Summary"
 msgstr ""
 
@@ -715,7 +725,7 @@ msgstr ""
 msgid "Suppressed {0} more notifications"
 msgstr ""
 
-#: src/pages/Mint.tsx:741
+#: src/pages/Mint.tsx:742
 msgid "Text"
 msgstr ""
 
@@ -731,7 +741,7 @@ msgstr ""
 msgid "This will destroy your tokens! Are you sure?"
 msgstr ""
 
-#: src/pages/Mint.tsx:922
+#: src/pages/Mint.tsx:923
 msgid "Ticker"
 msgstr ""
 
@@ -739,11 +749,11 @@ msgstr ""
 msgid "Token melted"
 msgstr ""
 
-#: src/pages/Mint.tsx:333
+#: src/pages/Mint.tsx:334
 msgid "Token supply is too high"
 msgstr ""
 
-#: src/pages/Mint.tsx:1102
+#: src/pages/Mint.tsx:1116
 msgid "Token supply requires an equal amount of RXD photons. This must be provided on mint for \"direct to wallet\" deployments."
 msgstr ""
 
@@ -751,11 +761,11 @@ msgstr ""
 msgid "Tokens melted"
 msgstr ""
 
-#: src/pages/Mint.tsx:1110
+#: src/pages/Mint.tsx:1124
 msgid "Total minted supply will be {totalDmintSupply} {0}"
 msgstr ""
 
-#: src/pages/Mint.tsx:1071
+#: src/pages/Mint.tsx:1085
 msgid "Total number of mints per contract"
 msgstr ""
 
@@ -770,7 +780,7 @@ msgstr ""
 msgid "Transaction rejected"
 msgstr ""
 
-#: src/pages/Mint.tsx:1125
+#: src/pages/Mint.tsx:1139
 msgid "Transaction size"
 msgstr ""
 
@@ -786,7 +796,7 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-#: src/pages/Mint.tsx:912
+#: src/pages/Mint.tsx:913
 msgid "Type of content the URL links. Leave empty for a website link."
 msgstr ""
 
@@ -798,7 +808,7 @@ msgstr ""
 msgid "Universal Names"
 msgstr ""
 
-#: src/pages/RecoverWallet.tsx:86
+#: src/pages/RecoverWallet.tsx:79
 msgid "Unknown error"
 msgstr ""
 
@@ -806,11 +816,11 @@ msgstr ""
 msgid "Unlock"
 msgstr ""
 
-#: src/components/Unlock.tsx:54
+#: src/components/Unlock.tsx:51
 msgid "Unlock to enable spending"
 msgstr ""
 
-#: src/components/StatusBar.tsx:55
+#: src/components/StatusBar.tsx:56
 msgid "Unlocked"
 msgstr ""
 
@@ -819,23 +829,23 @@ msgstr ""
 msgid "Unnamed token"
 msgstr ""
 
-#: src/pages/Mint.tsx:555
+#: src/pages/Mint.tsx:556
 msgid "Unrecognized file type"
 msgstr ""
 
-#: src/pages/Mint.tsx:324
+#: src/pages/Mint.tsx:325
 msgid "Unrecognized URL file type"
 msgstr ""
 
-#: src/pages/Mint.tsx:753
+#: src/pages/Mint.tsx:754
 msgid "Upload an image, text file or other content"
 msgstr ""
 
-#: src/pages/Mint.tsx:127
+#: src/pages/Mint.tsx:128
 msgid "Upload file"
 msgstr ""
 
-#: src/pages/Mint.tsx:740
+#: src/pages/Mint.tsx:741
 msgid "URL"
 msgstr ""
 
@@ -850,7 +860,7 @@ msgid "User"
 msgstr ""
 
 #: src/pages/Coins.tsx:52
-#: src/pages/Mint.tsx:964
+#: src/pages/Mint.tsx:969
 msgid "Value"
 msgstr ""
 
@@ -872,23 +882,24 @@ msgstr ""
 msgid "Wallet created"
 msgstr ""
 
-#: src/components/StatusBar.tsx:25
+#: src/components/StatusBar.tsx:26
+#: src/hooks/useActivityDetector.ts:20
 msgid "Wallet locked"
 msgstr ""
 
-#: src/components/Unlock.tsx:27
+#: src/components/Unlock.tsx:28
 msgid "Wallet unlocked"
 msgstr ""
 
-#: src/pages/Mint.tsx:736
+#: src/pages/Mint.tsx:737
 msgid "What data do you want to store?"
 msgstr ""
 
-#: src/pages/Mint.tsx:994
+#: src/pages/Mint.tsx:1008
 msgid "Yes"
 msgstr ""
 
-#: src/pages/Mint.tsx:812
+#: src/pages/Mint.tsx:813
 msgid "Your file will be stored on-chain."
 msgstr ""
 
@@ -896,7 +907,7 @@ msgstr ""
 msgid "Your recovery phrase is the only way to restore your wallet after logging out. Keep it in a safe place and never share it."
 msgstr ""
 
-#: src/pages/Mint.tsx:1151
+#: src/pages/Mint.tsx:1165
 msgid "Your token is ready to mint. Please review all data and the transaction fee before proceeding."
 msgstr ""
 

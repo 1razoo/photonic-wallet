@@ -14,6 +14,7 @@ import {
   FormHelperText,
   FormLabel,
   Grid,
+  HStack,
   Icon,
   IconButton,
   Image,
@@ -35,7 +36,7 @@ import { sha256 } from "@noble/hashes/sha256";
 import { hexToBytes } from "@noble/hashes/utils";
 import { filesize } from "filesize";
 import { useLiveQuery } from "dexie-react-hooks";
-import { DeleteIcon } from "@chakra-ui/icons";
+import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import { DropzoneState, useDropzone } from "react-dropzone";
 import { MdCheck, MdImage } from "react-icons/md";
 import GlowBox from "@app/components/GlowBox";
@@ -957,14 +958,27 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
               <FormControl>
                 <FormLabel>{t`Attributes`}</FormLabel>
                 <Box>
-                  <Flex gap={4}>
-                    <Input placeholder={t`Name`} ref={attrName} />
+                  <HStack>
                     <Input
-                      onBlur={addAttr}
+                      placeholder={t`Name`}
+                      ref={attrName}
+                      width="auto"
+                      flexGrow={1}
+                    />
+                    <Input
                       placeholder={t`Value`}
                       ref={attrValue}
+                      width="auto"
+                      flexGrow={1}
                     />
-                  </Flex>
+                    <Button
+                      leftIcon={<AddIcon />}
+                      onClick={addAttr}
+                      aria-label={t`Add attribute`}
+                    >
+                      Add
+                    </Button>
+                  </HStack>
                   <FormHelperText>
                     {t`Properties that describe your asset`}
                   </FormHelperText>
