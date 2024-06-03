@@ -2,7 +2,7 @@ import React, { useCallback, useReducer, useRef, useState } from "react";
 import mime from "mime";
 import { t, Trans } from "@lingui/macro";
 import { Link } from "react-router-dom";
-import { RST_DMINT, RST_FT, RST_NFT } from "@lib/protocols";
+import { RST_DMINT, RST_FT, RST_MUT, RST_NFT } from "@lib/protocols";
 import {
   Alert,
   AlertIcon,
@@ -359,14 +359,6 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       url,
       urlFileType
     );
-    // Default for immutable is true so only add args.i if creating a mutable token
-    const args: { [key: string]: unknown } = {};
-    if (immutable === "0") {
-      args.i = false;
-    }
-    if (tokenType === "fungible") {
-      args.ticker = ticker;
-    }
 
     if (content && enableHashstamp && hashStamp) {
       (content as SmartTokenRemoteFile).hs = new Uint8Array(hashStamp);
@@ -451,6 +443,15 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     const protocols = [tokenType === "fungible" ? RST_FT : RST_NFT];
     if (deployMethod === "dmint") {
       protocols.push(RST_DMINT);
+    }
+
+    if (immutable === "0") {
+      protocols.push(RST_MUT);
+    }
+
+    const args: { [key: string]: unknown } = {};
+    if (tokenType === "fungible") {
+      args.ticker = ticker;
     }
 
     const payload: SmartTokenPayload = {

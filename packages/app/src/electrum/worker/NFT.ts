@@ -380,6 +380,7 @@ export class NFTWorker implements Subscription {
       typeof payload.ticker === "string" ? payload.ticker : undefined;
     const name = toString(payload.name);
     const record: SmartToken = {
+      p: protocols,
       ref,
       tokenType,
       ticker,

@@ -57,9 +57,12 @@ export default function EditTokenTest({
     }
 
     const payload: Partial<SmartTokenPayload> = {
-      "main.txt": new TextEncoder().encode("mutable token is working"),
+      main: {
+        t: "text/plain",
+        b: new TextEncoder().encode("mutable token is working"),
+      },
     };
-    const rst = encodeRstMutable(payload, 1, 1, 0, 0);
+    const rst = encodeRstMutable("mod", payload, 1, 1, 0, 0);
     const mutOutputScript = mutableNftScript(mutRefLE, rst.payloadHash);
     const nftOutputScript = nftAuthScript(wallet.value.address, nftRefLE, [
       { ref: mutRefLE, scriptSigHash: rst.scriptSigHash },

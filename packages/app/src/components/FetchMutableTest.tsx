@@ -35,7 +35,7 @@ async function fetchTokenData(ref: Outpoint, immutable: boolean) {
   const input = refTx.inputs[vout];
 
   const decoded = decodeRst(input.script);
-  console.log(decoded);
+  console.log(new TextDecoder().decode(decoded?.embeddedFiles.main.b));
 }
 
 export default function FetchTokenTest({ token }: { token: SmartToken }) {

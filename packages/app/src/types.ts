@@ -61,6 +61,7 @@ export interface BlockHeader {
 // Tokens that follow Radiant Smart Token standard
 export interface SmartToken {
   id?: number;
+  p?: (number | string)[];
   tokenType: SmartTokenType;
   ref: string;
   ticker?: string;

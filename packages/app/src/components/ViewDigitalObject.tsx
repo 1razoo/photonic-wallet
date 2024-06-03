@@ -43,6 +43,8 @@ import ActionIcon from "./ActionIcon";
 import { MdDeleteForever } from "react-icons/md";
 import { TbArrowUpRight } from "react-icons/tb";
 import mime from "mime";
+// import FetchTokenTest from "./FetchMutableTest";
+// import EditTokenTest from "./EditTokenTest";
 
 export const PropertyCard = ({
   heading,
@@ -244,8 +246,7 @@ export default function ViewDigitalObject({
                   <EditTokenTest token={nft} txo={txo} />
                   <FetchTokenTest token={nft} />
                 </>
-              )}
-              */}
+              )} */}
               <Button
                 leftIcon={<ActionIcon as={TbArrowUpRight} />}
                 onClick={() => unlock(openSend)}

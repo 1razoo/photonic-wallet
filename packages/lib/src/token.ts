@@ -13,6 +13,7 @@ import {
 } from "./types";
 import { bytesToHex } from "@noble/hashes/utils";
 import { pushMinimalAsm } from "./script";
+import { RST_MUT } from "./protocols";
 
 // ESM compatibility
 const { Script } = rjs;
@@ -144,18 +145,20 @@ export function encodeRst(
 }
 
 export function encodeRstMutable(
+  operation: "mod" | "sl",
   payload: unknown,
   contractOutputIndex: number,
   refHashIndex: number,
   refIndex: number,
   tokenOutputIndex: number
 ) {
+  const opHex = Buffer.from(operation).toString("hex");
   const encodedPayload = encode(payload);
-  const asm = `${rstHex} ${encodedPayload.toString("hex")} ${pushMinimalAsm(
-    contractOutputIndex
-  )} ${pushMinimalAsm(refHashIndex)} ${pushMinimalAsm(
-    refIndex
-  )} ${pushMinimalAsm(tokenOutputIndex)}`;
+  const asm = `${rstHex} ${encodedPayload.toString(
+    "hex"
+  )} ${opHex} ${pushMinimalAsm(contractOutputIndex)} ${pushMinimalAsm(
+    refHashIndex
+  )} ${pushMinimalAsm(refIndex)} ${pushMinimalAsm(tokenOutputIndex)}`;
   const scriptSig = Script.fromASM(asm);
   const scriptSigHash = bytesToHex(sha256(scriptSig.toBuffer()));
   const payloadHash = bytesToHex(sha256(sha256(Buffer.from(encodedPayload))));
@@ -168,8 +171,7 @@ export function encodeRstMutable(
 }
 
 export function isImmutableToken(payload: SmartTokenPayload) {
-  // Default to immutable if arg.i isn't given
-  return payload.i !== undefined ? payload.i === true : true;
+  return !payload.p.includes(RST_MUT);
 }
 
 // Filter for attr objects

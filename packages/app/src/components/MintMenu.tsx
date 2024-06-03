@@ -10,9 +10,9 @@ import {
 import { t } from "@lingui/macro";
 import {
   TbTriangleSquareCircle,
-  TbCircles,
   TbBox,
   TbUserCircle,
+  TbStack2,
 } from "react-icons/tb";
 import { NavLink } from "react-router-dom";
 
@@ -38,7 +38,7 @@ export default function MintMenu() {
         <MenuItem
           as={NavLink}
           to="/mint/fungible"
-          icon={<Icon as={TbCircles} fontSize="2xl" />}
+          icon={<Icon as={TbStack2} fontSize="2xl" />}
         >
           {t`Fungible Token`}
         </MenuItem>
