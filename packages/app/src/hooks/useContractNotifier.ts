@@ -15,19 +15,19 @@ async function nftNotification(utxo: TxO) {
   const { ref: refLE } = parseNftScript(utxo.script);
   if (!refLE) return;
   const ref = reverseRef(refLE);
-  const atom = await db.atom.get({ ref });
-  if (!atom) return "";
-  return t`Digital object ${atom?.name && `"${atom.name}"`} received`;
+  const rst = await db.rst.get({ ref });
+  if (!rst) return "";
+  return t`Digital object ${rst?.name && `"${rst.name}"`} received`;
 }
 
 async function ftNotification(utxo: TxO) {
   const { ref: refLE } = parseFtScript(utxo.script);
   if (!refLE) return;
   const ref = reverseRef(refLE);
-  const atom = await db.atom.get({ ref });
-  if (!atom) return "";
-  const { ticker } = atom?.args || {};
-  return t`${utxo.value} ${ticker || atom?.name || "???"}  received`;
+  const rst = await db.rst.get({ ref });
+  if (!rst) return "";
+  const { ticker } = rst?.args || {};
+  return t`${utxo.value} ${ticker || rst?.name || "???"}  received`;
 }
 
 export default function useContractNotifier() {

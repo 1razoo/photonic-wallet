@@ -36,7 +36,12 @@ import {
 import { Outpoint, photonsToRXD } from "@photonic/lib";
 import { p2pkhScriptHash, parseNftScript } from "@photonic/lib/script";
 import { confirm, password } from "@inquirer/prompts";
-import { AtomPayload, ElectrumUtxo, Utxo, Wallet } from "@photonic/lib/types";
+import {
+  SmartTokenPayload,
+  ElectrumUtxo,
+  Utxo,
+  Wallet,
+} from "@photonic/lib/types";
 import { loadConfig } from "../config";
 import ora, { Ora } from "ora";
 
@@ -211,7 +216,7 @@ export default async function bundleCommit(
         args,
         ...meta,
         ...files,
-      } as AtomPayload,
+      } as SmartTokenPayload,
     };
   });
 

@@ -289,7 +289,7 @@ const router = createHashRouter([
             element: <Wallet />,
           },
           {
-            path: "/objects/atom/:sref",
+            path: "/objects/token/:sref",
             element: <Wallet />,
           },
           {
@@ -297,7 +297,7 @@ const router = createHashRouter([
             element: <Fungible />,
           },
           {
-            path: "/fungible/atom/:sref",
+            path: "/fungible/token/:sref",
             element: <Fungible />,
           },
           {

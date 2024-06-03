@@ -1,6 +1,6 @@
 import { Box, Flex, Icon, Text } from "@chakra-ui/react";
 import Outpoint from "@lib/Outpoint";
-import { Atom } from "@app/types";
+import { SmartToken } from "@app/types";
 import { Link } from "react-router-dom";
 import Identifier from "@app/components/Identifier";
 import Photons from "@app/components/Photons";
@@ -9,21 +9,21 @@ import { TbBox, TbUserCircle } from "react-icons/tb";
 import { IconType } from "react-icons/lib";
 
 export default function TokenCard({
-  atom,
+  rst,
   value,
   to,
   size = "md",
   defaultIcon,
 }: {
-  atom?: Atom;
+  rst?: SmartToken;
   value: number;
   to: string;
   size?: "sm" | "md";
   defaultIcon?: IconType;
 }) {
-  const ref = Outpoint.fromString(atom?.ref || "");
+  const ref = Outpoint.fromString(rst?.ref || "");
 
-  const shortAtom = ref.shortInput();
+  const short = ref.shortInput();
   return (
     <Box borderRadius="md" overflow="hidden" as={Link} to={to}>
       <Box
@@ -34,7 +34,7 @@ export default function TokenCard({
         justifyContent="center"
         p={2}
       >
-        <TokenContent atom={atom} defaultIcon={defaultIcon} thumbnail />
+        <TokenContent rst={rst} defaultIcon={defaultIcon} thumbnail />
       </Box>
       <Flex
         p={2}
@@ -46,9 +46,9 @@ export default function TokenCard({
         lineHeight={8}
       >
         <Flex alignItems="center">
-          {atom?.type === "user" && <Icon as={TbUserCircle} fontSize="2xl" />}
-          {atom?.type === "container" && <Icon as={TbBox} fontSize="2xl" />}
-          {atom?.name ? (
+          {rst?.type === "user" && <Icon as={TbUserCircle} fontSize="2xl" />}
+          {rst?.type === "container" && <Icon as={TbBox} fontSize="2xl" />}
+          {rst?.name ? (
             <Text
               fontWeight="500"
               color="lightBlue.A400"
@@ -57,10 +57,10 @@ export default function TokenCard({
               textOverflow="ellipsis"
               ml={1}
             >
-              {atom?.name}
+              {rst?.name}
             </Text>
           ) : (
-            <Identifier>{shortAtom}</Identifier>
+            <Identifier>{short}</Identifier>
           )}
         </Flex>
         <Text whiteSpace="nowrap" fontFamily="mono">

@@ -1,4 +1,4 @@
-import { Atom, ContractType, ElectrumCallback, TxO } from "@app/types";
+import { SmartToken, ContractType, ElectrumCallback, TxO } from "@app/types";
 import { NFTWorker } from "./NFT";
 import { buildUpdateTXOs } from "./updateTxos";
 import ElectrumManager from "@app/electrum/ElectrumManager";
@@ -33,7 +33,7 @@ export class FTWorker extends NFTWorker {
 
         // TODO there is some duplication in NFT and FT classes
 
-        const existingRefs: { [key: string]: Atom } = {};
+        const existingRefs: { [key: string]: SmartToken } = {};
         const newRefs: { [key: string]: TxO } = {};
         const scriptRefMap: { [key: string]: string } = {};
         for (const txo of added) {
@@ -41,9 +41,9 @@ export class FTWorker extends NFTWorker {
           if (!refLE) continue;
           const ref = reverseRef(refLE);
           scriptRefMap[txo.script] = ref;
-          const atom = ref && (await db.atom.get({ ref }));
-          if (atom) {
-            existingRefs[ref] = atom;
+          const rst = ref && (await db.rst.get({ ref }));
+          if (rst) {
+            existingRefs[ref] = rst;
           } else {
             newRefs[ref] = txo;
           }
@@ -55,19 +55,19 @@ export class FTWorker extends NFTWorker {
         );
         this.addRelated(related);
 
-        // All atoms should now be in the database. Insert txos.
-        await db.transaction("rw", db.txo, db.atom, async () => {
+        // All RSTs should now be in the database. Insert txos.
+        await db.transaction("rw", db.txo, db.rst, async () => {
           const ids = (await db.txo.bulkPut(added, undefined, {
             allKeys: true,
           })) as number[];
           await Promise.all(
             added.map(async (txo, index) => {
               const ref = scriptRefMap[txo.script];
-              const atom = existingRefs[ref] || accepted[ref];
-              if (atom) {
-                atom.lastTxoId = ids[index];
-                atom.spent = 0;
-                await db.atom.put(atom);
+              const rst = existingRefs[ref] || accepted[ref];
+              if (rst) {
+                rst.lastTxoId = ids[index];
+                rst.spent = 0;
+                await db.rst.put(rst);
               }
             })
           );

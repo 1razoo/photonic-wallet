@@ -67,19 +67,6 @@ export default class Outpoint {
     return this.short("o");
   }
 
-  atom() {
-    return `${base32crockford
-      .encode(this.txid)
-      .toLowerCase()}i${this.vout.readUInt32BE()}`;
-  }
-
-  shortAtom() {
-    return `${base32crockford
-      .encode(this.txid)
-      .substring(0, 8)
-      .toLowerCase()}i${this.vout.readUInt32BE()}`;
-  }
-
   refHash() {
     return Buffer.from(sha256(Buffer.from(this.ref(), "hex"))).toString("hex");
   }

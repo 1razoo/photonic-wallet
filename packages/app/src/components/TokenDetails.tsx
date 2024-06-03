@@ -17,33 +17,33 @@ import {
 import { t } from "@lingui/macro";
 import { filesize } from "filesize";
 import mime from "mime";
-import AtomData from "./AtomData";
+import TokenData from "./TokenData";
 import Identicon from "./Identicon";
 import Identifier from "./Identifier";
 import { PropertyCard } from "./ViewDigitalObject";
-import { Atom } from "@app/types";
+import { SmartToken } from "@app/types";
 import Outpoint from "@lib/Outpoint";
 import createExplorerUrl from "@app/network/createExplorerUrl";
 import { Link } from "react-router-dom";
 import { PropsWithChildren } from "react";
 
 export default function TokenDetails({
-  atom,
+  rst,
   author,
   container,
   children,
 }: PropsWithChildren<{
-  atom: Atom;
-  author?: Atom;
-  container?: Atom;
+  rst: SmartToken;
+  author?: SmartToken;
+  container?: SmartToken;
 }>) {
-  const ref = Outpoint.fromString(atom.ref);
+  const ref = Outpoint.fromString(rst.ref);
   const revealRef =
-    atom.revealOutpoint && Outpoint.fromString(atom.revealOutpoint);
-  const authorRef = atom.author && Outpoint.fromString(atom.author);
-  const containerRef = atom.container && Outpoint.fromString(atom.container);
-  const hasAttrs = atom.attrs && Object.keys(atom.attrs).length > 0;
-  const isIPFS = atom.fileSrc?.startsWith("ipfs://");
+    rst.revealOutpoint && Outpoint.fromString(rst.revealOutpoint);
+  const authorRef = rst.author && Outpoint.fromString(rst.author);
+  const containerRef = rst.container && Outpoint.fromString(rst.container);
+  const hasAttrs = rst.attrs && Object.keys(rst.attrs).length > 0;
+  const isIPFS = rst.fileSrc?.startsWith("ipfs://");
 
   return (
     <div>
@@ -54,12 +54,12 @@ export default function TokenDetails({
         </TabList>
         <TabPanels>
           <TabPanel px={0}>
-            {atom.description && (
+            {rst.description && (
               <PropertyCard heading={t`Description`} mb={4}>
-                {atom.description}
+                {rst.description}
               </PropertyCard>
             )}
-            <PropertyCard heading={t`Atomical ID`} mb={4}>
+            <PropertyCard heading={t`Radiant Ref`} mb={4}>
               <div>
                 <Identicon
                   value={ref.refHash()}
@@ -151,12 +151,12 @@ export default function TokenDetails({
                 <PropertyCard heading={t`IPFS CID`}>
                   <div>
                     <Identifier showCopy>
-                      {atom.fileSrc?.replace("ipfs://", "")}
+                      {rst.fileSrc?.replace("ipfs://", "")}
                     </Identifier>
                   </div>
                 </PropertyCard>
               )}
-              {atom.hashstamp && (
+              {rst.hashstamp && (
                 <PropertyCard
                   heading={t`HashStamp`}
                   info={
@@ -176,30 +176,30 @@ export default function TokenDetails({
                   <Flex gap={4}>
                     <Image
                       src={`data:image/webp;base64, ${btoa(
-                        String.fromCharCode(...new Uint8Array(atom.hashstamp))
+                        String.fromCharCode(...new Uint8Array(rst.hashstamp))
                       )}`}
                       width="64px"
                       height="64px"
                       objectFit="contain"
                       backgroundColor="white"
                     />
-                    {atom.hash && (
+                    {rst.hash && (
                       <div>
                         <Identifier>
-                          {bytesToHex(new Uint8Array(atom.hash))}
+                          {bytesToHex(new Uint8Array(rst.hash))}
                         </Identifier>
                       </div>
                     )}
                   </Flex>
                 </PropertyCard>
               )}
-              {atom.file && atom.fileSrc && (
+              {rst.file && rst.fileSrc && (
                 <>
                   <PropertyCard heading={t`Content length`}>
-                    {filesize(atom.file.byteLength) as string}
+                    {filesize(rst.file.byteLength) as string}
                   </PropertyCard>
                   <PropertyCard heading={t`Content type`}>
-                    {mime.getType(atom.fileSrc)}
+                    {mime.getType(rst.fileSrc)}
                   </PropertyCard>
                 </>
               )}
@@ -209,7 +209,7 @@ export default function TokenDetails({
               <>
                 <Divider my={4} />
                 <SimpleGrid columns={[1, 2]} spacing={4} gridAutoRows="1fr">
-                  {Object.entries(atom.attrs).map(([k, v]) => (
+                  {Object.entries(rst.attrs).map(([k, v]) => (
                     <PropertyCard heading={k} key={k}>
                       {v}
                     </PropertyCard>
@@ -219,7 +219,7 @@ export default function TokenDetails({
             )}
           </TabPanel>
           <TabPanel px={0}>
-            <AtomData atom={atom} />
+            <TokenData rst={rst} />
           </TabPanel>
         </TabPanels>
       </Tabs>

@@ -11,18 +11,18 @@ import {
   ElectrumCallback,
   ElectrumStatusUpdate,
   TxO,
-  Atom,
-  AtomType,
+  SmartToken,
+  SmartTokenType,
 } from "@app/types";
 import { ElectrumTxMap, buildUpdateTXOs } from "./updateTxos";
 import db from "@app/db";
 import Outpoint, { reverseRef } from "@lib/Outpoint";
 import {
-  decodeAtom,
+  decodeRst,
   filterArgs,
   filterAttrs,
   isImmutableToken,
-} from "@lib/atom";
+} from "@lib/token";
 import {
   Transaction,
   // @ts-ignore
@@ -80,7 +80,7 @@ export class NFTWorker implements Subscription {
           status
         );
 
-        const existingRefs: { [key: string]: Atom } = {};
+        const existingRefs: { [key: string]: SmartToken } = {};
         const newRefs: { [key: string]: TxO } = {};
         const scriptRefMap: { [key: string]: string } = {};
         for (const txo of added) {
@@ -88,9 +88,9 @@ export class NFTWorker implements Subscription {
           if (!refLE) continue;
           const ref = reverseRef(refLE);
           scriptRefMap[txo.script] = ref;
-          const atom = ref && (await db.atom.get({ ref }));
-          if (atom) {
-            existingRefs[ref] = atom;
+          const rst = ref && (await db.rst.get({ ref }));
+          if (rst) {
+            existingRefs[ref] = rst;
           } else {
             newRefs[ref] = txo;
           }
@@ -102,35 +102,35 @@ export class NFTWorker implements Subscription {
         );
         this.addRelated(related);
 
-        // All atoms should now be in the database. Insert txos.
-        db.transaction("rw", db.txo, db.atom, async () => {
+        // All RSTs should now be in the database. Insert txos.
+        db.transaction("rw", db.txo, db.rst, async () => {
           const ids = (await db.txo.bulkPut(added, undefined, {
             allKeys: true,
           })) as number[];
           await Promise.all(
             added.map(async (txo, index) => {
               const ref = scriptRefMap[txo.script];
-              const atom = existingRefs[ref] || accepted[ref];
-              if (atom) {
-                atom.lastTxoId = ids[index];
-                atom.spent = 0;
-                await db.atom.put(atom);
+              const rst = existingRefs[ref] || accepted[ref];
+              if (rst) {
+                rst.lastTxoId = ids[index];
+                rst.spent = 0;
+                await db.rst.put(rst);
               }
             })
           );
         });
 
         // Update any NFTs that have been transferred
-        await db.transaction("rw", db.atom, async () => {
+        await db.transaction("rw", db.rst, async () => {
           for (const lastTxo of spent) {
-            await db.atom.where({ lastTxoId: lastTxo.id }).modify({ spent: 1 });
+            await db.rst.where({ lastTxoId: lastTxo.id }).modify({ spent: 1 });
           }
         });
 
         // Update heights
-        await db.transaction("rw", db.atom, async () => {
+        await db.transaction("rw", db.rst, async () => {
           for (const [lastTxoId, conf] of confs) {
-            await db.atom
+            await db.rst
               .where({ lastTxoId })
               .modify({ height: conf.height || Infinity });
           }
@@ -143,16 +143,16 @@ export class NFTWorker implements Subscription {
   }
 
   /**
-   * Add new atoms to the database
+   * Add new RSTs to the database
    *
-   * @param refs TxOs containing atom data
+   * @param refs TxOs containing rst data
    * @param txMap Map of new transactions returned from ElectrumX
-   * @returns Atoms added to the database and any related refs that were found
+   * @returns RSTs added to the database and any related refs that were found
    */
   async addTokens(
     refs: { [key: string]: TxO | undefined },
     txMap: ElectrumTxMap = {}
-  ): Promise<{ accepted: { [key: string]: Atom }; related: string[] }> {
+  ): Promise<{ accepted: { [key: string]: SmartToken }; related: string[] }> {
     const refEntries = Object.entries(refs);
 
     // Create an array of freshly minted refs
@@ -230,7 +230,7 @@ export class NFTWorker implements Subscription {
               delegates.length && console.debug(`Found delegates`, delegates);
               delegates.forEach(foundDelegates.add, foundDelegates);
 
-              // Also save delegates so we don't need to look for them again later in saveAtom
+              // Also save delegates so we don't need to look for them again later in saveRst
               return [revealTxId, { tx, delegates }];
             }
 
@@ -281,21 +281,21 @@ export class NFTWorker implements Subscription {
     Object.keys(delegateRefMap).length &&
       console.debug("Delegate refs", delegateRefMap);
 
-    const accepted: { [key: string]: Atom } = {};
+    const accepted: { [key: string]: SmartToken } = {};
     const relatedArrs = await Promise.all(
       refEntries.map(async ([ref, txo]) => {
         const delegatedRefs = revealTxs[refReveals[ref]].delegates.flatMap(
           (r) => delegateRefMap[r]
         );
-        const { related, valid, atom } = await this.saveAtom(
+        const { related, valid, rst } = await this.saveRst(
           ref,
           txo,
           revealTxs[refReveals[ref]].tx,
           delegatedRefs,
           fresh.includes(ref)
         );
-        if (valid && txo && atom) {
-          accepted[atom.ref] = atom;
+        if (valid && txo && rst) {
+          accepted[rst.ref] = rst;
         }
         return related;
       })
@@ -307,14 +307,14 @@ export class NFTWorker implements Subscription {
     return { accepted, related };
   }
 
-  // Decode an Atom token and save to the database. Return the name so the user can be notified
-  async saveAtom(
+  // Decode an RST and save to the database. Return the name so the user can be notified
+  async saveRst(
     ref: string,
     receivedTxo: TxO | undefined, // Received txo can be undefined when token is an author or container dependency
     reveal: Transaction,
     delegatedRefs: string[],
     fresh: boolean
-  ): Promise<{ related: string[]; valid?: boolean; atom?: Atom }> {
+  ): Promise<{ related: string[]; valid?: boolean; rst?: SmartToken }> {
     const refTxId = ref.substring(0, 64);
     const refVout = parseInt(ref.substring(64), 10);
 
@@ -332,19 +332,20 @@ export class NFTWorker implements Subscription {
       return { related: [], valid: false };
     }
 
-    const atom = decodeAtom(script);
-    if (!atom) {
+    const rst = decodeRst(script);
+    if (!rst) {
       console.info("Unrecognised token");
       return { related: [], valid: false };
     }
 
     const related: string[] = [];
-    const { payload, files, operation } = atom;
+    const { payload, files, operation } = rst;
     const { in: containers, by: authors } = payload;
-    // Map atom operation (ft, nft, dat) to enum
-    const atomType = AtomType[operation.toUpperCase() as keyof typeof AtomType];
+    // Map rst operation (ft, nft, dat) to enum
+    const tokenType =
+      SmartTokenType[operation.toUpperCase() as keyof typeof SmartTokenType];
 
-    console.debug("Atom payload", payload);
+    console.debug("RST payload", payload);
 
     // Look for related tokens in outputs
     const outputTokens = reveal.outputs
@@ -373,9 +374,9 @@ export class NFTWorker implements Subscription {
     if (author) related.push(author);
 
     const name = toString(payload.name);
-    const record: Atom = {
+    const record: SmartToken = {
       ref,
-      atomType,
+      tokenType,
       revealOutpoint: Outpoint.fromUTXO(reveal.id, revealIndex).toString(),
       spent: 0,
       fresh: fresh ? 1 : 0,
@@ -399,12 +400,12 @@ export class NFTWorker implements Subscription {
       height: receivedTxo?.height || Infinity,
     };
 
-    record.id = (await db.atom.put(record)) as number;
+    record.id = (await db.rst.put(record)) as number;
 
     return {
       related,
       valid: true,
-      atom: record,
+      rst: record,
     };
   }
 
@@ -413,7 +414,7 @@ export class NFTWorker implements Subscription {
     const newRelated = (
       await Promise.all(
         related.map(async (ref) =>
-          (await db.atom.get({ ref })) ? undefined : ref
+          (await db.rst.get({ ref })) ? undefined : ref
         )
       )
     ).filter(Boolean) as string[];
@@ -424,7 +425,7 @@ export class NFTWorker implements Subscription {
       console.debug(`Existing related: ${related.length - newRelated.length}`);
 
       // Fetch new related tokens. A TxO is not needed for these since they are not owned by this user
-      // Only an atom record is needed for displaying the author and container names
+      // Only an rst record is needed for displaying the author and container names
       const relatedRefs = newRelated.map((ref) => [ref, undefined]);
 
       await this.addTokens(Object.fromEntries(relatedRefs));

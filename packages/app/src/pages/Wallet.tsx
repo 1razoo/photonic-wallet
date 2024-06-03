@@ -46,9 +46,9 @@ function TokenGrid({ open }: { open: boolean }) {
   const page = parseInt(pageParam || "0", 10);
   const [filterType, setFilterType] = useState<string[]>(allTypes);
   const nft = useNftQuery(
-    (atom) =>
-      atom.spent === 0 &&
-      (filterType.length ? filterType.includes(atom.type) : true),
+    (rst) =>
+      rst.spent === 0 &&
+      (filterType.length ? filterType.includes(rst.type) : true),
     pageSize,
     page,
     [filterType]
@@ -114,10 +114,10 @@ function TokenGrid({ open }: { open: boolean }) {
               (token) =>
                 token && (
                   <TokenCard
-                    atom={token.atom}
+                    rst={token.rst}
                     value={token.txo.value}
                     key={token.txo.id}
-                    to={`/objects/atom/${token.atom.ref}${
+                    to={`/objects/token/${token.rst.ref}${
                       page > 0 ? `?p=${page}` : ""
                     }`}
                     size={open ? "sm" : "md"}

@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 import { decode, encode } from "cbor-x";
 // @ts-ignore
 import rjs from "@radiantblockchain/radiantjs";
-import { AtomFile, AtomPayload } from "./types";
+import { SmartTokenFile, SmartTokenPayload } from "./types";
 import { bytesToHex } from "@noble/hashes/utils";
 import { pushMinimalAsm } from "./script";
 
@@ -12,20 +12,20 @@ import { pushMinimalAsm } from "./script";
 const { Script } = rjs;
 type Script = rjs.Script;
 
-export const atomHex = "72633032"; // rc02
-//export const atomHex = "61746f6d"; // atom
-export const atomBuffer = Buffer.from(atomHex, "hex");
+export const rstHex = "72633032"; // rc02
+//export const rstHex = ""; // rst
+export const rstBuffer = Buffer.from(rstHex, "hex");
 
 const toObject = (obj: unknown) =>
   typeof obj === "object" ? (obj as { [key: string]: unknown }) : {};
 
-export type DecodedAtom = {
+export type DecodedRst = {
   operation: string;
-  payload: AtomPayload;
-  files: { [key: string]: AtomFile };
+  payload: SmartTokenPayload;
+  files: { [key: string]: SmartTokenFile };
 };
 
-export function decodeAtom(script: Script): undefined | DecodedAtom {
+export function decodeRst(script: Script): undefined | DecodedRst {
   let result: { operation?: string; payload: object } = {
     operation: undefined,
     payload: {},
@@ -39,7 +39,7 @@ export function decodeAtom(script: Script): undefined | DecodedAtom {
     if (
       !buf ||
       opcodenum !== 4 ||
-      Buffer.from(buf).toString("hex") !== atomHex ||
+      Buffer.from(buf).toString("hex") !== rstHex ||
       script.chunks.length <= index + 2
     ) {
       return false;
@@ -93,11 +93,11 @@ export function decodeAtom(script: Script): undefined | DecodedAtom {
       attrs: toObject(attrs),
       ...Object.fromEntries(meta),
     },
-    files: Object.fromEntries(files) as { [key: string]: AtomFile },
+    files: Object.fromEntries(files) as { [key: string]: SmartTokenFile },
   };
 }
 
-export function encodeAtom(
+export function encodeRst(
   operation: string,
   payload: unknown
 ): { operation: string; script: string; payloadHash: string } {
@@ -105,7 +105,7 @@ export function encodeAtom(
   return {
     operation,
     script: new Script()
-      .add(atomBuffer)
+      .add(rstBuffer)
       .add(Buffer.from(operation))
       .add(encodedPayload)
       .toHex(),
@@ -113,7 +113,7 @@ export function encodeAtom(
   };
 }
 
-export function encodeAtomMutable(
+export function encodeRstMutable(
   operation: "mod" | "sl",
   payload: unknown,
   contractOutputIndex: number,
@@ -123,7 +123,7 @@ export function encodeAtomMutable(
 ) {
   const opHex = Buffer.from(operation).toString("hex");
   const encodedPayload = encode(payload);
-  const asm = `${atomHex} ${opHex} ${encodedPayload.toString(
+  const asm = `${rstHex} ${opHex} ${encodedPayload.toString(
     "hex"
   )} ${pushMinimalAsm(contractOutputIndex)} ${pushMinimalAsm(
     refHashIndex
@@ -139,7 +139,7 @@ export function encodeAtomMutable(
   };
 }
 
-export function isImmutableToken(payload: AtomPayload) {
+export function isImmutableToken(payload: SmartTokenPayload) {
   // Default to immutable if arg.i isn't given
   return payload.args?.i !== undefined ? payload.args.i === true : true;
 }

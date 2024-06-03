@@ -33,7 +33,7 @@ export type TokenRevealParams =
   | RevealDmintParams
   | RevealPsbtParams;
 
-export type AtomPayload = {
+export type SmartTokenPayload = {
   args: {
     [key: string]: unknown;
   };
@@ -48,13 +48,13 @@ export type AtomPayload = {
   [key: string]: unknown;
 };
 
-export type AtomRemoteFile = {
+export type SmartTokenRemoteFile = {
   src: string;
   h?: Uint8Array;
   hs?: Uint8Array;
 };
 
-export type AtomFile = Uint8Array | AtomRemoteFile;
+export type SmartTokenFile = Uint8Array | SmartTokenRemoteFile;
 
 export type CommitOperation = "nft" | "dat" | "ft";
 
@@ -122,7 +122,7 @@ export type TokenCommitData = {
   };
   immutable: boolean;
   outputValue: number;
-  atom: { operation: string; script: string; payloadHash: string };
+  rst: { operation: string; script: string; payloadHash: string };
 };
 
 export default {};

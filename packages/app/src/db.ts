@@ -1,6 +1,6 @@
 import Dexie, { Table } from "dexie";
 import {
-  Atom,
+  SmartToken,
   TxO,
   BlockHeader,
   SubscriptionStatus,
@@ -12,7 +12,7 @@ export type KeyValuePairs = unknown;
 
 export class Database extends Dexie {
   txo!: Table<TxO>;
-  atom!: Table<Atom>;
+  rst!: Table<SmartToken>;
   subscriptionStatus!: Table<SubscriptionStatus>;
   kvp!: Table<KeyValuePairs>;
   header!: Table<BlockHeader>;
@@ -24,7 +24,7 @@ export class Database extends Dexie {
       txo: "++id, &[txid+vout], contractType, [contractType+spent], [script+spent], [change+spent]",
       subscriptionStatus: "scriptHash",
       balance: "id",
-      atom: "++id, &ref, [type+spent], [type+spent+fresh], lastTxoId, height, atomType",
+      rst: "++id, &ref, [type+spent], [type+spent+fresh], lastTxoId, height, rstType",
       kvp: "",
       header: "hash, height",
       txq: "txid",

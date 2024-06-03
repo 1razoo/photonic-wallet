@@ -1,11 +1,11 @@
 const map: { [key: string]: string } = {
-  object: "Digital Object",
+  object: "Object",
   container: "Container",
   user: "User",
-  fungible: "Fungible Token",
+  fungible: "Fungible",
 };
 
-export default function AtomTokenType({
+export default function TokenType({
   type,
   lower = false,
 }: {

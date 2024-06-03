@@ -29,11 +29,11 @@ import Photons from "@app/components/Photons";
 import ContentContainer from "@app/components/ContentContainer";
 import DownloadLink from "@app/components/DownloadLink";
 import TokenContent from "@app/components/TokenContent";
-import AtomTokenType from "@app/components/AtomTokenType";
+import TokenType from "@app/components/TokenType";
 import PageHeader from "@app/components/PageHeader";
 import MeltDigitalObject from "./MeltDigitalObject";
 import TxSuccessModal from "./TxSuccessModal";
-import { Atom, TxO } from "../types";
+import { SmartToken, TxO } from "../types";
 import { openModal, wallet } from "@app/signals";
 import TokenDetails from "./TokenDetails";
 import createExplorerUrl from "@app/network/createExplorerUrl";
@@ -101,12 +101,12 @@ export default function ViewDigitalObject({
   const successDisclosure = useDisclosure();
   const [nft, txo, author, container] = useLiveQuery(
     async () => {
-      const nft = await db.atom.get({ ref: sref });
+      const nft = await db.rst.get({ ref: sref });
       if (!nft?.lastTxoId) return [undefined, undefined];
       const txo = await db.txo.get(nft.lastTxoId);
-      const a = nft?.author && (await db.atom.get({ ref: nft.author }));
-      const c = nft?.container && (await db.atom.get({ ref: nft.container }));
-      return [nft, txo, a, c] as [Atom, TxO, Atom?, Atom?];
+      const a = nft?.author && (await db.rst.get({ ref: nft.author }));
+      const c = nft?.container && (await db.rst.get({ ref: nft.container }));
+      return [nft, txo, a, c] as [SmartToken, TxO, SmartToken?, SmartToken?];
     },
     [sref],
     []
@@ -204,7 +204,7 @@ export default function ViewDigitalObject({
                   },
                 }}
               >
-                <TokenContent atom={nft} />
+                <TokenContent rst={nft} />
               </GridItem>
               {nft.file && !isKnownEmbed && (
                 <Warning>{t`Files may be unsafe and result in loss of funds`}</Warning>
@@ -260,13 +260,13 @@ export default function ViewDigitalObject({
               </Button>
             </SimpleGrid>
             {nft && (
-              <TokenDetails atom={nft} container={container} author={author}>
+              <TokenDetails rst={nft} container={container} author={author}>
                 <PropertyCard heading={t`Output value`}>
                   <Photons value={txo.value} />
                 </PropertyCard>
                 {nft.type && (
                   <PropertyCard heading={t`Type`}>
-                    <AtomTokenType type={nft.type} />
+                    <TokenType type={nft.type} />
                   </PropertyCard>
                 )}
                 <PropertyCard heading={t`Location`}>

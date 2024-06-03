@@ -14,8 +14,8 @@ export enum ContractType {
   FT,
 }
 
-// Type of Atom object (mint operation)
-export enum AtomType {
+// Type of radiant smart token (mint operation)
+export enum SmartTokenType {
   NFT,
   FT,
   DAT,
@@ -58,9 +58,10 @@ export interface BlockHeader {
   reorg: boolean;
 }
 
-export interface Atom {
+// Tokens that follow Radiant Smart Token standard
+export interface SmartToken {
   id?: number;
-  atomType: AtomType;
+  tokenType: SmartTokenType;
   ref: string;
   lastTxoId?: number;
   revealOutpoint?: string;

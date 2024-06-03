@@ -27,7 +27,7 @@ import {
 } from "@chakra-ui/react";
 import { useLiveQuery } from "dexie-react-hooks";
 import db from "@app/db";
-import { Atom, ContractType } from "@app/types";
+import { SmartToken, ContractType } from "@app/types";
 import { ftScript, p2pkhScript } from "@lib/script";
 import { buildTx } from "@lib/tx";
 import { feeRate, network, wallet } from "@app/signals";
@@ -38,12 +38,12 @@ import { electrumWorker } from "@app/electrum/Electrum";
 import FtBalance from "./FtBalance";
 
 interface Props {
-  atom: Atom;
+  rst: SmartToken;
   onSuccess?: (txid: string) => void;
   disclosure: UseDisclosureProps;
 }
 
-export default function SendFungible({ atom, onSuccess, disclosure }: Props) {
+export default function SendFungible({ rst, onSuccess, disclosure }: Props) {
   const { isOpen, onClose } = disclosure;
   const amount = useRef<HTMLInputElement>(null);
   const toAddress = useRef<HTMLInputElement>(null);
@@ -69,7 +69,7 @@ export default function SendFungible({ atom, onSuccess, disclosure }: Props) {
     setLoading(false);
   }, [isOpen]);
 
-  const ticker = (atom.args.ticker as string) || atom.name || "???";
+  const ticker = (rst.args.ticker as string) || rst.name || "???";
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -85,7 +85,7 @@ export default function SendFungible({ atom, onSuccess, disclosure }: Props) {
     }
 
     const value = parseInt(amount.current?.value, 10);
-    const refLE = reverseRef(atom.ref);
+    const refLE = reverseRef(rst.ref);
     const fromScript = ftScript(wallet.value.address, refLE);
     const tokens = await db.txo
       .where({ script: fromScript, spent: 0 })
@@ -163,20 +163,20 @@ export default function SendFungible({ atom, onSuccess, disclosure }: Props) {
       <form onSubmit={submit}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{t`Send ${atom.name || ticker}`}</ModalHeader>
+          <ModalHeader>{t`Send ${rst.name || ticker}`}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6} gap={4}>
             <VStack>
               <Box w="48px" h="48px">
                 <TokenContent
-                  atom={atom}
+                  rst={rst}
                   defaultIcon={RiQuestionFill}
                   thumbnail
                 />
               </Box>
               <Heading size="sm">{t`Balance`}</Heading>
               <Box>
-                <FtBalance id={atom.ref} />
+                <FtBalance id={rst.ref} />
               </Box>
             </VStack>
             {success || (

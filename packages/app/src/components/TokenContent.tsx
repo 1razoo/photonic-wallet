@@ -1,7 +1,7 @@
 import { Box, Icon, Image } from "@chakra-ui/react";
 import mime from "mime";
 import { QRCodeSVG } from "qrcode.react";
-import { Atom } from "@app/types";
+import { SmartToken } from "@app/types";
 import { TbLink } from "react-icons/tb";
 import {
   BsFileEarmarkFill,
@@ -30,15 +30,15 @@ const ContentMessage = ({ message = "No content" }: { message?: string }) => (
 );
 
 export default function TokenContent({
-  atom,
+  rst,
   thumbnail = false,
   defaultIcon = BsFillFileXFill,
 }: {
-  atom?: Atom;
+  rst?: SmartToken;
   thumbnail?: boolean;
   defaultIcon?: ((props: IconBaseProps) => JSX.Element) | IconType;
 }) {
-  const { fileSrc, file, filename } = atom || {};
+  const { fileSrc, file, filename } = rst || {};
   const maxLen = 1000;
   const type = filename && mime.getType(filename);
   const isImage = type?.startsWith("image/");

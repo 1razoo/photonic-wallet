@@ -1,6 +1,6 @@
 import { Box, Flex, Icon, Text } from "@chakra-ui/react";
 import Outpoint from "@lib/Outpoint";
-import { Atom } from "@app/types";
+import { SmartToken } from "@app/types";
 import { Link } from "react-router-dom";
 import Identifier from "@app/components/Identifier";
 import TokenContent from "@app/components/TokenContent";
@@ -18,20 +18,20 @@ const Ref = ({ value }: { value: string }) => {
 };
 
 export default function TokenRow({
-  atom,
+  rst,
   value,
   to,
   defaultIcon,
 }: {
-  atom: Atom;
+  rst: SmartToken;
   value: number;
   to: string;
   size?: "sm" | "md";
   defaultIcon?: IconType;
 }) {
-  const ref = Outpoint.fromString(atom?.ref || "");
+  const ref = Outpoint.fromString(rst?.ref || "");
 
-  const shortAtom = ref.shortInput();
+  const short = ref.shortInput();
   return (
     <Flex
       bgGradient="linear(to-b, bg.100, bg.300)"
@@ -49,13 +49,13 @@ export default function TokenRow({
       mx="auto"
     >
       <Box w="48px" h="48px" /*sx={{ "& > *": { w: "64px", h: "64px" } }}*/>
-        <TokenContent atom={atom} defaultIcon={defaultIcon} thumbnail />
+        <TokenContent rst={rst} defaultIcon={defaultIcon} thumbnail />
       </Box>
       <Box flexGrow={1}>
         <Flex gap={2}>
-          {atom.type === "user" && <Icon as={TbUserCircle} fontSize="2xl" />}
-          {atom.type === "container" && <Icon as={TbBox} fontSize="2xl" />}
-          {atom.name ? (
+          {rst.type === "user" && <Icon as={TbUserCircle} fontSize="2xl" />}
+          {rst.type === "container" && <Icon as={TbBox} fontSize="2xl" />}
+          {rst.name ? (
             <Text
               as="div"
               fontWeight="500"
@@ -65,16 +65,16 @@ export default function TokenRow({
               textOverflow="ellipsis"
               ml={1}
             >
-              {atom.name}
+              {rst.name}
             </Text>
           ) : (
-            <Identifier>{shortAtom}</Identifier>
+            <Identifier>{short}</Identifier>
           )}
           <Text as="div" color="gray.400">
-            {(atom.args.ticker as string) || ""}
+            {(rst.args.ticker as string) || ""}
           </Text>
         </Flex>
-        <Ref value={atom.ref} />
+        <Ref value={rst.ref} />
       </Box>
       <ValueTag>{value}</ValueTag>
     </Flex>

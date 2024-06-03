@@ -46,7 +46,7 @@ import Outpoint from "@lib/Outpoint";
 import { mintToken } from "@lib/mint";
 //import { encodeCid, upload } from "@lib/ipfs";
 import { photonsToRXD } from "@lib/format";
-import AtomTokenType from "@app/components/AtomTokenType";
+import TokenType from "@app/components/TokenType";
 import ContentContainer from "@app/components/ContentContainer";
 import PageHeader from "@app/components/PageHeader";
 //import HashStamp from "@app/components/HashStamp";
@@ -60,7 +60,7 @@ import {
   openModal,
   wallet,
 } from "@app/signals";
-import { AtomFile, AtomPayload, Utxo } from "@lib/types";
+import { SmartTokenFile, SmartTokenPayload, Utxo } from "@lib/types";
 import { electrumWorker } from "@app/electrum/Electrum";
 
 // IPFS uploading is currently disabled until an alternative to nft.storage can be found
@@ -162,7 +162,7 @@ const encodeContent = (
   text?: string,
   url?: string,
   urlFileType?: string
-): [string, AtomFile | undefined] => {
+): [string, SmartTokenFile | undefined] => {
   if (mode === "url") {
     return [`main.${urlFileType}`, { src: url as string }];
   }
@@ -246,12 +246,12 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   );
   const isConnected = electrumStatus.value === ElectrumStatus.CONNECTED;
   const users = useLiveQuery(
-    async () => await db.atom.where({ type: "user", spent: 0 }).toArray(),
+    async () => await db.rst.where({ type: "user", spent: 0 }).toArray(),
     [],
     []
   );
   const containers = useLiveQuery(
-    async () => await db.atom.where({ type: "container", spent: 0 }).toArray(),
+    async () => await db.rst.where({ type: "container", spent: 0 }).toArray(),
     [],
     []
   );
@@ -359,20 +359,20 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     }
 
     /*if (content && enableHashstamp && hashStamp) {
-      (content as AtomRemoteFile).hs = new Uint8Array(hashStamp);
-      (content as AtomRemoteFile).h = fileState.hash;
+      (content as SmartTokenRemoteFile).hs = new Uint8Array(hashStamp);
+      (content as SmartTokenRemoteFile).h = fileState.hash;
     }*/
 
     const userIndex =
       authorId !== "" && authorId !== undefined
         ? parseInt(authorId, 10)
         : undefined;
-    const userAtom = userIndex !== undefined ? users[userIndex] : undefined;
-    const userInput = userAtom
-      ? await db.txo.get(userAtom.lastTxoId as number)
+    const userRst = userIndex !== undefined ? users[userIndex] : undefined;
+    const userInput = userRst
+      ? await db.txo.get(userRst.lastTxoId as number)
       : undefined;
 
-    if (userIndex && !(userAtom && userInput)) {
+    if (userIndex && !(userRst && userInput)) {
       setLoading(false);
       toast({
         title: "Error",
@@ -386,13 +386,13 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       containerId !== "" && containerId !== undefined
         ? parseInt(containerId, 10)
         : undefined;
-    const containerAtom =
+    const containerRst =
       containerIndex !== undefined ? containers[containerIndex] : undefined;
-    const containerInput = containerAtom
-      ? await db.txo.get(containerAtom.lastTxoId as number)
+    const containerInput = containerRst
+      ? await db.txo.get(containerRst.lastTxoId as number)
       : undefined;
 
-    if (containerIndex && !(containerAtom && containerInput)) {
+    if (containerIndex && !(containerRst && containerInput)) {
       setLoading(false);
       toast({
         title: "Error",
@@ -415,16 +415,16 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         ["desc", fields.desc],
         [
           "in",
-          containerAtom && [
+          containerRst && [
             hexToBytes(
-              Outpoint.fromString(containerAtom.ref).reverse().toString()
+              Outpoint.fromString(containerRst.ref).reverse().toString()
             ),
           ],
         ],
         [
           "by",
-          userAtom && [
-            hexToBytes(Outpoint.fromString(userAtom.ref).reverse().toString()),
+          userRst && [
+            hexToBytes(Outpoint.fromString(userRst.ref).reverse().toString()),
           ],
         ],
         ["attrs", attrs.length && Object.fromEntries(attrs)],
@@ -438,7 +438,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
           }
         : undefined;
 
-    const payload: AtomPayload = {
+    const payload: SmartTokenPayload = {
       ...(Object.keys(args).length ? { args } : undefined),
       ...meta,
       ...fileObj,
@@ -663,7 +663,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       <ContentContainer>
         <PageHeader back to="/objects">
           <Trans>
-            Mint <AtomTokenType type={tokenType} />
+            Mint <TokenType type={tokenType} />
           </Trans>
         </PageHeader>
 

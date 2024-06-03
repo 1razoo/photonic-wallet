@@ -1,11 +1,11 @@
 import db from "@app/db";
 import { electrumWorker } from "@app/electrum/Electrum";
 import { feeRate, wallet } from "@app/signals";
-import { Atom, ContractType, TxO } from "@app/types";
+import { SmartToken, ContractType, TxO } from "@app/types";
 import { EditIcon } from "@chakra-ui/icons";
 import { GridItem, Button } from "@chakra-ui/react";
 import Outpoint from "@lib/Outpoint";
-import { encodeAtomMutable } from "@lib/atom";
+import { encodeRstMutable } from "@lib/token";
 import { fundTx, targetToUtxo } from "@lib/coinSelect";
 import {
   mutableNftScript,
@@ -14,7 +14,7 @@ import {
   parseMutableScript,
 } from "@lib/script";
 import { buildTx, findTokenOutput } from "@lib/tx";
-import { AtomPayload, UnfinalizedInput, Utxo } from "@lib/types";
+import { SmartTokenPayload, UnfinalizedInput, Utxo } from "@lib/types";
 import { t } from "@lingui/macro";
 import { Transaction } from "@radiantblockchain/radiantjs";
 
@@ -24,7 +24,7 @@ export default function EditTokenTest({
   token,
   txo,
 }: {
-  token: Atom;
+  token: SmartToken;
   txo: TxO;
 }) {
   const editToken = async () => {
@@ -56,13 +56,13 @@ export default function EditTokenTest({
       return;
     }
 
-    const payload: Partial<AtomPayload> = {
+    const payload: Partial<SmartTokenPayload> = {
       "main.txt": new TextEncoder().encode("mutable token is working"),
     };
-    const atom = encodeAtomMutable("mod", payload, 1, 1, 0, 0);
-    const mutOutputScript = mutableNftScript(mutRefLE, atom.payloadHash);
+    const rst = encodeRstMutable("mod", payload, 1, 1, 0, 0);
+    const mutOutputScript = mutableNftScript(mutRefLE, rst.payloadHash);
     const nftOutputScript = nftAuthScript(wallet.value.address, nftRefLE, [
-      { ref: mutRefLE, scriptSigHash: atom.scriptSigHash },
+      { ref: mutRefLE, scriptSigHash: rst.scriptSigHash },
     ]);
 
     const nftInput: UnfinalizedInput = { ...txo };
@@ -112,7 +112,7 @@ export default function EditTokenTest({
           // Clear p2pkh script sig
           script.set({ chunks: [] });
           // Add mutable script sig
-          script.add(atom.script);
+          script.add(rst.script);
         }
       }
     );

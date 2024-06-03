@@ -26,7 +26,7 @@ import ContentContainer from "@app/components/ContentContainer";
 import TokenContent from "@app/components/TokenContent";
 import PageHeader from "@app/components/PageHeader";
 import TxSuccessModal from "./TxSuccessModal";
-import { Atom } from "../types";
+import { SmartToken } from "../types";
 import { openModal, wallet } from "@app/signals";
 import {
   RiContractRightLine,
@@ -101,11 +101,11 @@ export default function ViewFungible({
   const successDisclosure = useDisclosure();
   const [token, author, container] = useLiveQuery(
     async () => {
-      const token = await db.atom.get({ ref: sref });
-      const a = token?.author && (await db.atom.get({ ref: token.author }));
+      const token = await db.rst.get({ ref: sref });
+      const a = token?.author && (await db.rst.get({ ref: token.author }));
       const c =
-        token?.container && (await db.atom.get({ ref: token.container }));
-      return [token, a, c] as [Atom?, Atom?, Atom?];
+        token?.container && (await db.rst.get({ ref: token.container }));
+      return [token, a, c] as [SmartToken?, SmartToken?, SmartToken?];
     },
     [sref],
     []
@@ -205,7 +205,7 @@ export default function ViewFungible({
                   {token && (
                     <Box w="64px" h="64px">
                       <TokenContent
-                        atom={token}
+                        rst={token}
                         defaultIcon={RiQuestionFill}
                         thumbnail
                       />
@@ -256,12 +256,12 @@ export default function ViewFungible({
                 {t`Melt`}
               </Button>
             </SimpleGrid>
-            <TokenDetails atom={token} container={container} author={author} />
+            <TokenDetails rst={token} container={container} author={author} />
           </Grid>
         </Container>
       </Grid>
       <SendFungible
-        atom={token}
+        rst={token}
         disclosure={sendDisclosure}
         onSuccess={(txid) => {
           sendDisclosure.onClose();
@@ -269,7 +269,7 @@ export default function ViewFungible({
         }}
       />
       <MeltFungible
-        atom={token}
+        rst={token}
         disclosure={meltDisclosure}
         onSuccess={(txid: string) => {
           meltDisclosure.onClose();

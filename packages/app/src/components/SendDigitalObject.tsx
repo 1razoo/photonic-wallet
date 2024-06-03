@@ -153,7 +153,7 @@ export default function SendDigitalObject({
             </FormControl>
             <FormControl>
               <FormLabel>{t`Digital Object`}</FormLabel>
-              <Identifier>{ref.reverse().atom()}</Identifier>
+              <Identifier>{ref.reverse().shortInput()}</Identifier>
             </FormControl>
             <FormControl>
               <FormLabel>{t`Amount`}</FormLabel>

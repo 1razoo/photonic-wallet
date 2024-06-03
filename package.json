@@ -13,6 +13,8 @@
     "build:tauri": "pnpm -F app run tauri build",
     "clean": "turbo run clean",
     "dev": "turbo run -F app dev",
+    "lint": "turbo run lint",
+    "check-types": "turbo run check-types",
     "cli": "node packages/cli/dist/cli.js"
   },
   "devDependencies": {
