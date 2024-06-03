@@ -34,12 +34,6 @@ export type TokenRevealParams =
   | RevealPsbtParams;
 
 export type SmartTokenPayload = {
-  args: {
-    [key: string]: unknown;
-  };
-  ctx: {
-    [key: string]: unknown;
-  };
   in?: Uint8Array[];
   by?: Uint8Array[];
   attrs: {
@@ -48,13 +42,18 @@ export type SmartTokenPayload = {
   [key: string]: unknown;
 };
 
+export type SmartTokenEmbeddedFile = {
+  t: string;
+  b: Uint8Array;
+};
+
 export type SmartTokenRemoteFile = {
   src: string;
   h?: Uint8Array;
   hs?: Uint8Array;
 };
 
-export type SmartTokenFile = Uint8Array | SmartTokenRemoteFile;
+export type SmartTokenFile = SmartTokenEmbeddedFile | SmartTokenRemoteFile;
 
 export type CommitOperation = "nft" | "dat" | "ft";
 

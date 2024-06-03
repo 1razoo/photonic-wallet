@@ -439,7 +439,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         : undefined;
 
     const payload: SmartTokenPayload = {
-      ...(Object.keys(args).length ? { args } : undefined),
+      ...(Object.keys(args).length ? args : undefined),
       ...meta,
       ...fileObj,
     };

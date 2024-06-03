@@ -24,7 +24,7 @@ export class Database extends Dexie {
       txo: "++id, &[txid+vout], contractType, [contractType+spent], [script+spent], [change+spent]",
       subscriptionStatus: "scriptHash",
       balance: "id",
-      rst: "++id, &ref, [type+spent], [type+spent+fresh], lastTxoId, height, rstType",
+      rst: "++id, &ref, [type+spent], [type+spent+fresh], lastTxoId, height, tokenType",
       kvp: "",
       header: "hash, height",
       txq: "txid",

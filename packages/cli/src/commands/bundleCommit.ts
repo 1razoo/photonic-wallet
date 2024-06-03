@@ -213,7 +213,7 @@ export default async function bundleCommit(
       operation,
       outputValue: (token as BundleTokenFt).supply || 1,
       payload: {
-        args,
+        ...args,
         ...meta,
         ...files,
       } as SmartTokenPayload,

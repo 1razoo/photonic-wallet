@@ -17,12 +17,7 @@ import {
 import { ElectrumTxMap, buildUpdateTXOs } from "./updateTxos";
 import db from "@app/db";
 import Outpoint, { reverseRef } from "@lib/Outpoint";
-import {
-  decodeRst,
-  filterArgs,
-  filterAttrs,
-  isImmutableToken,
-} from "@lib/token";
+import { decodeRst, filterAttrs, isImmutableToken } from "@lib/token";
 import {
   Transaction,
   // @ts-ignore
@@ -339,7 +334,7 @@ export class NFTWorker implements Subscription {
     }
 
     const related: string[] = [];
-    const { payload, files, operation } = rst;
+    const { payload, embeddedFiles, remoteFiles, operation } = rst;
     const { in: containers, by: authors } = payload;
     // Map rst operation (ft, nft, dat) to enum
     const tokenType =
@@ -359,24 +354,27 @@ export class NFTWorker implements Subscription {
     const type = toString(payload.type) || "object";
     const immutable = isImmutableToken(payload);
 
-    const [filename, file] = Object.entries(files)[0] || [];
-
     const {
       hs: hashstamp,
       h: hash,
       src: fileSrc,
-    } = file instanceof Uint8Array || typeof file !== "object"
-      ? { hs: undefined, h: undefined, src: undefined }
-      : file;
+    } = remoteFiles.image || { hs: undefined, h: undefined, src: undefined };
+    const file =
+      embeddedFiles.image && embeddedFiles.image.b.length < fileSizeLimit
+        ? embeddedFiles.image
+        : undefined;
 
     // Containers and authors will be fetched later
     if (container) related.push(container);
     if (author) related.push(author);
 
+    const ticker =
+      typeof payload.ticker === "string" ? payload.ticker : undefined;
     const name = toString(payload.name);
     const record: SmartToken = {
       ref,
       tokenType,
+      ticker,
       revealOutpoint: Outpoint.fromUTXO(reveal.id, revealIndex).toString(),
       spent: 0,
       fresh: fresh ? 1 : 0,
@@ -387,14 +385,9 @@ export class NFTWorker implements Subscription {
       author,
       container,
       attrs: filterAttrs(payload.attrs),
-      args: filterArgs(payload.args),
       fileSrc: fileSrc || undefined,
       // TODO store files in OPFS instead of IndexedDB
-      file:
-        file instanceof Uint8Array && file.length < fileSizeLimit
-          ? file
-          : undefined,
-      filename: toString(filename),
+      file,
       hash,
       hashstamp,
       height: receivedTxo?.height || Infinity,

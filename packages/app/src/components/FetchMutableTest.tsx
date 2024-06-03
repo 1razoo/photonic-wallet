@@ -35,12 +35,7 @@ async function fetchTokenData(ref: Outpoint, immutable: boolean) {
   const input = refTx.inputs[vout];
 
   const decoded = decodeRst(input.script);
-  const text = decoded?.files["main.txt"];
-  if (text instanceof Uint8Array) {
-    console.log(new TextDecoder("utf-8").decode(text));
-  } else {
-    console.log(decoded?.files);
-  }
+  console.log(decoded);
 }
 
 export default function FetchTokenTest({ token }: { token: SmartToken }) {

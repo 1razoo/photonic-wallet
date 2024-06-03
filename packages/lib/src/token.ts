@@ -4,7 +4,12 @@ import { Buffer } from "buffer";
 import { decode, encode } from "cbor-x";
 // @ts-ignore
 import rjs from "@radiantblockchain/radiantjs";
-import { SmartTokenFile, SmartTokenPayload } from "./types";
+import {
+  SmartTokenEmbeddedFile,
+  SmartTokenFile,
+  SmartTokenPayload,
+  SmartTokenRemoteFile,
+} from "./types";
 import { bytesToHex } from "@noble/hashes/utils";
 import { pushMinimalAsm } from "./script";
 
@@ -19,10 +24,29 @@ export const rstBuffer = Buffer.from(rstHex, "hex");
 const toObject = (obj: unknown) =>
   typeof obj === "object" ? (obj as { [key: string]: unknown }) : {};
 
+const filterFileObj = (
+  obj: SmartTokenFile
+): { embed?: SmartTokenEmbeddedFile; remote?: SmartTokenRemoteFile } => {
+  const embed = obj as Partial<SmartTokenEmbeddedFile>;
+  if (typeof embed.t === "string" && embed.b instanceof Uint8Array) {
+    return { embed: { t: embed.t, b: embed.b } };
+  }
+  const remote = obj as Partial<SmartTokenRemoteFile>;
+  if (
+    typeof remote.src === "string" &&
+    (remote.h === undefined || remote.h instanceof Uint8Array) &&
+    (remote.hs === undefined || remote.hs instanceof Uint8Array)
+  ) {
+    return { remote: { src: remote.src, h: remote.h, hs: remote.hs } };
+  }
+  return {};
+};
+
 export type DecodedRst = {
   operation: string;
   payload: SmartTokenPayload;
-  files: { [key: string]: SmartTokenFile };
+  embeddedFiles: { [key: string]: SmartTokenEmbeddedFile };
+  remoteFiles: { [key: string]: SmartTokenRemoteFile };
 };
 
 export function decodeRst(script: Script): undefined | DecodedRst {
@@ -69,31 +93,44 @@ export function decodeRst(script: Script): undefined | DecodedRst {
   if (!result.operation || !["nft", "ft", "dat"].includes(result.operation))
     return undefined;
 
-  const { args, ctx, attrs, ...rest } = result.payload as {
+  const { attrs, ...rest } = result.payload as {
     [key: string]: unknown;
   };
 
-  // Separate meta and file fields from root object
-  const { meta, files } = Object.entries(rest).reduce<{
+  // Separate files from root object
+  const { meta, embeds, remotes } = Object.entries(rest).reduce<{
     meta: [string, unknown][];
-    files: [string, unknown][];
+    embeds: [string, unknown][];
+    remotes: [string, unknown][];
   }>(
     (a, [k, v]) => {
-      a[k.indexOf(".") > 0 ? "files" : "meta"].push([k, v]);
+      const { embed, remote } = filterFileObj(
+        v as { t: string; b: Uint8Array }
+      );
+      if (embed) {
+        a.embeds.push([k, embed]);
+      } else if (remote) {
+        a.remotes.push([k, remote]);
+      } else {
+        a.meta.push([k, v]);
+      }
       return a;
     },
-    { meta: [], files: [] }
+    { meta: [], embeds: [], remotes: [] }
   );
 
   return {
     operation: result.operation,
     payload: {
-      args: toObject(args),
-      ctx: toObject(ctx),
       attrs: toObject(attrs),
       ...Object.fromEntries(meta),
     },
-    files: Object.fromEntries(files) as { [key: string]: SmartTokenFile },
+    embeddedFiles: Object.fromEntries(embeds) as {
+      [key: string]: SmartTokenEmbeddedFile;
+    },
+    remoteFiles: Object.fromEntries(remotes) as {
+      [key: string]: SmartTokenRemoteFile;
+    },
   };
 }
 
@@ -141,7 +178,7 @@ export function encodeRstMutable(
 
 export function isImmutableToken(payload: SmartTokenPayload) {
   // Default to immutable if arg.i isn't given
-  return payload.args?.i !== undefined ? payload.args.i === true : true;
+  return payload.i !== undefined ? payload.i === true : true;
 }
 
 // Filter for attr objects
@@ -154,15 +191,4 @@ export function filterAttrs(obj: object) {
         typeof value === "boolean"
     )
   );
-}
-
-function filterByKey(obj: object, allowedKeys: string[]) {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([key]) => allowedKeys.includes(key))
-  );
-}
-
-// Supported arg values
-export function filterArgs(args: object) {
-  return filterByKey(args, ["ticker"]);
 }

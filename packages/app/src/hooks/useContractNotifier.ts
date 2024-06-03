@@ -26,7 +26,7 @@ async function ftNotification(utxo: TxO) {
   const ref = reverseRef(refLE);
   const rst = await db.rst.get({ ref });
   if (!rst) return "";
-  const { ticker } = rst?.args || {};
+  const { ticker } = rst || {};
   return t`${utxo.value} ${ticker || rst?.name || "???"}  received`;
 }
 

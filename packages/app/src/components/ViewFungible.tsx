@@ -214,7 +214,7 @@ export default function ViewFungible({
                   <Box ml={4} flexGrow={1}>
                     <Heading size="md">{token.name}</Heading>
                     <Heading size="md" fontWeight="normal" color="gray.400">
-                      {(token.args.ticker as string) || <i>No ticker</i>}
+                      {(token.ticker as string) || <i>No ticker</i>}
                     </Heading>
                   </Box>
                   <ValueTag>

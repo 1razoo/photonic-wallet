@@ -69,7 +69,7 @@ export default function SendFungible({ rst, onSuccess, disclosure }: Props) {
     setLoading(false);
   }, [isOpen]);
 
-  const ticker = (rst.args.ticker as string) || rst.name || "???";
+  const ticker = (rst.ticker as string) || rst.name || "???";
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

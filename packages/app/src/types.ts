@@ -63,21 +63,20 @@ export interface SmartToken {
   id?: number;
   tokenType: SmartTokenType;
   ref: string;
+  ticker?: string;
   lastTxoId?: number;
   revealOutpoint?: string;
   spent: 0 | 1;
   fresh: 0 | 1;
   name: string;
-  type: string;
+  type: string; // User defined type
   immutable?: boolean;
   description: string;
   author: string;
   container: string;
   attrs: { [key: string]: string };
-  args: { [key: string]: unknown };
-  filename?: string;
-  fileSrc?: string;
-  file?: ArrayBuffer; // TODO save multiple files? Should this go in OPFS or reference the OPFS raw tx?
+  fileSrc?: string; // Remote file URL
+  file?: { t: string; b: ArrayBuffer }; // Embedded file. TODO save multiple files? Should this go in OPFS or reference the OPFS raw tx?
   hash?: ArrayBuffer;
   hashstamp?: ArrayBuffer;
   height?: number;

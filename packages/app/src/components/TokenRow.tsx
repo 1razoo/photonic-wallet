@@ -71,7 +71,7 @@ export default function TokenRow({
             <Identifier>{short}</Identifier>
           )}
           <Text as="div" color="gray.400">
-            {(rst.args.ticker as string) || ""}
+            {(rst.ticker as string) || ""}
           </Text>
         </Flex>
         <Ref value={rst.ref} />
