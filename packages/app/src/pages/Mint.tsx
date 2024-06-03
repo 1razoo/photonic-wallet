@@ -72,7 +72,8 @@ import {
 import { electrumWorker } from "@app/electrum/Electrum";
 import { PromiseExtended } from "dexie";
 
-const MAX_BYTES = 100000;
+const MAX_BYTES = 100_000;
+const MAX_IPFS_BYTES = 5_000_000;
 
 type ContentMode = "file" | "text" | "url";
 
@@ -561,7 +562,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
     reader.onload = async () => {
       const newState: FileState = { ...noFile };
 
-      if (files[0].size > MAX_BYTES) {
+      if (files[0].size > MAX_IPFS_BYTES) {
         toast({ title: t`File is too large`, status: "error" });
         setFileState(newState);
         return;
