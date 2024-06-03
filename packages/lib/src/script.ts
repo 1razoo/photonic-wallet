@@ -4,7 +4,7 @@ import { sha256 } from "@noble/hashes/sha256";
 import { Buffer } from "buffer";
 import { rstBuffer, rstHex } from "./token";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
-import { CommitOperation } from "./types";
+import { TokenContractType } from "./types";
 import {
   bigIntToVmNumber,
   encodeDataPush,
@@ -86,7 +86,7 @@ export function revealScriptSigSize(rstLen: number) {
 }
 
 export function commitScriptSize(
-  operation: CommitOperation,
+  contract: TokenContractType,
   hasDelegate: boolean
 ) {
   const opSize = {
@@ -94,7 +94,7 @@ export function commitScriptSize(
     nft: 10,
     dat: 0,
   };
-  return 71 + opSize[operation] + (hasDelegate ? 56 : 0);
+  return 71 + opSize[contract] + (hasDelegate ? 56 : 0);
 }
 
 export function scriptHash(hex: string): string {
@@ -147,12 +147,8 @@ export function ftCommitScript(
     .add(Opcode.OP_HASH256)
     .add(Buffer.from(payloadHash, "hex"))
     .add(Opcode.OP_EQUALVERIFY);
-  // rst ft
-  script
-    .add(Buffer.from("ft"))
-    .add(Opcode.OP_EQUALVERIFY)
-    .add(rstBuffer)
-    .add(Opcode.OP_EQUALVERIFY);
+  // rst
+  script.add(rstBuffer).add(Opcode.OP_EQUALVERIFY);
   // Ensure normal ref for this input exists in an output
   // TODO should supply be enforced? Maybe not since output can be a PoW mint contract which doesn't provide photon supply
   script.add(
@@ -183,12 +179,8 @@ export function nftCommitScript(
     .add(Opcode.OP_HASH256)
     .add(Buffer.from(payloadHash, "hex"))
     .add(Opcode.OP_EQUALVERIFY);
-  // rst nft
-  script
-    .add(Buffer.from("nft"))
-    .add(Opcode.OP_EQUALVERIFY)
-    .add(rstBuffer)
-    .add(Opcode.OP_EQUALVERIFY);
+  // rst
+  script.add(rstBuffer).add(Opcode.OP_EQUALVERIFY);
   // Ensure singleton for this input exists in an output
   script.add(
     Script.fromASM(
@@ -202,7 +194,7 @@ export function nftCommitScript(
   return script.toHex();
 }
 
-// A dat operation is used for data storage. Similar to the nft operation but no singleton is created.
+// dat is used for data storage. Similar to nft but no singleton is created.
 export function datCommitScript(
   address: string,
   payloadHash: string,
@@ -291,6 +283,7 @@ export function mutableNftScript(mutableRef: string, payloadHash: string) {
       `OP_DUP 20 OP_SPLIT OP_BIN2NUM OP_1SUB OP_4 OP_NUM2BIN OP_CAT`, // Build token ref (mutable ref -1)
       `OP_2 OP_PICK OP_REFDATASUMMARY_OUTPUT OP_4 OP_ROLL 24 OP_MUL OP_SPLIT OP_NIP 24 OP_SPLIT OP_DROP OP_EQUALVERIFY`, // Check token ref exists in token output at given refdatasummary index
       `OP_SWAP OP_STATESCRIPTBYTECODE_OUTPUT OP_ROT OP_SPLIT OP_NIP 45 OP_SPLIT OP_DROP OP_OVER 20 OP_CAT OP_INPUTINDEX OP_INPUTBYTECODE OP_SHA256 OP_CAT OP_EQUALVERIFY`, // Compare ref + scriptsig hash in token output to this script's ref + scriptsig hash
+      // FIXME
       `OP_3 OP_PICK 6d6f64 OP_EQUAL OP_IF`, // Modify operation
       `OP_OVER OP_CODESCRIPTBYTECODE_OUTPUT OP_INPUTINDEX OP_CODESCRIPTBYTECODE_UTXO OP_EQUALVERIFY`, // Contract script must exist unchanged in output
       `OP_OVER OP_STATESCRIPTBYTECODE_OUTPUT 20 OP_4 OP_PICK OP_HASH256 OP_CAT 75 OP_CAT OP_EQUALVERIFY OP_ELSE`, // State script must contain payload hash

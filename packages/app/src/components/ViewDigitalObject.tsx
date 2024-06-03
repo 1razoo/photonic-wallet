@@ -42,6 +42,7 @@ import { useViewPanelContext } from "@app/layouts/ViewPanelLayout";
 import ActionIcon from "./ActionIcon";
 import { MdDeleteForever } from "react-icons/md";
 import { TbArrowUpRight } from "react-icons/tb";
+import mime from "mime";
 
 export const PropertyCard = ({
   heading,
@@ -112,7 +113,7 @@ export default function ViewDigitalObject({
     []
   );
   const txid = useRef("");
-  const { onCopy: onLinkCopy } = useClipboard(nft?.fileSrc || "");
+  const { onCopy: onLinkCopy } = useClipboard(nft?.remote?.src || "");
 
   // TODO show loading or 404
   if (!txo || !nft) {
@@ -143,16 +144,16 @@ export default function ViewDigitalObject({
     successDisclosure.onOpen();
   };
 
-  const isIPFS = nft.fileSrc?.startsWith("ipfs://");
+  const isIPFS = nft.remote?.src?.startsWith("ipfs://");
   const isKnownEmbed = [
-    ".txt",
-    ".jpg",
-    ".png",
-    ".gif",
-    ".webp",
-    ".svg",
-    ".avif",
-  ].includes(nft.filename?.substring(nft.filename?.lastIndexOf(".")) || "");
+    "text/plain",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "image/avif",
+    "image/svg+xml",
+  ].includes(nft.embed?.t || "");
   const location = Outpoint.fromUTXO(txo.txid, txo.vout);
 
   return (
@@ -206,26 +207,26 @@ export default function ViewDigitalObject({
               >
                 <TokenContent rst={nft} />
               </GridItem>
-              {nft.file && !isKnownEmbed && (
+              {nft.embed && !isKnownEmbed && (
                 <Warning>{t`Files may be unsafe and result in loss of funds`}</Warning>
               )}
-              {!nft.file && nft.fileSrc && !isIPFS && (
+              {!nft.embed && nft.remote && !isIPFS && (
                 <Warning>
                   {t`URLs may be unsafe and result in loss of funds`}
                 </Warning>
               )}
-              {nft.file && (
+              {nft.embed && (
                 <GridItem
                   as={DownloadLink}
-                  data={nft.file}
-                  filename={nft.filename}
+                  data={nft.embed.b}
+                  filename={`main.${mime.getExtension(nft.embed.t) || "dat"}`}
                   leftIcon={<ActionIcon as={DownloadIcon} />}
                   colSpan={2}
                 >
                   {t`Download`}
                 </GridItem>
               )}
-              {!nft.file && nft.fileSrc && (
+              {!nft.embed && nft.remote && (
                 <>
                   <GridItem
                     as={Button}

@@ -28,7 +28,8 @@ export const ipfsUrl = (url: string) => {
   );
 };
 
-export const errorMessage = (message: string) => chalk.redBright(message);
+export const errorMessage = (message: string) =>
+  `\n${chalk.redBright(message)}`;
 
 export const successMessage = (message: string) =>
   chalk(chalk.greenBright(symbols.success), message);

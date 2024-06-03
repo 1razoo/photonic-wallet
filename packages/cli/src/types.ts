@@ -1,5 +1,5 @@
 import {
-  CommitOperation,
+  TokenContractType,
   NetworkKey,
   TokenCommitData,
   RevealPsbtParams,
@@ -9,8 +9,14 @@ import {
 
 export type RemoteTokenFile = {
   src: string;
+  contentType?: string;
   hash?: boolean | string;
   stamp?: boolean;
+};
+
+export type EmbeddedTokenFile = {
+  contentType?: string;
+  path: string;
 };
 
 type BundleTokenBase = {
@@ -23,17 +29,17 @@ type BundleTokenBase = {
   authorRefs?: string[];
   containerRefs?: string[];
   files?: {
-    [key: string]: RemoteTokenFile | string;
+    [key: string]: RemoteTokenFile | EmbeddedTokenFile;
   };
   attrs?: { [key: string]: unknown };
 };
 
 export type BundleTokenNft = BundleTokenBase & {
-  operation: Extract<CommitOperation, "nft" | "dat">;
+  contract: Extract<TokenContractType, "nft" | "dat">;
 };
 
 export type BundleTokenFt = BundleTokenBase & {
-  operation: Extract<CommitOperation, "ft">;
+  contract: Extract<TokenContractType, "ft">;
   ticker: string;
   supply: number;
 };

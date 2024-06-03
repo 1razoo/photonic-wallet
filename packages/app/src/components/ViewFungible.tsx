@@ -111,7 +111,7 @@ export default function ViewFungible({
     []
   );
   const txid = useRef("");
-  const { onCopy: onLinkCopy } = useClipboard(token?.fileSrc || "");
+  const { onCopy: onLinkCopy } = useClipboard(token?.remote?.src || "");
 
   // TODO show loading or 404
   if (!token) {
@@ -142,16 +142,16 @@ export default function ViewFungible({
     successDisclosure.onOpen();
   };
 
-  const isIPFS = token.fileSrc?.startsWith("ipfs://");
+  const isIPFS = token.remote?.src?.startsWith("ipfs://");
   const isKnownEmbed = [
-    ".txt",
-    ".jpg",
-    ".png",
-    ".gif",
-    ".webp",
-    ".svg",
-    ".avif",
-  ].includes(token.filename?.substring(token.filename?.lastIndexOf(".")) || "");
+    "text/plain",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "image/avif",
+    "image/svg+xml",
+  ].includes(token.embed?.t || "");
 
   return (
     <>
@@ -222,15 +222,15 @@ export default function ViewFungible({
                   </ValueTag>
                 </Flex>
               </GridItem>
-              {token.file && !isKnownEmbed && (
+              {token.embed && !isKnownEmbed && (
                 <Warning>{t`Files may be unsafe and result in loss of funds`}</Warning>
               )}
-              {!token.file && token.fileSrc && !isIPFS && (
+              {!token.embed && token.remote && !isIPFS && (
                 <Warning>
                   {t`URLs may be unsafe and result in loss of funds`}
                 </Warning>
               )}
-              {!token.file && token.fileSrc && (
+              {!token.embed && token.remote && (
                 <>
                   <GridItem
                     as={Button}

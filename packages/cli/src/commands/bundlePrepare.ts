@@ -1,4 +1,5 @@
 import path from "path";
+import mime from "mime";
 import { Command } from "commander";
 import chalk from "chalk";
 import fs from "fs";
@@ -20,7 +21,12 @@ import {
   readJson,
   resolveDir,
 } from "../utils";
-import type { BundleFile, RemoteTokenFile, StateFile } from "../types";
+import type {
+  BundleFile,
+  EmbeddedTokenFile,
+  RemoteTokenFile,
+  StateFile,
+} from "../types";
 import { bundleFileSchema } from "../schemas";
 import { rimraf } from "rimraf";
 import { loadConfig } from "../config";
@@ -146,12 +152,16 @@ export default async function bundlePrepare(this: Command, inputDir?: string) {
             }
           }
         } else {
-          const localFilename = tokenFile as string;
+          const embed = tokenFile as EmbeddedTokenFile;
           if (
-            fs.statSync(path.join(bundleDir, localFilename)).size >
+            fs.statSync(path.join(bundleDir, embed.path)).size >
             config.maxFileSize
           ) {
-            throw new Error(`File '${localFilename}' is too large`);
+            throw new Error(`File '${embed.path}' is too large`);
+          }
+          if (!embed.contentType) {
+            const contentType = mime.getType(embed.path);
+            embed.contentType = contentType || "application/octet-stream";
           }
         }
         done++;

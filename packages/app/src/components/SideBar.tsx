@@ -15,7 +15,7 @@ import { RepeatClockIcon } from "@chakra-ui/icons";
 import { t } from "@lingui/macro";
 import { HiOutlineAtSymbol } from "react-icons/hi";
 import { MdHome } from "react-icons/md";
-import { TbTriangleSquareCircle, TbCircles, TbCoins } from "react-icons/tb";
+import { TbTriangleSquareCircle, TbCoins, TbStack2 } from "react-icons/tb";
 import MenuButton from "./MenuButton";
 import SyncBar from "./SyncBar";
 
@@ -69,35 +69,35 @@ export default function SideBar({ ...rest }: GridProps) {
         <MenuButton
           display={{ base: "inline-flex", lg: "none" }}
           to="/home"
-          leftIcon={<Icon as={MdHome} boxSize={4} />}
+          leftIcon={<Icon as={MdHome} boxSize={5} />}
         >
           {t`Home`}
         </MenuButton>
         <MenuButton
           to="/objects"
           match="/objects"
-          leftIcon={<Icon as={TbTriangleSquareCircle} boxSize={4} />}
+          leftIcon={<Icon as={TbTriangleSquareCircle} boxSize={5} />}
         >
           {t`Digital Objects`}
         </MenuButton>
         <MenuButton
           to="/fungible"
           match="/fungible"
-          leftIcon={<Icon as={TbCircles} boxSize={4} />}
+          leftIcon={<Icon as={TbStack2} boxSize={5} />}
         >
           {t`Fungible Tokens`}
         </MenuButton>
         <MenuButton
           display="none"
           to="/names"
-          leftIcon={<Icon as={HiOutlineAtSymbol} boxSize={4} />}
+          leftIcon={<Icon as={HiOutlineAtSymbol} boxSize={5} />}
         >
           {t`Universal Names`}
         </MenuButton>
-        <MenuButton to="/coins" leftIcon={<Icon as={TbCoins} boxSize={4} />}>
+        <MenuButton to="/coins" leftIcon={<Icon as={TbCoins} boxSize={5} />}>
           {t`Coins`}
         </MenuButton>
-        <MenuButton to="/history" leftIcon={<RepeatClockIcon boxSize={4} />}>
+        <MenuButton to="/history" leftIcon={<RepeatClockIcon boxSize={5} />}>
           {t`History`}
         </MenuButton>
       </SimpleGrid>

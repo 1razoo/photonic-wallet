@@ -285,6 +285,9 @@ importers:
       joi:
         specifier: ^17.12.0
         version: 17.12.0
+      mime:
+        specifier: ^3.0.0
+        version: 3.0.0
       ora:
         specifier: ^8.0.1
         version: 8.0.1
@@ -310,6 +313,9 @@ importers:
       '@types/gradient-string':
         specifier: ^1.1.5
         version: 1.1.5
+      '@types/mime':
+        specifier: ^3.0.2
+        version: 3.0.4
       '@types/node':
         specifier: ^20.10.5
         version: 20.11.5

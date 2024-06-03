@@ -84,6 +84,16 @@ export function fundTx(
     fee: number;
   } = bsvCoinSelect(inputs, target, feeRate, changeScript);
 
+  if (!selected.inputs) {
+    return {
+      funded: false,
+      funding: [],
+      remaining: utxos,
+      change: [],
+      fee: 0,
+    };
+  }
+
   // Find funding inputs
   const remaining = [...utxos];
   const funding = selected.inputs
@@ -106,7 +116,7 @@ export function fundTx(
   // Find change outputs
   const change = selected.outputs.slice(target.length);
 
-  return { funding, remaining, change, fee: selected.fee };
+  return { funded: true, funding, remaining, change, fee: selected.fee };
 }
 
 export function updateUnspent(

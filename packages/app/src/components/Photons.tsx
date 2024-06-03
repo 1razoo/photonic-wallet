@@ -3,7 +3,7 @@ import { network } from "@app/signals";
 
 export default function Photons({ value }: { value: number }) {
   if (value < 10000) {
-    return <>{value}~</>;
+    return <>{value}ph</>;
   }
   return (
     <>

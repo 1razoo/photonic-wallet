@@ -32,24 +32,28 @@ const tokenBaseSchema = Joi.object({
   containerRefs: Joi.array().items(refString),
   files: Joi.object().pattern(Joi.string(), [
     Joi.object({
-      src: Joi.string().when("$prepared", { is: true, then: Joi.required() }),
+      contentType: Joi.string(),
+      src: Joi.string().required(),
       hash: [Joi.boolean(), Joi.string().hex()],
       stamp: Joi.boolean(),
     }),
-    Joi.string(),
+    {
+      contentType: Joi.string(),
+      path: Joi.string(),
+    },
   ]),
   attrs: Joi.object().pattern(Joi.string(), Joi.any()),
 });
 
 const nftSchema = tokenBaseSchema.append({
-  operation: Joi.valid("nft", "dat").when("$prepared", {
+  contract: Joi.valid("nft", "dat").when("$prepared", {
     is: true,
     then: Joi.required(),
   }),
 });
 
 const ftSchema = tokenBaseSchema.append({
-  operation: Joi.valid("ft").when("$prepared", {
+  contract: Joi.valid("ft").when("$prepared", {
     is: true,
     then: Joi.required(),
   }),

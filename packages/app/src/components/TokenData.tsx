@@ -11,6 +11,7 @@ import { t } from "@lingui/macro";
 import { SmartToken } from "@app/types";
 import { DownloadIcon } from "@chakra-ui/icons";
 import ActionIcon from "./ActionIcon";
+import mime from "mime";
 
 export default function TokenData({ rst }: { rst: SmartToken }) {
   const reveal = rst.revealOutpoint && Outpoint.fromString(rst.revealOutpoint);
@@ -51,7 +52,14 @@ export default function TokenData({ rst }: { rst: SmartToken }) {
           wordBreak="break-all"
           bg="blackAlpha.300"
         >
-          {jsonHex({ ...decoded.payload, ...decoded.files }, 36)}
+          {jsonHex(
+            {
+              ...decoded.payload,
+              ...decoded.embeddedFiles,
+              ...decoded.remoteFiles,
+            },
+            36
+          )}
         </Box>
       </PropertyCard>
       <SimpleGrid columns={{ base: 1, lg: 2 }} gap={2}>
@@ -65,12 +73,12 @@ export default function TokenData({ rst }: { rst: SmartToken }) {
             {t`Download transaction`}
           </DownloadLink>
         )}
-        {rst.file && (
+        {rst.embed && (
           <DownloadLink
             leftIcon={<ActionIcon as={DownloadIcon} />}
             mimeType="application/octet-stream"
-            data={rst.file}
-            filename={rst.filename || "file"}
+            data={rst.embed.b}
+            filename={`main.${mime.getExtension(rst.embed.t) || "dat"}`}
           >
             {t`Download main file`}
           </DownloadLink>

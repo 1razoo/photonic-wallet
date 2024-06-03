@@ -75,10 +75,13 @@ export interface SmartToken {
   author: string;
   container: string;
   attrs: { [key: string]: string };
-  fileSrc?: string; // Remote file URL
-  file?: { t: string; b: ArrayBuffer }; // Embedded file. TODO save multiple files? Should this go in OPFS or reference the OPFS raw tx?
-  hash?: ArrayBuffer;
-  hashstamp?: ArrayBuffer;
+  embed?: { t: string; b: ArrayBuffer }; // Embedded file. TODO save multiple files? Should this go in OPFS or reference the OPFS raw tx?
+  remote?: {
+    t: string;
+    src: string;
+    h?: ArrayBuffer;
+    hs?: ArrayBuffer;
+  }; // Remote file
   height?: number;
 }
 

@@ -24,7 +24,7 @@ export default function Fungible() {
 }
 
 function TokenGrid() {
-  const [rsts, balances] = useLiveQuery(
+  const [tokens, balances] = useLiveQuery(
     async () => {
       // Get all FTs
       const tokens = await db.rst
@@ -50,33 +50,32 @@ function TokenGrid() {
     balances &&
     (balances[rst.ref]?.confirmed || 0 + balances[rst.ref]?.unconfirmed || 0);
 
-  if (!rsts) {
+  if (!tokens) {
     return null;
   }
+
+  const withBalance = tokens.filter((t) => hasBalance(t));
 
   return (
     <>
       <PageHeader toolbar={<MintMenu />}>{t`Fungible Tokens`}</PageHeader>
       <Box px={4} overflowY="auto">
-        {rsts.length === 0 ? (
+        {withBalance.length === 0 ? (
           <NoContent>{t`No assets`}</NoContent>
         ) : (
-          rsts.map(
-            (token) =>
-              hasBalance(token) && (
-                <TokenRow
-                  rst={token}
-                  value={
-                    (balances[token.ref]?.confirmed || 0) +
-                    (balances[token.ref]?.unconfirmed || 0)
-                  }
-                  key={token.ref}
-                  to={`/fungible/token/${token.ref}`}
-                  size="sm"
-                  defaultIcon={RiQuestionFill}
-                />
-              )
-          )
+          tokens.map((token) => (
+            <TokenRow
+              rst={token}
+              value={
+                (balances[token.ref]?.confirmed || 0) +
+                (balances[token.ref]?.unconfirmed || 0)
+              }
+              key={token.ref}
+              to={`/fungible/token/${token.ref}`}
+              size="sm"
+              defaultIcon={RiQuestionFill}
+            />
+          ))
         )}
       </Box>
     </>

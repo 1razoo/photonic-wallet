@@ -26,6 +26,8 @@ import type {
   BundleTokenNft,
   RevealFile,
   StateFile,
+  EmbeddedTokenFile,
+  RemoteTokenFile,
 } from "../types";
 import path from "path";
 import {
@@ -44,6 +46,7 @@ import {
 } from "@photonic/lib/types";
 import { loadConfig } from "../config";
 import ora, { Ora } from "ora";
+import { RST_FT, RST_NFT } from "@photonic/lib/protocols";
 
 const { Address, Transaction } = rjs;
 
@@ -168,15 +171,17 @@ export default async function bundleCommit(
     const files =
       token.files &&
       Object.fromEntries(
-        Object.entries(token.files).map(([payloadFilename, tokenFile]) => {
-          if (typeof tokenFile === "string") {
-            return [payloadFilename, readFile(tokenFile)];
+        Object.entries(token.files).map(([key, tokenFile]) => {
+          if (typeof (tokenFile as EmbeddedTokenFile).path === "string") {
+            const embed = tokenFile as EmbeddedTokenFile;
+            return [key, { t: embed.contentType, b: readFile(embed.path) }];
           }
-          const { src, hash } = tokenFile;
-          const srcHash = bytesToHex(sha256(tokenFile.src));
-          const hs = tokenFile.stamp && readFile("cache", `hs.${srcHash}.webp`);
+          const remote = tokenFile as RemoteTokenFile;
+          const { src, hash } = remote;
+          const srcHash = bytesToHex(sha256(remote.src));
+          const hs = remote.stamp && readFile("cache", `hs.${srcHash}.webp`);
           return [
-            payloadFilename,
+            key,
             {
               src,
               ...(hash && typeof hash === "string" && { h: hexToBytes(hash) }),
@@ -203,14 +208,14 @@ export default async function bundleCommit(
       ].filter(([, v]) => (Array.isArray(v) ? v.length : v))
     );
 
-    const operation = token.operation;
+    const contract = token.contract;
     const args = {
-      i: true, // TODO support mutable outputs
-      ...(operation === "ft" && { ticker: (token as BundleTokenFt).ticker }),
+      p: [contract === "ft" ? RST_FT : RST_NFT],
+      ...(contract === "ft" && { ticker: (token as BundleTokenFt).ticker }),
     };
 
     return {
-      operation,
+      contract,
       outputValue: (token as BundleTokenFt).supply || 1,
       payload: {
         ...args,
@@ -229,7 +234,7 @@ export default async function bundleCommit(
   });
 
   // Get UTXOs for funding
-  let unspentRxd = electrumToCoinSel(
+  let unspentRxd: Utxo[] = electrumToCoinSel(
     await client.request(
       "blockchain.scripthash.listunspent",
       p2pkhScriptHash(wallet.address)
@@ -276,19 +281,25 @@ export default async function bundleCommit(
     }
   };
 
-  const batches = commitBundle(
-    bundle.reveal.method,
-    wallet.address,
-    wallet.wif,
-    unspentRxd,
-    tokens,
-    delegate && {
-      ref: delegate.ref,
-      utxos: delegate.utxos,
-    },
-    bundle.commit.batchSize,
-    step
-  );
+  let batches;
+  try {
+    batches = commitBundle(
+      bundle.reveal.method,
+      wallet.address,
+      wallet.wif,
+      unspentRxd,
+      tokens,
+      delegate && {
+        ref: delegate.ref,
+        utxos: delegate.utxos,
+      },
+      bundle.commit.batchSize,
+      step
+    );
+  } catch (error) {
+    this.error(errorMessage((error as Error).message || "Error"));
+  }
+
   fees.push(...batches.fees);
   progress.succeed();
 

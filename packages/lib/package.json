@@ -13,7 +13,8 @@
     "./ipfs": "./src/ipfs.ts",
     "./encryption": "./src/encryption.ts",
     "./mint": "./src/mint.ts",
-    "./types": "./src/types.ts"
+    "./types": "./src/types.ts",
+    "./protocols": "./src/protocols.ts"
   },
   "scripts": {
     "lint": "eslint \"src/**/*.ts*\"",

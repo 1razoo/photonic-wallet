@@ -43,7 +43,7 @@ export default function TokenDetails({
   const authorRef = rst.author && Outpoint.fromString(rst.author);
   const containerRef = rst.container && Outpoint.fromString(rst.container);
   const hasAttrs = rst.attrs && Object.keys(rst.attrs).length > 0;
-  const isIPFS = rst.fileSrc?.startsWith("ipfs://");
+  const isIPFS = rst.remote?.src?.startsWith("ipfs://");
 
   return (
     <div>
@@ -59,7 +59,7 @@ export default function TokenDetails({
                 {rst.description}
               </PropertyCard>
             )}
-            <PropertyCard heading={t`Radiant Ref`} mb={4}>
+            <PropertyCard heading={t`Radiant ID`} mb={4}>
               <div>
                 <Identicon
                   value={ref.refHash()}
@@ -151,12 +151,12 @@ export default function TokenDetails({
                 <PropertyCard heading={t`IPFS CID`}>
                   <div>
                     <Identifier showCopy>
-                      {rst.fileSrc?.replace("ipfs://", "")}
+                      {rst.remote?.src.replace("ipfs://", "")}
                     </Identifier>
                   </div>
                 </PropertyCard>
               )}
-              {rst.hashstamp && (
+              {rst.remote?.hs && (
                 <PropertyCard
                   heading={t`HashStamp`}
                   info={
@@ -176,30 +176,30 @@ export default function TokenDetails({
                   <Flex gap={4}>
                     <Image
                       src={`data:image/webp;base64, ${btoa(
-                        String.fromCharCode(...new Uint8Array(rst.hashstamp))
+                        String.fromCharCode(...new Uint8Array(rst.remote?.hs))
                       )}`}
                       width="64px"
                       height="64px"
                       objectFit="contain"
                       backgroundColor="white"
                     />
-                    {rst.hash && (
+                    {rst.remote?.h && (
                       <div>
                         <Identifier>
-                          {bytesToHex(new Uint8Array(rst.hash))}
+                          {bytesToHex(new Uint8Array(rst.remote?.h))}
                         </Identifier>
                       </div>
                     )}
                   </Flex>
                 </PropertyCard>
               )}
-              {rst.file && rst.fileSrc && (
+              {rst.embed && (
                 <>
                   <PropertyCard heading={t`Content length`}>
-                    {filesize(rst.file.byteLength) as string}
+                    {filesize(rst.embed.b.byteLength) as string}
                   </PropertyCard>
                   <PropertyCard heading={t`Content type`}>
-                    {mime.getType(rst.fileSrc)}
+                    {rst.embed.t || "Unknown"}
                   </PropertyCard>
                 </>
               )}

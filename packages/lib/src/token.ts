@@ -9,6 +9,7 @@ import {
   SmartTokenFile,
   SmartTokenPayload,
   SmartTokenRemoteFile,
+  TokenContractType,
 } from "./types";
 import { bytesToHex } from "@noble/hashes/utils";
 import { pushMinimalAsm } from "./script";
@@ -17,7 +18,7 @@ import { pushMinimalAsm } from "./script";
 const { Script } = rjs;
 type Script = rjs.Script;
 
-export const rstHex = "72633032"; // rc02
+export const rstHex = "726333"; // rc3
 //export const rstHex = ""; // rst
 export const rstBuffer = Buffer.from(rstHex, "hex");
 
@@ -37,21 +38,26 @@ const filterFileObj = (
     (remote.h === undefined || remote.h instanceof Uint8Array) &&
     (remote.hs === undefined || remote.hs instanceof Uint8Array)
   ) {
-    return { remote: { src: remote.src, h: remote.h, hs: remote.hs } };
+    return {
+      remote: {
+        t: typeof remote.t === "string" ? remote.t : "",
+        src: remote.src,
+        h: remote.h,
+        hs: remote.hs,
+      },
+    };
   }
   return {};
 };
 
 export type DecodedRst = {
-  operation: string;
   payload: SmartTokenPayload;
   embeddedFiles: { [key: string]: SmartTokenEmbeddedFile };
   remoteFiles: { [key: string]: SmartTokenRemoteFile };
 };
 
 export function decodeRst(script: Script): undefined | DecodedRst {
-  let result: { operation?: string; payload: object } = {
-    operation: undefined,
+  const result: { payload: object } = {
     payload: {},
   };
   (
@@ -62,20 +68,15 @@ export function decodeRst(script: Script): undefined | DecodedRst {
   ).some(({ opcodenum, buf }, index) => {
     if (
       !buf ||
-      opcodenum !== 4 ||
+      opcodenum !== 3 ||
       Buffer.from(buf).toString("hex") !== rstHex ||
-      script.chunks.length <= index + 2
+      script.chunks.length <= index + 1
     ) {
       return false;
     }
 
-    const operation = script.chunks[index + 1];
-    const payload = script.chunks[index + 2];
-    if (
-      (operation.opcodenum !== 2 && operation.opcodenum !== 3) ||
-      !operation.buf ||
-      !payload.buf
-    ) {
+    const payload = script.chunks[index + 1];
+    if (!payload.buf) {
       return false;
     }
     const decoded = decode(Buffer.from(payload.buf));
@@ -83,17 +84,11 @@ export function decodeRst(script: Script): undefined | DecodedRst {
       return false;
     }
 
-    result = {
-      operation: Buffer.from(operation.buf).toString(),
-      payload: decoded,
-    };
+    result.payload = decoded;
     return true;
   });
 
-  if (!result.operation || !["nft", "ft", "dat"].includes(result.operation))
-    return undefined;
-
-  const { attrs, ...rest } = result.payload as {
+  const { p, attrs, ...rest } = result.payload as {
     [key: string]: unknown;
   };
 
@@ -120,8 +115,10 @@ export function decodeRst(script: Script): undefined | DecodedRst {
   );
 
   return {
-    operation: result.operation,
     payload: {
+      p: Array.isArray(p)
+        ? p.filter((v) => ["string", "number"].includes(typeof v))
+        : [],
       attrs: toObject(attrs),
       ...Object.fromEntries(meta),
     },
@@ -135,42 +132,36 @@ export function decodeRst(script: Script): undefined | DecodedRst {
 }
 
 export function encodeRst(
-  operation: string,
+  contract: TokenContractType,
   payload: unknown
-): { operation: string; script: string; payloadHash: string } {
+): { contract: TokenContractType; scriptSig: string; payloadHash: string } {
   const encodedPayload = encode(payload);
   return {
-    operation,
-    script: new Script()
-      .add(rstBuffer)
-      .add(Buffer.from(operation))
-      .add(encodedPayload)
-      .toHex(),
+    contract,
+    scriptSig: new Script().add(rstBuffer).add(encodedPayload).toHex(),
     payloadHash: bytesToHex(sha256(sha256(Buffer.from(encodedPayload)))),
   };
 }
 
 export function encodeRstMutable(
-  operation: "mod" | "sl",
   payload: unknown,
   contractOutputIndex: number,
   refHashIndex: number,
   refIndex: number,
   tokenOutputIndex: number
 ) {
-  const opHex = Buffer.from(operation).toString("hex");
   const encodedPayload = encode(payload);
-  const asm = `${rstHex} ${opHex} ${encodedPayload.toString(
-    "hex"
-  )} ${pushMinimalAsm(contractOutputIndex)} ${pushMinimalAsm(
-    refHashIndex
-  )} ${pushMinimalAsm(refIndex)} ${pushMinimalAsm(tokenOutputIndex)}`;
-  const script = Script.fromASM(asm);
-  const scriptSigHash = bytesToHex(sha256(script.toBuffer()));
+  const asm = `${rstHex} ${encodedPayload.toString("hex")} ${pushMinimalAsm(
+    contractOutputIndex
+  )} ${pushMinimalAsm(refHashIndex)} ${pushMinimalAsm(
+    refIndex
+  )} ${pushMinimalAsm(tokenOutputIndex)}`;
+  const scriptSig = Script.fromASM(asm);
+  const scriptSigHash = bytesToHex(sha256(scriptSig.toBuffer()));
   const payloadHash = bytesToHex(sha256(sha256(Buffer.from(encodedPayload))));
 
   return {
-    script,
+    scriptSig,
     payloadHash,
     scriptSigHash,
   };

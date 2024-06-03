@@ -27,6 +27,7 @@ import ElectrumManager from "@app/electrum/ElectrumManager";
 import opfs from "@app/opfs";
 import setSubscriptionStatus from "./setSubscriptionStatus";
 import { batchRequests } from "@lib/util";
+import { RST_FT, RST_NFT } from "@lib/protocols";
 
 // 500KB size limit
 const fileSizeLimit = 500_000;
@@ -334,13 +335,24 @@ export class NFTWorker implements Subscription {
     }
 
     const related: string[] = [];
-    const { payload, embeddedFiles, remoteFiles, operation } = rst;
-    const { in: containers, by: authors } = payload;
-    // Map rst operation (ft, nft, dat) to enum
-    const tokenType =
-      SmartTokenType[operation.toUpperCase() as keyof typeof SmartTokenType];
+    const { payload, embeddedFiles, remoteFiles } = rst;
 
-    console.debug("RST payload", payload);
+    const protocols = payload.p;
+
+    const contract = protocols.includes(RST_FT)
+      ? "ft"
+      : protocols.includes(RST_NFT)
+      ? "nft"
+      : undefined;
+
+    if (!contract) {
+      console.info("Unregognised protocol");
+      return { related: [], valid: false };
+    }
+    const { in: containers, by: authors } = payload;
+    // Map token protocol to enum
+    const tokenType =
+      SmartTokenType[contract.toUpperCase() as keyof typeof SmartTokenType];
 
     // Look for related tokens in outputs
     const outputTokens = reveal.outputs
@@ -354,14 +366,10 @@ export class NFTWorker implements Subscription {
     const type = toString(payload.type) || "object";
     const immutable = isImmutableToken(payload);
 
-    const {
-      hs: hashstamp,
-      h: hash,
-      src: fileSrc,
-    } = remoteFiles.image || { hs: undefined, h: undefined, src: undefined };
-    const file =
-      embeddedFiles.image && embeddedFiles.image.b.length < fileSizeLimit
-        ? embeddedFiles.image
+    const remote = remoteFiles.main;
+    const embed =
+      embeddedFiles.main && embeddedFiles.main.b.length < fileSizeLimit
+        ? embeddedFiles.main
         : undefined;
 
     // Containers and authors will be fetched later
@@ -385,11 +393,9 @@ export class NFTWorker implements Subscription {
       author,
       container,
       attrs: filterAttrs(payload.attrs),
-      fileSrc: fileSrc || undefined,
       // TODO store files in OPFS instead of IndexedDB
-      file,
-      hash,
-      hashstamp,
+      embed,
+      remote,
       height: receivedTxo?.height || Infinity,
     };
 

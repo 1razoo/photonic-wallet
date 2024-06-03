@@ -32,7 +32,7 @@ const UnlockButton = () => {
     return (
       <MenuButton
         as="button"
-        leftIcon={hover ? <UnlockIcon boxSize={4} /> : <LockIcon boxSize={4} />}
+        leftIcon={hover ? <UnlockIcon boxSize={5} /> : <LockIcon boxSize={5} />}
         onClick={() => unlockWallet()}
         onMouseOver={() => setHover(true)}
         onMouseOut={() => setHover(false)}
@@ -45,7 +45,7 @@ const UnlockButton = () => {
   return (
     <MenuButton
       as="button"
-      leftIcon={hover ? <LockIcon boxSize={4} /> : <UnlockIcon boxSize={4} />}
+      leftIcon={hover ? <LockIcon boxSize={5} /> : <UnlockIcon boxSize={5} />}
       onClick={() => {
         onClickLock();
         setHover(false);
@@ -84,7 +84,7 @@ const ConnectButton = () => {
       <MenuButton
         as="button"
         leftIcon={
-          <Icon as={hover ? DisconnectedIcon : ConnectedIcon} boxSize={4} />
+          <Icon as={hover ? DisconnectedIcon : ConnectedIcon} boxSize={5} />
         }
         onClick={() => {
           electrumWorker.value.disconnect("user");
@@ -110,7 +110,7 @@ const ConnectButton = () => {
     <MenuButton
       as="button"
       leftIcon={
-        <Icon as={hover ? ConnectedIcon : DisconnectedIcon} boxSize={4} />
+        <Icon as={hover ? ConnectedIcon : DisconnectedIcon} boxSize={5} />
       }
       onClick={() => {
         onClickConnect();
@@ -131,7 +131,7 @@ export default function StatusBar() {
       <UnlockButton />
       <MenuButton
         to="/settings/wallet"
-        leftIcon={<SettingsIcon boxSize={4} />}
+        leftIcon={<SettingsIcon boxSize={5} />}
         match="/settings"
       >
         {t`Settings`}

@@ -59,7 +59,7 @@ export default function EditTokenTest({
     const payload: Partial<SmartTokenPayload> = {
       "main.txt": new TextEncoder().encode("mutable token is working"),
     };
-    const rst = encodeRstMutable("mod", payload, 1, 1, 0, 0);
+    const rst = encodeRstMutable(payload, 1, 1, 0, 0);
     const mutOutputScript = mutableNftScript(mutRefLE, rst.payloadHash);
     const nftOutputScript = nftAuthScript(wallet.value.address, nftRefLE, [
       { ref: mutRefLE, scriptSigHash: rst.scriptSigHash },
@@ -98,6 +98,8 @@ export default function EditTokenTest({
       feeRate.value
     );
 
+    if (!fund.funded) return;
+
     inputs.push(...fund.funding);
     outputs.push(...fund.change);
 
@@ -112,7 +114,7 @@ export default function EditTokenTest({
           // Clear p2pkh script sig
           script.set({ chunks: [] });
           // Add mutable script sig
-          script.add(rst.script);
+          script.add(rst.scriptSig);
         }
       }
     );
