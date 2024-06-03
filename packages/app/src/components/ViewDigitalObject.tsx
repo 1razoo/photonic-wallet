@@ -113,7 +113,7 @@ export default function ViewDigitalObject({
     []
   );
   const txid = useRef("");
-  const { onCopy: onLinkCopy } = useClipboard(nft?.remote?.src || "");
+  const { onCopy: onLinkCopy } = useClipboard(nft?.remote?.u || "");
 
   // TODO show loading or 404
   if (!txo || !nft) {
@@ -144,7 +144,7 @@ export default function ViewDigitalObject({
     successDisclosure.onOpen();
   };
 
-  const isIPFS = nft.remote?.src?.startsWith("ipfs://");
+  const isIPFS = nft.remote?.u?.startsWith("ipfs://");
   const isKnownEmbed = [
     "text/plain",
     "image/jpeg",

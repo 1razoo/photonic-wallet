@@ -43,7 +43,7 @@ export default function TokenDetails({
   const authorRef = rst.author && Outpoint.fromString(rst.author);
   const containerRef = rst.container && Outpoint.fromString(rst.container);
   const hasAttrs = rst.attrs && Object.keys(rst.attrs).length > 0;
-  const isIPFS = rst.remote?.src?.startsWith("ipfs://");
+  const isIPFS = rst.remote?.u?.startsWith("ipfs://");
 
   return (
     <div>
@@ -151,7 +151,7 @@ export default function TokenDetails({
                 <PropertyCard heading={t`IPFS CID`}>
                   <div>
                     <Identifier showCopy>
-                      {rst.remote?.src.replace("ipfs://", "")}
+                      {rst.remote?.u.replace("ipfs://", "")}
                     </Identifier>
                   </div>
                 </PropertyCard>

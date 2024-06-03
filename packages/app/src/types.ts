@@ -78,7 +78,7 @@ export interface SmartToken {
   embed?: { t: string; b: ArrayBuffer }; // Embedded file. TODO save multiple files? Should this go in OPFS or reference the OPFS raw tx?
   remote?: {
     t: string;
-    src: string;
+    u: string;
     h?: ArrayBuffer;
     hs?: ArrayBuffer;
   }; // Remote file

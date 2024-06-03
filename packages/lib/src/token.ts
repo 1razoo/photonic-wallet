@@ -34,14 +34,14 @@ const filterFileObj = (
   }
   const remote = obj as Partial<SmartTokenRemoteFile>;
   if (
-    typeof remote.src === "string" &&
+    typeof remote.u === "string" &&
     (remote.h === undefined || remote.h instanceof Uint8Array) &&
     (remote.hs === undefined || remote.hs instanceof Uint8Array)
   ) {
     return {
       remote: {
         t: typeof remote.t === "string" ? remote.t : "",
-        src: remote.src,
+        u: remote.u,
         h: remote.h,
         hs: remote.hs,
       },

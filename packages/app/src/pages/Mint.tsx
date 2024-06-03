@@ -173,7 +173,7 @@ const encodeContent = (
   const urlContentType =
     (urlFileType && mime.getType(urlFileType)) || "text/html";
   if (mode === "url") {
-    return [`main`, { t: urlContentType, src: url as string }];
+    return [`main`, { t: urlContentType, u: url as string }];
   }
 
   if (mode === "text") {
@@ -182,7 +182,7 @@ const encodeContent = (
 
   if (fileState.file) {
     if (fileState.ipfs) {
-      return ["main", { t: urlContentType, src: `ipfs://${fileState.cid}` }];
+      return ["main", { t: urlContentType, u: `ipfs://${fileState.cid}` }];
     }
 
     return [

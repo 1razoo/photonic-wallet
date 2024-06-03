@@ -50,7 +50,7 @@ export type SmartTokenEmbeddedFile = {
 
 export type SmartTokenRemoteFile = {
   t: string;
-  src: string;
+  u: string;
   h?: Uint8Array;
   hs?: Uint8Array;
 };

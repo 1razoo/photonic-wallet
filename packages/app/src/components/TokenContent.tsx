@@ -42,8 +42,8 @@ export default function TokenContent({
 
   // Image URL
   if (remote && remote.t?.startsWith("image/")) {
-    const isIpfs = remote.src?.match(/^ipfs:\/\//);
-    const url = isIpfs ? useIpfsUrl(remote.src) : remote.src;
+    const isIpfs = remote.u?.match(/^ipfs:\/\//);
+    const url = isIpfs ? useIpfsUrl(remote.u) : remote.u;
     if (isIpfs) {
       return (
         <Image
@@ -80,13 +80,13 @@ export default function TokenContent({
       <>
         {thumbnail || (
           <Box borderRadius="md" overflow="hidden" mb={4}>
-            <QRCodeSVG size={256} value={remote.src} includeMargin />
+            <QRCodeSVG size={256} value={remote.u} includeMargin />
           </Box>
         )}
         <div>
-          <Identifier copyValue={remote.src} showCopy>
-            {remote.src.substring(0, 200)}
-            {remote.src.length > 200 && "..."}
+          <Identifier copyValue={remote.u} showCopy>
+            {remote.u.substring(0, 200)}
+            {remote.u.length > 200 && "..."}
           </Identifier>
         </div>
       </>

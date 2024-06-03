@@ -111,7 +111,7 @@ export default function ViewFungible({
     []
   );
   const txid = useRef("");
-  const { onCopy: onLinkCopy } = useClipboard(token?.remote?.src || "");
+  const { onCopy: onLinkCopy } = useClipboard(token?.remote?.u || "");
 
   // TODO show loading or 404
   if (!token) {
@@ -142,7 +142,7 @@ export default function ViewFungible({
     successDisclosure.onOpen();
   };
 
-  const isIPFS = token.remote?.src?.startsWith("ipfs://");
+  const isIPFS = token.remote?.u?.startsWith("ipfs://");
   const isKnownEmbed = [
     "text/plain",
     "image/jpeg",
