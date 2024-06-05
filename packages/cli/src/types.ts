@@ -1,10 +1,10 @@
 import {
   TokenContractType,
   NetworkKey,
-  TokenCommitData,
   RevealPsbtParams,
   RevealDirectParams,
   Utxo,
+  TokenMint,
 } from "@photonic/lib/types";
 
 export type RemoteTokenFile = {
@@ -88,7 +88,7 @@ export type CommitFile = {
     tx: { base: string; mint: string };
     ref: string;
   };
-  commits: { txid: string; tx: string; data: TokenCommitData[] }[];
+  commits: { txid: string; tx: string; data: TokenMint[] }[];
 };
 
 export type DirectMintFile = {
