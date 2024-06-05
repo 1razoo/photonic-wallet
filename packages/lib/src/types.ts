@@ -37,7 +37,7 @@ export type SmartTokenPayload = {
   p: (string | number)[];
   in?: Uint8Array[];
   by?: Uint8Array[];
-  attrs: {
+  attrs?: {
     [key: string]: unknown;
   };
   [key: string]: unknown;
@@ -114,7 +114,7 @@ export type ElectrumHeadersResponse = {
   max: number;
 };
 
-export type TokenCommitData = {
+export type TokenMint = {
   utxo: {
     txid: string;
     vout: number;
@@ -123,7 +123,9 @@ export type TokenCommitData = {
   };
   immutable: boolean;
   outputValue: number;
-  rst: { contract: TokenContractType; scriptSig: string; payloadHash: string };
+  contract: TokenContractType;
+  revealScriptSig: string;
+  payloadHash: string;
 };
 
 export default {};

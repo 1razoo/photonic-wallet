@@ -1,5 +1,4 @@
 import { Buffer } from "buffer";
-import { base32crockford } from "@scure/base";
 import { sha256 } from "@noble/hashes/sha256";
 
 export default class Outpoint {

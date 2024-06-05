@@ -16,7 +16,6 @@ import {
 } from "@chakra-ui/react";
 import { t } from "@lingui/macro";
 import { filesize } from "filesize";
-import mime from "mime";
 import TokenData from "./TokenData";
 import Identicon from "./Identicon";
 import Identifier from "./Identifier";
@@ -26,6 +25,32 @@ import Outpoint from "@lib/Outpoint";
 import createExplorerUrl from "@app/network/createExplorerUrl";
 import { Link } from "react-router-dom";
 import { PropsWithChildren } from "react";
+
+function RefProperty({ tokenRef }: { tokenRef: Outpoint }) {
+  return (
+    <div>
+      <Identicon
+        value={tokenRef.refHash()}
+        width="24px"
+        height="24px"
+        sx={{ svg: { height: "26px" } }}
+        float="left"
+      />
+      <Identifier showCopy copyValue={tokenRef.ref()}>
+        {tokenRef.ref("i")}
+      </Identifier>
+      <IconButton
+        aria-label={t`Open in block explorer`}
+        icon={<ExternalLinkIcon />}
+        size="xs"
+        variant="ghost"
+        as={Link}
+        to={createExplorerUrl(tokenRef.getTxid())}
+        target="_blank"
+      />
+    </div>
+  );
+}
 
 export default function TokenDetails({
   rst,
@@ -60,28 +85,13 @@ export default function TokenDetails({
               </PropertyCard>
             )}
             <PropertyCard heading={t`Radiant ID`} mb={4}>
-              <div>
-                <Identicon
-                  value={ref.refHash()}
-                  width="24px"
-                  height="24px"
-                  sx={{ svg: { height: "26px" } }}
-                  float="left"
-                />
-                <Identifier showCopy copyValue={ref.ref()}>
-                  {ref.ref("i")}
-                </Identifier>
-                <IconButton
-                  aria-label={t`Open in block explorer`}
-                  icon={<ExternalLinkIcon />}
-                  size="xs"
-                  variant="ghost"
-                  as={Link}
-                  to={createExplorerUrl(ref.getTxid())}
-                  target="_blank"
-                />
-              </div>
+              <RefProperty tokenRef={ref} />
             </PropertyCard>
+            {rst.location && (
+              <PropertyCard heading={t`Link`} mb={4}>
+                <RefProperty tokenRef={Outpoint.fromString(rst.location)} />
+              </PropertyCard>
+            )}
             {revealRef && (
               <PropertyCard heading={t`Mint`} mb={4}>
                 <div>

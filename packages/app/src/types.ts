@@ -69,6 +69,7 @@ export interface SmartToken {
   revealOutpoint?: string;
   spent: 0 | 1;
   fresh: 0 | 1;
+  location?: string;
   name: string;
   type: string; // User defined type
   immutable?: boolean;

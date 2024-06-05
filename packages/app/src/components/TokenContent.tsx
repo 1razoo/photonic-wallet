@@ -2,6 +2,7 @@ import { Box, Icon, Image } from "@chakra-ui/react";
 import { QRCodeSVG } from "qrcode.react";
 import { SmartToken } from "@app/types";
 import { TbLink } from "react-icons/tb";
+import { FaCircleXmark } from "react-icons/fa6";
 import {
   BsFileEarmarkFill,
   BsFillFileTextFill,
@@ -12,21 +13,6 @@ import Identifier from "./Identifier";
 import useIpfsUrl from "@app/hooks/useIpfsUrl";
 import UnsafeImage from "./UnsafeImage";
 import { IconBaseProps, IconType } from "react-icons/lib";
-
-const ContentMessage = ({ message = "No content" }: { message?: string }) => (
-  <Box
-    bg="blackAlpha.400"
-    p={4}
-    fontSize="md"
-    mx={4}
-    textAlign="center"
-    fontWeight="bold"
-    color="gray.200"
-    userSelect="none"
-  >
-    {message}
-  </Box>
-);
 
 export default function TokenContent({
   rst,
@@ -145,16 +131,14 @@ export default function TokenContent({
     }
 
     return (
-      <>
-        <Icon
-          as={BsFileEarmarkFill}
-          width="100%"
-          height="100%"
-          color="gray.500"
-          mb={2}
-        />
-        <ContentMessage />
-      </>
+      <Icon
+        as={BsFileEarmarkFill}
+        width="100%"
+        height="100%"
+        maxWidth="200px"
+        color="gray.500"
+        mb={2}
+      />
     );
   }
 
@@ -166,14 +150,10 @@ export default function TokenContent({
 
   return (
     <>
-      <Icon
-        as={defaultIcon}
-        width="100%"
-        height="100%"
-        color="gray.500"
-        mb={2}
-      />
-      <ContentMessage />
+      <Icon as={FaCircleXmark} boxSize={8} color="gray.500" />
+      <Box fontSize="md" userSelect="none" mt={2}>
+        No content
+      </Box>
     </>
   );
 }

@@ -19,7 +19,12 @@ import { Trans, t } from "@lingui/macro";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import db from "@app/db";
-import { CopyIcon, DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import {
+  CopyIcon,
+  DownloadIcon,
+  ExternalLinkIcon,
+  LinkIcon,
+} from "@chakra-ui/icons";
 import Outpoint from "@lib/Outpoint";
 import Identifier from "@app/components/Identifier";
 import SendDigitalObject from "@app/components/SendDigitalObject";
@@ -157,6 +162,7 @@ export default function ViewDigitalObject({
     "image/svg+xml",
   ].includes(nft.embed?.t || "");
   const location = Outpoint.fromUTXO(txo.txid, txo.vout);
+  const isLink = !!nft.location;
 
   return (
     <>
@@ -194,7 +200,7 @@ export default function ViewDigitalObject({
             <SimpleGrid columns={2} gap={2}>
               <GridItem
                 p={4}
-                minHeight="250px"
+                minHeight="120px"
                 alignItems="center"
                 justifyContent="center"
                 position="relative"
@@ -207,6 +213,18 @@ export default function ViewDigitalObject({
                   },
                 }}
               >
+                {isLink && (
+                  <Box
+                    position="absolute"
+                    top={2}
+                    right={2}
+                    bgColor="blackAlpha.400"
+                    p={2}
+                    borderRadius={4}
+                  >
+                    <LinkIcon boxSize={8} />
+                  </Box>
+                )}
                 <TokenContent rst={nft} />
               </GridItem>
               {nft.embed && !isKnownEmbed && (

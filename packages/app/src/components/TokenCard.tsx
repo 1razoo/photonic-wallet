@@ -7,6 +7,7 @@ import Photons from "@app/components/Photons";
 import TokenContent from "@app/components/TokenContent";
 import { TbBox, TbUserCircle } from "react-icons/tb";
 import { IconType } from "react-icons/lib";
+import { LinkIcon } from "@chakra-ui/icons";
 
 export default function TokenCard({
   rst,
@@ -22,6 +23,7 @@ export default function TokenCard({
   defaultIcon?: IconType;
 }) {
   const ref = Outpoint.fromString(rst?.ref || "");
+  const isLink = !!rst?.location;
 
   const short = ref.shortInput();
   return (
@@ -30,10 +32,23 @@ export default function TokenCard({
         bgGradient="linear(to-b, bg.100, bg.300)"
         height={size === "sm" ? "175px" : "250px"}
         display="flex"
+        position="relative"
         alignItems="center"
         justifyContent="center"
         p={2}
       >
+        {isLink && (
+          <Box
+            position="absolute"
+            top={2}
+            right={2}
+            bgColor="blackAlpha.400"
+            p={2}
+            borderRadius={4}
+          >
+            <LinkIcon boxSize={8} />
+          </Box>
+        )}
         <TokenContent rst={rst} defaultIcon={defaultIcon} thumbnail />
       </Box>
       <Flex

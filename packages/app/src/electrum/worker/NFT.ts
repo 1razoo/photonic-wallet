@@ -17,7 +17,12 @@ import {
 import { ElectrumTxMap, buildUpdateTXOs } from "./updateTxos";
 import db from "@app/db";
 import Outpoint, { reverseRef } from "@lib/Outpoint";
-import { decodeRst, filterAttrs, isImmutableToken } from "@lib/token";
+import {
+  decodeRst,
+  extractRevealPayload,
+  filterAttrs,
+  isImmutableToken,
+} from "@lib/token";
 import {
   Transaction,
   // @ts-ignore
@@ -311,27 +316,26 @@ export class NFTWorker implements Subscription {
     delegatedRefs: string[],
     fresh: boolean
   ): Promise<{ related: string[]; valid?: boolean; rst?: SmartToken }> {
-    const refTxId = ref.substring(0, 64);
-    const refVout = parseInt(ref.substring(64), 10);
-
-    // Find token script in the reveal tx
-    const revealIndex = reveal.inputs.findIndex((input) => {
-      return (
-        input.prevTxId.toString("hex") === refTxId &&
-        input.outputIndex === refVout
-      );
-    });
-    const script = revealIndex >= 0 && reveal.inputs[revealIndex].script;
-
-    if (!script) {
-      console.debug("No script at reveal index", ref);
-      return { related: [], valid: false };
-    }
-
-    const rst = decodeRst(script);
+    const { revealIndex, rst } = extractRevealPayload(ref, reveal.inputs);
     if (!rst) {
       console.info("Unrecognised token");
       return { related: [], valid: false };
+    }
+
+    let location = undefined;
+    if (rst.payload.loc && Number.isInteger(rst.payload.loc)) {
+      // Location is set to a ref offset. Get the payload and merge.
+      const offset = rst.payload.loc as number;
+      const op = Outpoint.fromString(ref);
+      const linkedRef = Outpoint.fromUTXO(
+        op.getTxid(),
+        op.getVout() + offset
+      ).toString();
+      const linked = extractRevealPayload(linkedRef, reveal.inputs);
+      if (linked.revealIndex >= 0 && linked.rst?.payload) {
+        rst.payload = { ...linked.rst.payload, ...rst.payload };
+        location = linkedRef;
+      }
     }
 
     const related: string[] = [];
@@ -389,11 +393,12 @@ export class NFTWorker implements Subscription {
       fresh: fresh ? 1 : 0,
       type,
       immutable,
+      location,
       name,
       description: toString(payload.desc),
       author,
       container,
-      attrs: filterAttrs(payload.attrs),
+      attrs: payload.attrs ? filterAttrs(payload.attrs) : {},
       // TODO store files in OPFS instead of IndexedDB
       embed,
       remote,

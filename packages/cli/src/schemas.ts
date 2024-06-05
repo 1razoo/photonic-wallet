@@ -5,6 +5,7 @@ const refString = Joi.string().hex().length(72);
 const tokenBaseSchema = Joi.object({
   // Reveal object isn't required in the bundle but can be used to prepopulate the generated reveal.json file
   // Why doesn't ...reveal.method work here?
+  // dmint not fully implemented yet
   reveal: Joi.when("$method", {
     switch: [
       {

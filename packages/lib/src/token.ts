@@ -9,11 +9,10 @@ import {
   SmartTokenFile,
   SmartTokenPayload,
   SmartTokenRemoteFile,
-  TokenContractType,
 } from "./types";
 import { bytesToHex } from "@noble/hashes/utils";
 import { pushMinimalAsm } from "./script";
-import { RST_MUT } from "./protocols";
+import { RST_MUT, RST_NFT } from "./protocols";
 
 // ESM compatibility
 const { Script } = rjs;
@@ -132,14 +131,10 @@ export function decodeRst(script: Script): undefined | DecodedRst {
   };
 }
 
-export function encodeRst(
-  contract: TokenContractType,
-  payload: unknown
-): { contract: TokenContractType; scriptSig: string; payloadHash: string } {
+export function encodeRst(payload: unknown) {
   const encodedPayload = encode(payload);
   return {
-    contract,
-    scriptSig: new Script().add(rstBuffer).add(encodedPayload).toHex(),
+    revealScriptSig: new Script().add(rstBuffer).add(encodedPayload).toHex(),
     payloadHash: bytesToHex(sha256(sha256(Buffer.from(encodedPayload)))),
   };
 }
@@ -170,8 +165,9 @@ export function encodeRstMutable(
   };
 }
 
-export function isImmutableToken(payload: SmartTokenPayload) {
-  return !payload.p.includes(RST_MUT);
+export function isImmutableToken({ p }: SmartTokenPayload) {
+  // Mutable tokens must be NFTs that implement the mutable contract
+  return !(p.includes(RST_NFT) && p.includes(RST_MUT));
 }
 
 // Filter for attr objects
@@ -184,4 +180,28 @@ export function filterAttrs(obj: object) {
         typeof value === "boolean"
     )
   );
+}
+
+// Find token script for a ref in reveal inputs and decode if found
+export function extractRevealPayload(
+  ref: string,
+  inputs: rjs.Transaction.Input[]
+) {
+  const refTxId = ref.substring(0, 64);
+  const refVout = parseInt(ref.substring(64), 10);
+
+  // Find token script in the reveal tx
+  const revealIndex = inputs.findIndex((input) => {
+    return (
+      input.prevTxId.toString("hex") === refTxId &&
+      input.outputIndex === refVout
+    );
+  });
+  const script = revealIndex >= 0 && inputs[revealIndex].script;
+
+  if (!script) {
+    return { revealIndex: -1 };
+  }
+
+  return { revealIndex, rst: decodeRst(script) };
 }
