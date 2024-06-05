@@ -334,6 +334,11 @@ export class NFTWorker implements Subscription {
       const linked = extractRevealPayload(linkedRef, reveal.inputs);
       if (linked.revealIndex >= 0 && linked.rst?.payload) {
         rst.payload = { ...linked.rst.payload, ...rst.payload };
+        rst.embeddedFiles = {
+          ...linked.rst.embeddedFiles,
+          ...rst.embeddedFiles,
+        };
+        rst.remoteFiles = { ...linked.rst.remoteFiles, ...rst.remoteFiles };
         location = linkedRef;
       }
     }
