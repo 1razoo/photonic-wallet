@@ -394,7 +394,7 @@ export class NFTWorker implements Subscription {
       tokenType,
       ticker,
       revealOutpoint: Outpoint.fromUTXO(reveal.id, revealIndex).toString(),
-      spent: 0,
+      spent: receivedTxo ? 0 : 1, // If not owned by user then set as spent
       fresh: fresh ? 1 : 0,
       type,
       immutable,
