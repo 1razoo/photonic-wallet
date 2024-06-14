@@ -21,7 +21,6 @@ import WalletLayout from "./layouts/WalletLayout";
 import Placeholder from "./pages/Placeholder";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/source-code-pro";
-import "@fontsource/days-one/latin.css";
 import "./index.css";
 import Coins from "./pages/Coins";
 import MobileHome from "./pages/MobileHome";
