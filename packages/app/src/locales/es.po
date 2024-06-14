@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2024-06-05 04:27+0000\n"
+"POT-Creation-Date: 2024-06-14 10:27+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -9,7 +9,7 @@ msgstr ""
 
 #: src/hooks/useContractNotifier.ts:11
 #: src/hooks/useContractNotifier.ts:30
-msgid "{0} {1}  received"
+msgid "{0} {1} received"
 msgstr ""
 
 #: src/components/SendDigitalObject.tsx:151
@@ -93,7 +93,7 @@ msgstr ""
 msgid "Block"
 msgstr ""
 
-#: src/pages/Mint.tsx:1212
+#: src/pages/Mint.tsx:1214
 msgid "Calculate Fee"
 msgstr ""
 
@@ -249,20 +249,6 @@ msgstr ""
 msgid "Difficulty"
 msgstr ""
 
-#: src/components/MintMenu.tsx:36
-#: src/components/SendDigitalObject.tsx:155
-msgid "Digital Object"
-msgstr ""
-
-#: src/hooks/useContractNotifier.ts:20
-msgid "Digital object {0} received"
-msgstr ""
-
-#: src/components/SideBar.tsx:81
-#: src/pages/Wallet.tsx:61
-msgid "Digital Objects"
-msgstr ""
-
 #: src/pages/Mint.tsx:1047
 msgid "Direct to wallet"
 msgstr ""
@@ -311,7 +297,7 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
-#: src/pages/Mint.tsx:1153
+#: src/pages/Mint.tsx:1155
 msgid "Fee"
 msgstr ""
 
@@ -342,7 +328,7 @@ msgstr ""
 msgid "Filter"
 msgstr ""
 
-#: src/pages/Mint.tsx:1160
+#: src/pages/Mint.tsx:1162
 msgid "FT supply funding"
 msgstr ""
 
@@ -492,7 +478,7 @@ msgstr ""
 
 #: src/components/MintMenu.tsx:28
 #: src/components/TokenDetails.tsx:96
-#: src/pages/Mint.tsx:1197
+#: src/pages/Mint.tsx:1199
 msgid "Mint"
 msgstr ""
 
@@ -518,10 +504,6 @@ msgstr ""
 
 #: src/pages/Servers.tsx:152
 msgid "Move up"
-msgstr ""
-
-#: src/pages/Mint.tsx:1083
-msgid "Multiple contracts allows parallel mining, reducing congestion for low difficulty contracts"
 msgstr ""
 
 #: src/pages/Mint.tsx:1038
@@ -555,6 +537,10 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
+#: src/hooks/useContractNotifier.ts:20
+msgid "NFT {0} received"
+msgstr ""
+
 #: src/pages/IpfsSettings.tsx:58
 msgid "NFT.Storage API Key"
 msgstr ""
@@ -584,19 +570,25 @@ msgstr ""
 msgid "No, allow token owner to modify"
 msgstr ""
 
+#: src/components/MintMenu.tsx:36
+#: src/components/SendDigitalObject.tsx:155
+msgid "Non-Fungible Token"
+msgstr ""
+
+#: src/components/SideBar.tsx:81
+#: src/pages/Wallet.tsx:61
+msgid "Non-Fungible Tokens"
+msgstr ""
+
 #: src/pages/Mint.tsx:720
 msgid "None"
 msgstr ""
 
-#: src/pages/Mint.tsx:1072
-msgid "Number of contracts"
-msgstr ""
-
-#: src/pages/Mint.tsx:1087
+#: src/pages/Mint.tsx:1089
 msgid "Number of mints"
 msgstr ""
 
-#: src/pages/Mint.tsx:1111
+#: src/pages/Mint.tsx:1113
 msgid "Number of tokens created on each mint"
 msgstr ""
 
@@ -631,7 +623,7 @@ msgstr ""
 msgid "Passwords do not match"
 msgstr ""
 
-#: src/pages/Mint.tsx:1118
+#: src/pages/Mint.tsx:1120
 msgid "Photon Supply"
 msgstr ""
 
@@ -639,7 +631,7 @@ msgstr ""
 msgid "Please close the window"
 msgstr ""
 
-#: src/pages/Mint.tsx:1182
+#: src/pages/Mint.tsx:1184
 msgid "Please reconnect to mint your token"
 msgstr ""
 
@@ -674,7 +666,7 @@ msgstr ""
 msgid "Recovery phrase"
 msgstr ""
 
-#: src/pages/Mint.tsx:1101
+#: src/pages/Mint.tsx:1103
 msgid "Reward"
 msgstr ""
 
@@ -713,7 +705,7 @@ msgid "Send {0} coins and tokens to this address"
 msgstr ""
 
 #: src/components/SendDigitalObject.tsx:137
-msgid "Send Digital Object"
+msgid "Send Non-Fungible Token"
 msgstr ""
 
 #: src/components/SendRXD.tsx:130
@@ -746,7 +738,7 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
-#: src/pages/Mint.tsx:1144
+#: src/pages/Mint.tsx:1146
 msgid "Summary"
 msgstr ""
 
@@ -782,7 +774,7 @@ msgstr ""
 msgid "Token supply is too high"
 msgstr ""
 
-#: src/pages/Mint.tsx:1128
+#: src/pages/Mint.tsx:1130
 msgid "Token supply requires an equal amount of RXD photons. This must be provided on mint for \"direct to wallet\" deployments."
 msgstr ""
 
@@ -790,12 +782,12 @@ msgstr ""
 msgid "Tokens melted"
 msgstr ""
 
-#: src/pages/Mint.tsx:1136
+#: src/pages/Mint.tsx:1138
 msgid "Total minted supply will be {totalDmintSupply} {0}"
 msgstr ""
 
-#: src/pages/Mint.tsx:1097
-msgid "Total number of mints per contract"
+#: src/pages/Mint.tsx:1099
+msgid "Total number of mints"
 msgstr ""
 
 #: src/components/MintSuccessModal.tsx:43
@@ -809,7 +801,7 @@ msgstr ""
 msgid "Transaction rejected"
 msgstr ""
 
-#: src/pages/Mint.tsx:1151
+#: src/pages/Mint.tsx:1153
 msgid "Transaction size"
 msgstr ""
 
@@ -940,7 +932,7 @@ msgstr ""
 msgid "Your recovery phrase is the only way to restore your wallet after logging out. Keep it in a safe place and never share it."
 msgstr ""
 
-#: src/pages/Mint.tsx:1177
+#: src/pages/Mint.tsx:1179
 msgid "Your token is ready to mint. Please review all data and the transaction fee before proceeding."
 msgstr ""
 
