@@ -33,7 +33,7 @@ export default function MintMenu() {
           to="/mint/object"
           icon={<Icon as={TbTriangleSquareCircle} fontSize="2xl" />}
         >
-          {t`Digital Object`}
+          {t`Non-Fungible Token`}
         </MenuItem>
         <MenuItem
           as={NavLink}

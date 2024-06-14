@@ -2,7 +2,7 @@ import React, { useCallback, useReducer, useRef, useState } from "react";
 import mime from "mime";
 import { t, Trans } from "@lingui/macro";
 import { Link } from "react-router-dom";
-import { RST_DMINT, RST_FT, RST_MUT, RST_NFT } from "@lib/protocols";
+import { GLYPH_DMINT, GLYPH_FT, GLYPH_MUT, GLYPH_NFT } from "@lib/protocols";
 import {
   Alert,
   AlertIcon,
@@ -257,12 +257,12 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   );
   const isConnected = electrumStatus.value === ElectrumStatus.CONNECTED;
   const users = useLiveQuery(
-    async () => await db.rst.where({ type: "user", spent: 0 }).toArray(),
+    async () => await db.glyph.where({ type: "user", spent: 0 }).toArray(),
     [],
     []
   );
   const containers = useLiveQuery(
-    async () => await db.rst.where({ type: "container", spent: 0 }).toArray(),
+    async () => await db.glyph.where({ type: "container", spent: 0 }).toArray(),
     [],
     []
   );
@@ -370,12 +370,12 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       authorId !== "" && authorId !== undefined
         ? parseInt(authorId, 10)
         : undefined;
-    const userRst = userIndex !== undefined ? users[userIndex] : undefined;
-    const userInput = userRst
-      ? await db.txo.get(userRst.lastTxoId as number)
+    const userGlyph = userIndex !== undefined ? users[userIndex] : undefined;
+    const userInput = userGlyph
+      ? await db.txo.get(userGlyph.lastTxoId as number)
       : undefined;
 
-    if (userIndex && !(userRst && userInput)) {
+    if (userIndex && !(userGlyph && userInput)) {
       setLoading(false);
       toast({
         title: "Error",
@@ -389,13 +389,13 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       containerId !== "" && containerId !== undefined
         ? parseInt(containerId, 10)
         : undefined;
-    const containerRst =
+    const containerGlyph =
       containerIndex !== undefined ? containers[containerIndex] : undefined;
-    const containerInput = containerRst
-      ? await db.txo.get(containerRst.lastTxoId as number)
+    const containerInput = containerGlyph
+      ? await db.txo.get(containerGlyph.lastTxoId as number)
       : undefined;
 
-    if (containerIndex && !(containerRst && containerInput)) {
+    if (containerIndex && !(containerGlyph && containerInput)) {
       setLoading(false);
       toast({
         title: "Error",
@@ -418,16 +418,16 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         ["desc", fields.desc],
         [
           "in",
-          containerRst && [
+          containerGlyph && [
             hexToBytes(
-              Outpoint.fromString(containerRst.ref).reverse().toString()
+              Outpoint.fromString(containerGlyph.ref).reverse().toString()
             ),
           ],
         ],
         [
           "by",
-          userRst && [
-            hexToBytes(Outpoint.fromString(userRst.ref).reverse().toString()),
+          userGlyph && [
+            hexToBytes(Outpoint.fromString(userGlyph.ref).reverse().toString()),
           ],
         ],
         ["attrs", attrs.length && Object.fromEntries(attrs)],
@@ -441,13 +441,13 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
           }
         : undefined;
 
-    const protocols = [tokenType === "fungible" ? RST_FT : RST_NFT];
+    const protocols = [tokenType === "fungible" ? GLYPH_FT : GLYPH_NFT];
     if (deployMethod === "dmint") {
-      protocols.push(RST_DMINT);
+      protocols.push(GLYPH_DMINT);
     }
 
     if (immutable === "0") {
-      protocols.push(RST_MUT);
+      protocols.push(GLYPH_MUT);
     }
 
     const args: { [key: string]: unknown } = {};
@@ -481,14 +481,14 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         const address = wallet.value.address;
         if (tokenType === "fungible") {
           if (deployMethod === "dmint") {
-            const { difficulty, numContracts, maxHeight, reward } = fields;
+            const { difficulty, maxHeight, reward } = fields;
             // Value 1 is for the dmint contracts
             return {
               value: 1,
               method: "dmint" as const,
               params: {
                 difficulty: parseInt(difficulty, 10),
-                numContracts: parseInt(numContracts, 10),
+                numContracts: 1, //parseInt(numContracts, 10),
                 maxHeight: parseInt(maxHeight, 10),
                 reward: parseInt(reward, 10),
                 address,
@@ -670,7 +670,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   const diff = parseInt(formData.difficulty, 10);
   const timeToMine = diff > 0 ? calcTimeToMine(diff) : "";
   const totalDmintSupply =
-    parseInt(formData.numContracts, 10) *
+    //parseInt(formData.numContracts, 10) *
     parseInt(formData.maxHeight, 10) *
     parseInt(formData.reward, 10);
 
@@ -1068,6 +1068,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                           </FormHelperText>
                         )}
                       </FormControl>
+                      {/*
                       <FormControl>
                         <FormLabel>{t`Number of contracts`}</FormLabel>
                         <Input
@@ -1083,6 +1084,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                           {t`Multiple contracts allows parallel mining, reducing congestion for low difficulty contracts`}
                         </FormHelperText>
                       </FormControl>
+                      */}
                       <FormControl>
                         <FormLabel>{t`Number of mints`}</FormLabel>
                         <Input
@@ -1094,7 +1096,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                           min={1}
                         />
                         <FormHelperText>
-                          {t`Total number of mints per contract`}
+                          {t`Total number of mints`}
                         </FormHelperText>
                       </FormControl>
                       <FormControl>

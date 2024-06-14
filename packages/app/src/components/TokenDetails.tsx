@@ -53,22 +53,22 @@ function RefProperty({ tokenRef }: { tokenRef: Outpoint }) {
 }
 
 export default function TokenDetails({
-  rst,
+  glyph,
   author,
   container,
   children,
 }: PropsWithChildren<{
-  rst: SmartToken;
+  glyph: SmartToken;
   author?: SmartToken;
   container?: SmartToken;
 }>) {
-  const ref = Outpoint.fromString(rst.ref);
+  const ref = Outpoint.fromString(glyph.ref);
   const revealRef =
-    rst.revealOutpoint && Outpoint.fromString(rst.revealOutpoint);
-  const authorRef = rst.author && Outpoint.fromString(rst.author);
-  const containerRef = rst.container && Outpoint.fromString(rst.container);
-  const hasAttrs = rst.attrs && Object.keys(rst.attrs).length > 0;
-  const isIPFS = rst.remote?.u?.startsWith("ipfs://");
+    glyph.revealOutpoint && Outpoint.fromString(glyph.revealOutpoint);
+  const authorRef = glyph.author && Outpoint.fromString(glyph.author);
+  const containerRef = glyph.container && Outpoint.fromString(glyph.container);
+  const hasAttrs = glyph.attrs && Object.keys(glyph.attrs).length > 0;
+  const isIPFS = glyph.remote?.u?.startsWith("ipfs://");
 
   return (
     <div>
@@ -79,17 +79,17 @@ export default function TokenDetails({
         </TabList>
         <TabPanels>
           <TabPanel px={0}>
-            {rst.description && (
+            {glyph.description && (
               <PropertyCard heading={t`Description`} mb={4}>
-                {rst.description}
+                {glyph.description}
               </PropertyCard>
             )}
             <PropertyCard heading={t`Radiant ID`} mb={4}>
               <RefProperty tokenRef={ref} />
             </PropertyCard>
-            {rst.location && (
+            {glyph.location && (
               <PropertyCard heading={t`Link`} mb={4}>
-                <RefProperty tokenRef={Outpoint.fromString(rst.location)} />
+                <RefProperty tokenRef={Outpoint.fromString(glyph.location)} />
               </PropertyCard>
             )}
             {revealRef && (
@@ -161,12 +161,12 @@ export default function TokenDetails({
                 <PropertyCard heading={t`IPFS CID`}>
                   <div>
                     <Identifier showCopy>
-                      {rst.remote?.u.replace("ipfs://", "")}
+                      {glyph.remote?.u.replace("ipfs://", "")}
                     </Identifier>
                   </div>
                 </PropertyCard>
               )}
-              {rst.remote?.hs && (
+              {glyph.remote?.hs && (
                 <PropertyCard
                   heading={t`HashStamp`}
                   info={
@@ -186,30 +186,30 @@ export default function TokenDetails({
                   <Flex gap={4}>
                     <Image
                       src={`data:image/webp;base64, ${btoa(
-                        String.fromCharCode(...new Uint8Array(rst.remote?.hs))
+                        String.fromCharCode(...new Uint8Array(glyph.remote?.hs))
                       )}`}
                       width="64px"
                       height="64px"
                       objectFit="contain"
                       backgroundColor="white"
                     />
-                    {rst.remote?.h && (
+                    {glyph.remote?.h && (
                       <div>
                         <Identifier>
-                          {bytesToHex(new Uint8Array(rst.remote?.h))}
+                          {bytesToHex(new Uint8Array(glyph.remote?.h))}
                         </Identifier>
                       </div>
                     )}
                   </Flex>
                 </PropertyCard>
               )}
-              {rst.embed && (
+              {glyph.embed && (
                 <>
                   <PropertyCard heading={t`Content length`}>
-                    {filesize(rst.embed.b.byteLength) as string}
+                    {filesize(glyph.embed.b.byteLength) as string}
                   </PropertyCard>
                   <PropertyCard heading={t`Content type`}>
-                    {rst.embed.t || "Unknown"}
+                    {glyph.embed.t || "Unknown"}
                   </PropertyCard>
                 </>
               )}
@@ -219,7 +219,7 @@ export default function TokenDetails({
               <>
                 <Divider my={4} />
                 <SimpleGrid columns={[1, 2]} spacing={4} gridAutoRows="1fr">
-                  {Object.entries(rst.attrs).map(([k, v]) => (
+                  {Object.entries(glyph.attrs).map(([k, v]) => (
                     <PropertyCard heading={k} key={k}>
                       {v}
                     </PropertyCard>
@@ -229,7 +229,7 @@ export default function TokenDetails({
             )}
           </TabPanel>
           <TabPanel px={0}>
-            <TokenData rst={rst} />
+            <TokenData glyph={glyph} />
           </TabPanel>
         </TabPanels>
       </Tabs>

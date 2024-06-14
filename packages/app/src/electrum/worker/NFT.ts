@@ -18,7 +18,7 @@ import { ElectrumTxMap, buildUpdateTXOs } from "./updateTxos";
 import db from "@app/db";
 import Outpoint, { reverseRef } from "@lib/Outpoint";
 import {
-  decodeRst,
+  decodeGlyph,
   extractRevealPayload,
   filterAttrs,
   isImmutableToken,
@@ -32,7 +32,7 @@ import ElectrumManager from "@app/electrum/ElectrumManager";
 import opfs from "@app/opfs";
 import setSubscriptionStatus from "./setSubscriptionStatus";
 import { batchRequests } from "@lib/util";
-import { RST_FT, RST_NFT } from "@lib/protocols";
+import { GLYPH_FT, GLYPH_NFT } from "@lib/protocols";
 
 // 500KB size limit
 const fileSizeLimit = 500_000;
@@ -89,9 +89,9 @@ export class NFTWorker implements Subscription {
           if (!refLE) continue;
           const ref = reverseRef(refLE);
           scriptRefMap[txo.script] = ref;
-          const rst = ref && (await db.rst.get({ ref }));
-          if (rst) {
-            existingRefs[ref] = rst;
+          const glyph = ref && (await db.glyph.get({ ref }));
+          if (glyph) {
+            existingRefs[ref] = glyph;
           } else {
             newRefs[ref] = txo;
           }
@@ -103,35 +103,37 @@ export class NFTWorker implements Subscription {
         );
         this.addRelated(related);
 
-        // All RSTs should now be in the database. Insert txos.
-        db.transaction("rw", db.txo, db.rst, async () => {
+        // All glyphs should now be in the database. Insert txos.
+        db.transaction("rw", db.txo, db.glyph, async () => {
           const ids = (await db.txo.bulkPut(added, undefined, {
             allKeys: true,
           })) as number[];
           await Promise.all(
             added.map(async (txo, index) => {
               const ref = scriptRefMap[txo.script];
-              const rst = existingRefs[ref] || accepted[ref];
-              if (rst) {
-                rst.lastTxoId = ids[index];
-                rst.spent = 0;
-                await db.rst.put(rst);
+              const glyph = existingRefs[ref] || accepted[ref];
+              if (glyph) {
+                glyph.lastTxoId = ids[index];
+                glyph.spent = 0;
+                await db.glyph.put(glyph);
               }
             })
           );
         });
 
         // Update any NFTs that have been transferred
-        await db.transaction("rw", db.rst, async () => {
+        await db.transaction("rw", db.glyph, async () => {
           for (const lastTxo of spent) {
-            await db.rst.where({ lastTxoId: lastTxo.id }).modify({ spent: 1 });
+            await db.glyph
+              .where({ lastTxoId: lastTxo.id })
+              .modify({ spent: 1 });
           }
         });
 
         // Update heights
-        await db.transaction("rw", db.rst, async () => {
+        await db.transaction("rw", db.glyph, async () => {
           for (const [lastTxoId, conf] of confs) {
-            await db.rst
+            await db.glyph
               .where({ lastTxoId })
               .modify({ height: conf.height || Infinity });
           }
@@ -144,11 +146,11 @@ export class NFTWorker implements Subscription {
   }
 
   /**
-   * Add new RSTs to the database
+   * Add new glyphs to the database
    *
-   * @param refs TxOs containing rst data
+   * @param refs TxOs containing glyph data
    * @param txMap Map of new transactions returned from ElectrumX
-   * @returns RSTs added to the database and any related refs that were found
+   * @returns glyphs added to the database and any related refs that were found
    */
   async addTokens(
     refs: { [key: string]: TxO | undefined },
@@ -231,7 +233,7 @@ export class NFTWorker implements Subscription {
               delegates.length && console.debug(`Found delegates`, delegates);
               delegates.forEach(foundDelegates.add, foundDelegates);
 
-              // Also save delegates so we don't need to look for them again later in saveRst
+              // Also save delegates so we don't need to look for them again later in saveGlyph
               return [revealTxId, { tx, delegates }];
             }
 
@@ -288,15 +290,15 @@ export class NFTWorker implements Subscription {
         const delegatedRefs = revealTxs[refReveals[ref]].delegates.flatMap(
           (r) => delegateRefMap[r]
         );
-        const { related, valid, rst } = await this.saveRst(
+        const { related, valid, glyph } = await this.saveGlyph(
           ref,
           txo,
           revealTxs[refReveals[ref]].tx,
           delegatedRefs,
           fresh.includes(ref)
         );
-        if (valid && txo && rst) {
-          accepted[rst.ref] = rst;
+        if (valid && txo && glyph) {
+          accepted[glyph.ref] = glyph;
         }
         return related;
       })
@@ -308,49 +310,49 @@ export class NFTWorker implements Subscription {
     return { accepted, related };
   }
 
-  // Decode an RST and save to the database. Return the name so the user can be notified
-  async saveRst(
+  // Decode a glyph and save to the database. Return the name so the user can be notified
+  async saveGlyph(
     ref: string,
     receivedTxo: TxO | undefined, // Received txo can be undefined when token is an author or container dependency
     reveal: Transaction,
     delegatedRefs: string[],
     fresh: boolean
-  ): Promise<{ related: string[]; valid?: boolean; rst?: SmartToken }> {
-    const { revealIndex, rst } = extractRevealPayload(ref, reveal.inputs);
-    if (!rst) {
+  ): Promise<{ related: string[]; valid?: boolean; glyph?: SmartToken }> {
+    const { revealIndex, glyph } = extractRevealPayload(ref, reveal.inputs);
+    if (!glyph) {
       console.info("Unrecognised token");
       return { related: [], valid: false };
     }
 
     let location = undefined;
-    if (rst.payload.loc && Number.isInteger(rst.payload.loc)) {
-      // Location is set to a ref offset. Get the payload and merge.
-      const offset = rst.payload.loc as number;
+    if (glyph.payload.loc !== undefined && Number.isInteger(glyph.payload.loc)) {
+      // Location is set to a ref vout. Get the payload and merge.
+      const vout = glyph.payload.loc as number;
       const op = Outpoint.fromString(ref);
-      const linkedRef = Outpoint.fromUTXO(
-        op.getTxid(),
-        op.getVout() + offset
-      ).toString();
+      const linkedRef = Outpoint.fromUTXO(op.getTxid(), vout).toString();
       const linked = extractRevealPayload(linkedRef, reveal.inputs);
-      if (linked.revealIndex >= 0 && linked.rst?.payload) {
-        rst.payload = { ...linked.rst.payload, ...rst.payload };
-        rst.embeddedFiles = {
-          ...linked.rst.embeddedFiles,
-          ...rst.embeddedFiles,
+      if (linked.revealIndex >= 0 && linked.glyph?.payload) {
+        glyph.payload = { ...linked.glyph.payload, ...glyph.payload };
+        glyph.embeddedFiles = {
+          ...linked.glyph.embeddedFiles,
+          ...glyph.embeddedFiles,
         };
-        rst.remoteFiles = { ...linked.rst.remoteFiles, ...rst.remoteFiles };
+        glyph.remoteFiles = {
+          ...linked.glyph.remoteFiles,
+          ...glyph.remoteFiles,
+        };
         location = linkedRef;
       }
     }
 
     const related: string[] = [];
-    const { payload, embeddedFiles, remoteFiles } = rst;
+    const { payload, embeddedFiles, remoteFiles } = glyph;
 
     const protocols = payload.p;
 
-    const contract = protocols.includes(RST_FT)
+    const contract = protocols.includes(GLYPH_FT)
       ? "ft"
-      : protocols.includes(RST_NFT)
+      : protocols.includes(GLYPH_NFT)
       ? "nft"
       : undefined;
 
@@ -410,12 +412,12 @@ export class NFTWorker implements Subscription {
       height: receivedTxo?.height || Infinity,
     };
 
-    record.id = (await db.rst.put(record)) as number;
+    record.id = (await db.glyph.put(record)) as number;
 
     return {
       related,
       valid: true,
-      rst: record,
+      glyph: record,
     };
   }
 
@@ -424,7 +426,7 @@ export class NFTWorker implements Subscription {
     const newRelated = (
       await Promise.all(
         related.map(async (ref) =>
-          (await db.rst.get({ ref })) ? undefined : ref
+          (await db.glyph.get({ ref })) ? undefined : ref
         )
       )
     ).filter(Boolean) as string[];
@@ -435,7 +437,7 @@ export class NFTWorker implements Subscription {
       console.debug(`Existing related: ${related.length - newRelated.length}`);
 
       // Fetch new related tokens. A TxO is not needed for these since they are not owned by this user
-      // Only an rst record is needed for displaying the author and container names
+      // Only a glyph record is needed for displaying the author and container names
       const relatedRefs = newRelated.map((ref) => [ref, undefined]);
 
       await this.addTokens(Object.fromEntries(relatedRefs));

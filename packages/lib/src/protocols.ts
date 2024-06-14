@@ -1,5 +1,5 @@
-export const RST_FT = 1;
-export const RST_NFT = 2;
-export const RST_DAT = 3;
-export const RST_DMINT = 4;
-export const RST_MUT = 5;
+export const GLYPH_FT = 1;
+export const GLYPH_NFT = 2;
+export const GLYPH_DAT = 3;
+export const GLYPH_DMINT = 4;
+export const GLYPH_MUT = 5;

@@ -134,7 +134,7 @@ export default function SendDigitalObject({
       <form onSubmit={submit}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{t`Send Digital Object`}</ModalHeader>
+          <ModalHeader>{t`Send Non-Fungible Token`}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6} gap={4}>
             {success || (
@@ -152,7 +152,7 @@ export default function SendDigitalObject({
               />
             </FormControl>
             <FormControl>
-              <FormLabel>{t`Digital Object`}</FormLabel>
+              <FormLabel>{t`Non-Fungible Token`}</FormLabel>
               <Identifier>{ref.reverse().shortInput()}</Identifier>
             </FormControl>
             <FormControl>

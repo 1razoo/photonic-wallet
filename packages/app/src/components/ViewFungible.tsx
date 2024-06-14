@@ -101,10 +101,10 @@ export default function ViewFungible({
   const successDisclosure = useDisclosure();
   const [token, author, container] = useLiveQuery(
     async () => {
-      const token = await db.rst.get({ ref: sref });
-      const a = token?.author && (await db.rst.get({ ref: token.author }));
+      const token = await db.glyph.get({ ref: sref });
+      const a = token?.author && (await db.glyph.get({ ref: token.author }));
       const c =
-        token?.container && (await db.rst.get({ ref: token.container }));
+        token?.container && (await db.glyph.get({ ref: token.container }));
       return [token, a, c] as [SmartToken?, SmartToken?, SmartToken?];
     },
     [sref],
@@ -205,7 +205,7 @@ export default function ViewFungible({
                   {token && (
                     <Box w="64px" h="64px">
                       <TokenContent
-                        rst={token}
+                        glyph={token}
                         defaultIcon={RiQuestionFill}
                         thumbnail
                       />
@@ -256,12 +256,12 @@ export default function ViewFungible({
                 {t`Melt`}
               </Button>
             </SimpleGrid>
-            <TokenDetails rst={token} container={container} author={author} />
+            <TokenDetails glyph={token} container={container} author={author} />
           </Grid>
         </Container>
       </Grid>
       <SendFungible
-        rst={token}
+        glyph={token}
         disclosure={sendDisclosure}
         onSuccess={(txid) => {
           sendDisclosure.onClose();
@@ -269,7 +269,7 @@ export default function ViewFungible({
         }}
       />
       <MeltFungible
-        rst={token}
+        glyph={token}
         disclosure={meltDisclosure}
         onSuccess={(txid: string) => {
           meltDisclosure.onClose();

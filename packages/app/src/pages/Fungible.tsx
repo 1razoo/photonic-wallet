@@ -27,7 +27,7 @@ function TokenGrid() {
   const [tokens, balances] = useLiveQuery(
     async () => {
       // Get all FTs
-      const tokens = await db.rst
+      const tokens = await db.glyph
         .where({ tokenType: SmartTokenType.FT })
         .toArray();
 
@@ -45,10 +45,10 @@ function TokenGrid() {
     [null, null]
   );
 
-  const hasBalance = (rst: SmartToken) =>
-    rst &&
+  const hasBalance = (glyph: SmartToken) =>
+    glyph &&
     balances &&
-    (balances[rst.ref]?.confirmed || 0 + balances[rst.ref]?.unconfirmed || 0);
+    (balances[glyph.ref]?.confirmed || 0 + balances[glyph.ref]?.unconfirmed || 0);
 
   if (!tokens) {
     return null;
@@ -65,7 +65,7 @@ function TokenGrid() {
         ) : (
           tokens.map((token) => (
             <TokenRow
-              rst={token}
+              glyph={token}
               value={
                 (balances[token.ref]?.confirmed || 0) +
                 (balances[token.ref]?.unconfirmed || 0)

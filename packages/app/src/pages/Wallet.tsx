@@ -46,9 +46,9 @@ function TokenGrid({ open }: { open: boolean }) {
   const page = parseInt(pageParam || "0", 10);
   const [filterType, setFilterType] = useState<string[]>(allTypes);
   const nft = useNftQuery(
-    (rst) =>
-      rst.spent === 0 &&
-      (filterType.length ? filterType.includes(rst.type) : true),
+    (glyph) =>
+      glyph.spent === 0 &&
+      (filterType.length ? filterType.includes(glyph.type) : true),
     pageSize,
     page,
     [filterType]
@@ -58,7 +58,7 @@ function TokenGrid({ open }: { open: boolean }) {
 
   return (
     <>
-      <PageHeader toolbar={<MintMenu />}>{t`Digital Objects`}</PageHeader>
+      <PageHeader toolbar={<MintMenu />}>{t`Non-Fungible Tokens`}</PageHeader>
 
       <HStack height="42px" gap={4} mb={2} mx={4} alignItems="start">
         <Menu closeOnSelect={false}>
@@ -114,10 +114,10 @@ function TokenGrid({ open }: { open: boolean }) {
               (token) =>
                 token && (
                   <TokenCard
-                    rst={token.rst}
+                    glyph={token.glyph}
                     value={token.txo.value}
                     key={token.txo.id}
-                    to={`/objects/token/${token.rst.ref}${
+                    to={`/objects/token/${token.glyph.ref}${
                       page > 0 ? `?p=${page}` : ""
                     }`}
                     size={open ? "sm" : "md"}

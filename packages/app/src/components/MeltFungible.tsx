@@ -29,12 +29,12 @@ import { reverseRef } from "@lib/Outpoint";
 import { electrumWorker } from "@app/electrum/Electrum";
 
 interface Props {
-  rst: SmartToken;
+  glyph: SmartToken;
   onSuccess?: (txid: string) => void;
   disclosure: UseDisclosureProps;
 }
 
-export default function MeltFungible({ rst, onSuccess, disclosure }: Props) {
+export default function MeltFungible({ glyph, onSuccess, disclosure }: Props) {
   const { isOpen, onClose } = disclosure;
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(true);
@@ -59,7 +59,7 @@ export default function MeltFungible({ rst, onSuccess, disclosure }: Props) {
     setSuccess(true);
     setLoading(true);
 
-    const refLE = reverseRef(rst.ref);
+    const refLE = reverseRef(glyph.ref);
     const fromScript = ftScript(wallet.value.address, refLE);
     const tokens = await db.txo
       .where({ script: fromScript, spent: 0 })

@@ -41,9 +41,9 @@ export class FTWorker extends NFTWorker {
           if (!refLE) continue;
           const ref = reverseRef(refLE);
           scriptRefMap[txo.script] = ref;
-          const rst = ref && (await db.rst.get({ ref }));
-          if (rst) {
-            existingRefs[ref] = rst;
+          const glyph = ref && (await db.glyph.get({ ref }));
+          if (glyph) {
+            existingRefs[ref] = glyph;
           } else {
             newRefs[ref] = txo;
           }
@@ -55,19 +55,19 @@ export class FTWorker extends NFTWorker {
         );
         this.addRelated(related);
 
-        // All RSTs should now be in the database. Insert txos.
-        await db.transaction("rw", db.txo, db.rst, async () => {
+        // All glyphs should now be in the database. Insert txos.
+        await db.transaction("rw", db.txo, db.glyph, async () => {
           const ids = (await db.txo.bulkPut(added, undefined, {
             allKeys: true,
           })) as number[];
           await Promise.all(
             added.map(async (txo, index) => {
               const ref = scriptRefMap[txo.script];
-              const rst = existingRefs[ref] || accepted[ref];
-              if (rst) {
-                rst.lastTxoId = ids[index];
-                rst.spent = 0;
-                await db.rst.put(rst);
+              const glyph = existingRefs[ref] || accepted[ref];
+              if (glyph) {
+                glyph.lastTxoId = ids[index];
+                glyph.spent = 0;
+                await db.glyph.put(glyph);
               }
             })
           );

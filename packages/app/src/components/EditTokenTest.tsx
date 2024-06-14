@@ -5,7 +5,7 @@ import { SmartToken, ContractType, TxO } from "@app/types";
 import { EditIcon } from "@chakra-ui/icons";
 import { GridItem, Button } from "@chakra-ui/react";
 import Outpoint from "@lib/Outpoint";
-import { encodeRstMutable } from "@lib/token";
+import { encodeGlyphMutable } from "@lib/token";
 import { fundTx, targetToUtxo } from "@lib/coinSelect";
 import {
   mutableNftScript,
@@ -62,10 +62,10 @@ export default function EditTokenTest({
         b: new TextEncoder().encode("mutable token is working"),
       },
     };
-    const rst = encodeRstMutable("mod", payload, 1, 1, 0, 0);
-    const mutOutputScript = mutableNftScript(mutRefLE, rst.payloadHash);
+    const glyph = encodeGlyphMutable("mod", payload, 1, 1, 0, 0);
+    const mutOutputScript = mutableNftScript(mutRefLE, glyph.payloadHash);
     const nftOutputScript = nftAuthScript(wallet.value.address, nftRefLE, [
-      { ref: mutRefLE, scriptSigHash: rst.scriptSigHash },
+      { ref: mutRefLE, scriptSigHash: glyph.scriptSigHash },
     ]);
 
     const nftInput: UnfinalizedInput = { ...txo };
@@ -117,7 +117,7 @@ export default function EditTokenTest({
           // Clear p2pkh script sig
           script.set({ chunks: [] });
           // Add mutable script sig
-          script.add(rst.scriptSig);
+          script.add(glyph.scriptSig);
         }
       }
     );

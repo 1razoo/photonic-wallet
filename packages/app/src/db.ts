@@ -12,7 +12,7 @@ export type KeyValuePairs = unknown;
 
 export class Database extends Dexie {
   txo!: Table<TxO>;
-  rst!: Table<SmartToken>;
+  glyph!: Table<SmartToken>;
   subscriptionStatus!: Table<SubscriptionStatus>;
   kvp!: Table<KeyValuePairs>;
   header!: Table<BlockHeader>;
@@ -24,7 +24,7 @@ export class Database extends Dexie {
       txo: "++id, &[txid+vout], contractType, [contractType+spent], [script+spent], [change+spent]",
       subscriptionStatus: "scriptHash",
       balance: "id",
-      rst: "++id, &ref, [type+spent], [type+spent+fresh], lastTxoId, height, tokenType",
+      glyph: "++id, &ref, [type+spent], [type+spent+fresh], lastTxoId, height, tokenType",
       kvp: "",
       header: "hash, height",
       txq: "txid",

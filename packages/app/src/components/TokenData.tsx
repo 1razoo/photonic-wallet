@@ -3,7 +3,7 @@ import { Transaction } from "@radiantblockchain/radiantjs";
 import opfs from "@app/opfs";
 import Outpoint from "@lib/Outpoint";
 import { Box, SimpleGrid } from "@chakra-ui/react";
-import { DecodedRst, decodeRst } from "@lib/token";
+import { DecodedGlyph, decodeGlyph } from "@lib/token";
 import { jsonHex } from "@lib/util";
 import DownloadLink from "./DownloadLink";
 import { PropertyCard } from "./ViewDigitalObject";
@@ -13,11 +13,11 @@ import { DownloadIcon } from "@chakra-ui/icons";
 import ActionIcon from "./ActionIcon";
 import mime from "mime";
 
-export default function TokenData({ rst }: { rst: SmartToken }) {
-  const reveal = rst.revealOutpoint && Outpoint.fromString(rst.revealOutpoint);
+export default function TokenData({ glyph }: { glyph: SmartToken }) {
+  const reveal = glyph.revealOutpoint && Outpoint.fromString(glyph.revealOutpoint);
   const [{ tx, decoded }, setData] = useState<{
     tx?: string;
-    decoded?: DecodedRst;
+    decoded?: DecodedGlyph;
   }>({
     tx: undefined,
     decoded: undefined,
@@ -32,7 +32,7 @@ export default function TokenData({ rst }: { rst: SmartToken }) {
         const script = tx
           ? new Transaction(tx).inputs[reveal.getVout()].script
           : undefined;
-        const decoded = (script && decodeRst(script)) || undefined;
+        const decoded = (script && decodeGlyph(script)) || undefined;
 
         setData({ tx, decoded });
       }
@@ -73,12 +73,12 @@ export default function TokenData({ rst }: { rst: SmartToken }) {
             {t`Download transaction`}
           </DownloadLink>
         )}
-        {rst.embed && (
+        {glyph.embed && (
           <DownloadLink
             leftIcon={<ActionIcon as={DownloadIcon} />}
             mimeType="application/octet-stream"
-            data={rst.embed.b}
-            filename={`main.${mime.getExtension(rst.embed.t) || "dat"}`}
+            data={glyph.embed.b}
+            filename={`main.${mime.getExtension(glyph.embed.t) || "dat"}`}
           >
             {t`Download main file`}
           </DownloadLink>

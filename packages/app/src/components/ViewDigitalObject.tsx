@@ -109,11 +109,11 @@ export default function ViewDigitalObject({
   const successDisclosure = useDisclosure();
   const [nft, txo, author, container] = useLiveQuery(
     async () => {
-      const nft = await db.rst.get({ ref: sref });
+      const nft = await db.glyph.get({ ref: sref });
       if (!nft?.lastTxoId) return [undefined, undefined];
       const txo = await db.txo.get(nft.lastTxoId);
-      const a = nft?.author && (await db.rst.get({ ref: nft.author }));
-      const c = nft?.container && (await db.rst.get({ ref: nft.container }));
+      const a = nft?.author && (await db.glyph.get({ ref: nft.author }));
+      const c = nft?.container && (await db.glyph.get({ ref: nft.container }));
       return [nft, txo, a, c] as [SmartToken, TxO, SmartToken?, SmartToken?];
     },
     [sref],
@@ -225,7 +225,7 @@ export default function ViewDigitalObject({
                     <LinkIcon boxSize={8} />
                   </Box>
                 )}
-                <TokenContent rst={nft} />
+                <TokenContent glyph={nft} />
               </GridItem>
               {nft.embed && !isKnownEmbed && (
                 <Warning>{t`Files may be unsafe and result in loss of funds`}</Warning>
@@ -280,7 +280,7 @@ export default function ViewDigitalObject({
               </Button>
             </SimpleGrid>
             {nft && (
-              <TokenDetails rst={nft} container={container} author={author}>
+              <TokenDetails glyph={nft} container={container} author={author}>
                 <PropertyCard heading={t`Output value`}>
                   <Photons value={txo.value} />
                 </PropertyCard>

@@ -4,13 +4,14 @@
 
 ## Introduction
 
-Photonic Wallet is a non-custodial wallet for minting and transferring tokens, following the Radiant Smart Token standard. The code runs completely client side and only requires a connection to an ElectrumX server.
+Photonic Wallet is a non-custodial wallet for minting and transferring tokens, following the Glyphs Protocol. The code runs completely client side and only requires a connection to an ElectrumX server.
 
 This is alpha software in active development. If you would like to test it, please be cautious and report any bugs.
 
 ## Features
 
 - Mint and transfer non-fungible and fungible tokens
+- PoW mint contract creation
 - Container and author tokens
 - IPFS file uploading
 - On-chain image thumbnail generation

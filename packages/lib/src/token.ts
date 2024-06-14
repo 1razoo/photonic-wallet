@@ -12,15 +12,14 @@ import {
 } from "./types";
 import { bytesToHex } from "@noble/hashes/utils";
 import { pushMinimalAsm } from "./script";
-import { RST_MUT, RST_NFT } from "./protocols";
+import { GLYPH_MUT, GLYPH_NFT } from "./protocols";
 
 // ESM compatibility
 const { Script } = rjs;
 type Script = rjs.Script;
 
-export const rstHex = "726333"; // rc3
-//export const rstHex = ""; // rst
-export const rstBuffer = Buffer.from(rstHex, "hex");
+export const glyphMagicBytesHex = "676c79"; // gly
+export const glyphMagicBytesBuffer = Buffer.from(glyphMagicBytesHex, "hex");
 
 const toObject = (obj: unknown) =>
   typeof obj === "object" ? (obj as { [key: string]: unknown }) : {};
@@ -50,13 +49,13 @@ const filterFileObj = (
   return {};
 };
 
-export type DecodedRst = {
+export type DecodedGlyph = {
   payload: SmartTokenPayload;
   embeddedFiles: { [key: string]: SmartTokenEmbeddedFile };
   remoteFiles: { [key: string]: SmartTokenRemoteFile };
 };
 
-export function decodeRst(script: Script): undefined | DecodedRst {
+export function decodeGlyph(script: Script): undefined | DecodedGlyph {
   const result: { payload: object } = {
     payload: {},
   };
@@ -69,7 +68,7 @@ export function decodeRst(script: Script): undefined | DecodedRst {
     if (
       !buf ||
       opcodenum !== 3 ||
-      Buffer.from(buf).toString("hex") !== rstHex ||
+      Buffer.from(buf).toString("hex") !== glyphMagicBytesHex ||
       script.chunks.length <= index + 1
     ) {
       return false;
@@ -131,15 +130,18 @@ export function decodeRst(script: Script): undefined | DecodedRst {
   };
 }
 
-export function encodeRst(payload: unknown) {
+export function encodeGlyph(payload: unknown) {
   const encodedPayload = encode(payload);
   return {
-    revealScriptSig: new Script().add(rstBuffer).add(encodedPayload).toHex(),
+    revealScriptSig: new Script()
+      .add(glyphMagicBytesBuffer)
+      .add(encodedPayload)
+      .toHex(),
     payloadHash: bytesToHex(sha256(sha256(Buffer.from(encodedPayload)))),
   };
 }
 
-export function encodeRstMutable(
+export function encodeGlyphMutable(
   operation: "mod" | "sl",
   payload: unknown,
   contractOutputIndex: number,
@@ -149,7 +151,7 @@ export function encodeRstMutable(
 ) {
   const opHex = Buffer.from(operation).toString("hex");
   const encodedPayload = encode(payload);
-  const asm = `${rstHex} ${encodedPayload.toString(
+  const asm = `${glyphMagicBytesHex} ${encodedPayload.toString(
     "hex"
   )} ${opHex} ${pushMinimalAsm(contractOutputIndex)} ${pushMinimalAsm(
     refHashIndex
@@ -167,7 +169,7 @@ export function encodeRstMutable(
 
 export function isImmutableToken({ p }: SmartTokenPayload) {
   // Mutable tokens must be NFTs that implement the mutable contract
-  return !(p.includes(RST_NFT) && p.includes(RST_MUT));
+  return !(p.includes(GLYPH_NFT) && p.includes(GLYPH_MUT));
 }
 
 // Filter for attr objects
@@ -203,5 +205,5 @@ export function extractRevealPayload(
     return { revealIndex: -1 };
   }
 
-  return { revealIndex, rst: decodeRst(script) };
+  return { revealIndex, glyph: decodeGlyph(script) };
 }

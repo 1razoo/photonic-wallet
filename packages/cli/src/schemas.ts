@@ -47,7 +47,7 @@ const tokenBaseSchema = Joi.object({
 });
 
 const nftSchema = tokenBaseSchema.append({
-  contract: Joi.valid("nft", "dat").when("$prepared", {
+  contract: Joi.valid("nft").when("$prepared", {
     is: true,
     then: Joi.required(),
   }),

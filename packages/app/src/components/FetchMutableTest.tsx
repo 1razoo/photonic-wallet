@@ -3,7 +3,7 @@ import { SmartToken } from "@app/types";
 import { DownloadIcon } from "@chakra-ui/icons";
 import { GridItem, Button } from "@chakra-ui/react";
 import Outpoint from "@lib/Outpoint";
-import { decodeRst } from "@lib/token";
+import { decodeGlyph } from "@lib/token";
 import { parseMutableScript } from "@lib/script";
 import { findTokenOutput } from "@lib/tx";
 import { t } from "@lingui/macro";
@@ -34,7 +34,7 @@ async function fetchTokenData(ref: Outpoint, immutable: boolean) {
 
   const input = refTx.inputs[vout];
 
-  const decoded = decodeRst(input.script);
+  const decoded = decodeGlyph(input.script);
   console.log(new TextDecoder().decode(decoded?.embeddedFiles.main.b));
 }
 

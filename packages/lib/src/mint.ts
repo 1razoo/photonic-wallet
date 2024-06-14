@@ -1,4 +1,4 @@
-import { encodeRst, isImmutableToken } from "./token";
+import { encodeGlyph, isImmutableToken } from "./token";
 import {
   commitScriptSize,
   dMintDiffToTarget,
@@ -40,7 +40,7 @@ import { fundTx, targetToUtxo, updateUnspent } from "./coinSelect";
 import { buildTx } from "./tx";
 import Outpoint from "./Outpoint";
 import rjs from "@radiantblockchain/radiantjs";
-import { RST_NFT } from "./protocols";
+import { GLYPH_NFT } from "./protocols";
 const { Script, crypto } = rjs;
 
 const defaultFeeRate = 5000;
@@ -142,7 +142,7 @@ export function commitBundle(
 // Create an NFT that links to another token in the same transaction
 // Currently only used to keep a record of dmints.
 function createLinkCommit(
-  targetRefOffset: number,
+  targetRefVout: number,
   address: string,
   targetPayload: SmartTokenPayload,
   delegate?: {
@@ -151,14 +151,14 @@ function createLinkCommit(
   }
 ) {
   const linkPayload: SmartTokenPayload = {
-    p: [RST_NFT],
-    loc: targetRefOffset,
+    p: [GLYPH_NFT],
+    loc: targetRefVout,
   };
   // Set link to the same author if there is one
   if (targetPayload.by) {
     linkPayload.by = targetPayload.by;
   }
-  const { payloadHash, revealScriptSig } = encodeRst(linkPayload);
+  const { payloadHash, revealScriptSig } = encodeGlyph(linkPayload);
   return {
     payloadHash,
     revealScriptSig,
@@ -182,7 +182,7 @@ export function createCommitOutputs(
 ) {
   const p2pkh = p2pkhScript(address);
   const immutable = isImmutableToken(payload);
-  const { payloadHash, revealScriptSig } = encodeRst(payload);
+  const { payloadHash, revealScriptSig } = encodeGlyph(payload);
   const scriptFn = {
     nft: nftCommitScript,
     ft: ftCommitScript,
@@ -591,7 +591,7 @@ export function revealPsbt(
 
   // Iterate revealParams object so transactions can be selectively created
   Object.entries(revealParams).forEach(([k, { photons, address }]) => {
-    const { rst, utxo, immutable } = outpointTokenMap[k];
+    const { glyph, utxo, immutable } = outpointTokenMap[k];
     const txObj: { reveal: string; mutable?: string } = {
       reveal: buildTx(
         address,
@@ -600,7 +600,7 @@ export function revealPsbt(
         [{ script: p2pkhScript(address), value: photons }],
         false,
         (_, script) => {
-          script.add(Script.fromString(rst.script));
+          script.add(Script.fromString(glyph.script));
         },
         crypto.Signature.SIGHASH_SINGLE | crypto.Signature.SIGHASH_ANYONECANPAY
       ).toString(),
@@ -623,7 +623,7 @@ export function revealPsbt(
         ],
         [
           {
-            script: mutableNftScript(mutableRef, rst.payloadHash),
+            script: mutableNftScript(mutableRef, glyph.payloadHash),
             value: 1,
           },
         ],
@@ -667,7 +667,7 @@ export function mintToken(
   const createLinkToken = deploy.method === "dmint";
 
   const linkCommit = createLinkToken
-    ? createLinkCommit(outputs.length * -1, deploy.params.address, payload) // Link to the first ref
+    ? createLinkCommit(0, deploy.params.address, payload) // Link to the first ref
     : undefined;
   // Link NFT is always the last output before any change
   linkCommit && outputs.push(linkCommit.output);

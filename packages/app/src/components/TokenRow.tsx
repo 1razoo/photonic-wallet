@@ -18,18 +18,18 @@ const Ref = ({ value }: { value: string }) => {
 };
 
 export default function TokenRow({
-  rst,
+  glyph,
   value,
   to,
   defaultIcon,
 }: {
-  rst: SmartToken;
+  glyph: SmartToken;
   value: number;
   to: string;
   size?: "sm" | "md";
   defaultIcon?: IconType;
 }) {
-  const ref = Outpoint.fromString(rst?.ref || "");
+  const ref = Outpoint.fromString(glyph?.ref || "");
 
   const short = ref.shortInput();
   return (
@@ -49,13 +49,13 @@ export default function TokenRow({
       mx="auto"
     >
       <Box w="48px" h="48px" /*sx={{ "& > *": { w: "64px", h: "64px" } }}*/>
-        <TokenContent rst={rst} defaultIcon={defaultIcon} thumbnail />
+        <TokenContent glyph={glyph} defaultIcon={defaultIcon} thumbnail />
       </Box>
       <Box flexGrow={1}>
         <Flex gap={2}>
-          {rst.type === "user" && <Icon as={TbUserCircle} fontSize="2xl" />}
-          {rst.type === "container" && <Icon as={TbBox} fontSize="2xl" />}
-          {rst.name ? (
+          {glyph.type === "user" && <Icon as={TbUserCircle} fontSize="2xl" />}
+          {glyph.type === "container" && <Icon as={TbBox} fontSize="2xl" />}
+          {glyph.name ? (
             <Text
               as="div"
               fontWeight="500"
@@ -65,16 +65,16 @@ export default function TokenRow({
               textOverflow="ellipsis"
               ml={1}
             >
-              {rst.name}
+              {glyph.name}
             </Text>
           ) : (
             <Identifier>{short}</Identifier>
           )}
           <Text as="div" color="gray.400">
-            {(rst.ticker as string) || ""}
+            {(glyph.ticker as string) || ""}
           </Text>
         </Flex>
-        <Ref value={rst.ref} />
+        <Ref value={glyph.ref} />
       </Box>
       <ValueTag>{value}</ValueTag>
     </Flex>

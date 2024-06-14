@@ -10,20 +10,20 @@ import { IconType } from "react-icons/lib";
 import { LinkIcon } from "@chakra-ui/icons";
 
 export default function TokenCard({
-  rst,
+  glyph,
   value,
   to,
   size = "md",
   defaultIcon,
 }: {
-  rst?: SmartToken;
+  glyph?: SmartToken;
   value: number;
   to: string;
   size?: "sm" | "md";
   defaultIcon?: IconType;
 }) {
-  const ref = Outpoint.fromString(rst?.ref || "");
-  const isLink = !!rst?.location;
+  const ref = Outpoint.fromString(glyph?.ref || "");
+  const isLink = !!glyph?.location;
 
   const short = ref.shortInput();
   return (
@@ -49,7 +49,7 @@ export default function TokenCard({
             <LinkIcon boxSize={8} />
           </Box>
         )}
-        <TokenContent rst={rst} defaultIcon={defaultIcon} thumbnail />
+        <TokenContent glyph={glyph} defaultIcon={defaultIcon} thumbnail />
       </Box>
       <Flex
         p={2}
@@ -61,9 +61,9 @@ export default function TokenCard({
         lineHeight={8}
       >
         <Flex alignItems="center">
-          {rst?.type === "user" && <Icon as={TbUserCircle} fontSize="2xl" />}
-          {rst?.type === "container" && <Icon as={TbBox} fontSize="2xl" />}
-          {rst?.name ? (
+          {glyph?.type === "user" && <Icon as={TbUserCircle} fontSize="2xl" />}
+          {glyph?.type === "container" && <Icon as={TbBox} fontSize="2xl" />}
+          {glyph?.name ? (
             <Text
               fontWeight="500"
               color="lightBlue.A400"
@@ -72,7 +72,7 @@ export default function TokenCard({
               textOverflow="ellipsis"
               ml={1}
             >
-              {rst?.name}
+              {glyph?.name}
             </Text>
           ) : (
             <Identifier>{short}</Identifier>

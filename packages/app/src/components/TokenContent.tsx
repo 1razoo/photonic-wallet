@@ -15,15 +15,15 @@ import UnsafeImage from "./UnsafeImage";
 import { IconBaseProps, IconType } from "react-icons/lib";
 
 export default function TokenContent({
-  rst,
+  glyph,
   thumbnail = false,
   defaultIcon = BsFillFileXFill,
 }: {
-  rst?: SmartToken;
+  glyph?: SmartToken;
   thumbnail?: boolean;
   defaultIcon?: ((props: IconBaseProps) => JSX.Element) | IconType;
 }) {
-  const { embed, remote } = rst || {};
+  const { embed, remote } = glyph || {};
   const maxLen = 1000;
 
   // Image URL

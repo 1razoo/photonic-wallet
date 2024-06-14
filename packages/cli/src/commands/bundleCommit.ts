@@ -46,7 +46,7 @@ import {
 } from "@photonic/lib/types";
 import { loadConfig } from "../config";
 import ora, { Ora } from "ora";
-import { RST_FT, RST_NFT } from "@photonic/lib/protocols";
+import { GLYPH_FT, GLYPH_NFT } from "@photonic/lib/protocols";
 
 const { Address, Transaction } = rjs;
 
@@ -210,7 +210,7 @@ export default async function bundleCommit(
 
     const contract = token.contract;
     const args = {
-      p: [contract === "ft" ? RST_FT : RST_NFT],
+      p: [contract === "ft" ? GLYPH_FT : GLYPH_NFT],
       ...(contract === "ft" && { ticker: (token as BundleTokenFt).ticker }),
     };
 

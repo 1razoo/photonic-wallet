@@ -8,26 +8,26 @@ import { parseFtScript, parseNftScript } from "@lib/script";
 import { t } from "@lingui/macro";
 
 async function rxdNotification(utxo: TxO) {
-  return t`${photonsToRXD(utxo.value)} ${network.value.ticker}  received`;
+  return t`${photonsToRXD(utxo.value)} ${network.value.ticker} received`;
 }
 
 async function nftNotification(utxo: TxO) {
   const { ref: refLE } = parseNftScript(utxo.script);
   if (!refLE) return;
   const ref = reverseRef(refLE);
-  const rst = await db.rst.get({ ref });
-  if (!rst) return "";
-  return t`Digital object ${rst?.name && `"${rst.name}"`} received`;
+  const glyph = await db.glyph.get({ ref });
+  if (!glyph) return "";
+  return t`NFT ${glyph?.name && `"${glyph.name}"`} received`;
 }
 
 async function ftNotification(utxo: TxO) {
   const { ref: refLE } = parseFtScript(utxo.script);
   if (!refLE) return;
   const ref = reverseRef(refLE);
-  const rst = await db.rst.get({ ref });
-  if (!rst) return "";
-  const { ticker } = rst || {};
-  return t`${utxo.value} ${ticker || rst?.name || "???"}  received`;
+  const glyph = await db.glyph.get({ ref });
+  if (!glyph) return "";
+  const { ticker } = glyph || {};
+  return t`${utxo.value} ${ticker || glyph?.name || "???"} received`;
 }
 
 export default function useContractNotifier() {

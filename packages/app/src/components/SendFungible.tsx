@@ -38,12 +38,12 @@ import { electrumWorker } from "@app/electrum/Electrum";
 import FtBalance from "./FtBalance";
 
 interface Props {
-  rst: SmartToken;
+  glyph: SmartToken;
   onSuccess?: (txid: string) => void;
   disclosure: UseDisclosureProps;
 }
 
-export default function SendFungible({ rst, onSuccess, disclosure }: Props) {
+export default function SendFungible({ glyph, onSuccess, disclosure }: Props) {
   const { isOpen, onClose } = disclosure;
   const amount = useRef<HTMLInputElement>(null);
   const toAddress = useRef<HTMLInputElement>(null);
@@ -69,7 +69,7 @@ export default function SendFungible({ rst, onSuccess, disclosure }: Props) {
     setLoading(false);
   }, [isOpen]);
 
-  const ticker = (rst.ticker as string) || rst.name || "???";
+  const ticker = (glyph.ticker as string) || glyph.name || "???";
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -85,7 +85,7 @@ export default function SendFungible({ rst, onSuccess, disclosure }: Props) {
     }
 
     const value = parseInt(amount.current?.value, 10);
-    const refLE = reverseRef(rst.ref);
+    const refLE = reverseRef(glyph.ref);
     const fromScript = ftScript(wallet.value.address, refLE);
     const tokens = await db.txo
       .where({ script: fromScript, spent: 0 })
@@ -163,20 +163,20 @@ export default function SendFungible({ rst, onSuccess, disclosure }: Props) {
       <form onSubmit={submit}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{t`Send ${rst.name || ticker}`}</ModalHeader>
+          <ModalHeader>{t`Send ${glyph.name || ticker}`}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6} gap={4}>
             <VStack>
               <Box w="48px" h="48px">
                 <TokenContent
-                  rst={rst}
+                  glyph={glyph}
                   defaultIcon={RiQuestionFill}
                   thumbnail
                 />
               </Box>
               <Heading size="sm">{t`Balance`}</Heading>
               <Box>
-                <FtBalance id={rst.ref} />
+                <FtBalance id={glyph.ref} />
               </Box>
             </VStack>
             {success || (
