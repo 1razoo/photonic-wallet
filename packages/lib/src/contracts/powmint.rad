@@ -1,0 +1,58 @@
+contract PowMint(int REWARD, bytes36 CONTRACT_REF, bytes36 TOKEN_REF, int TARGET, bytes4 HEIGHT, int MAX_HEIGHT)
+function (bytes4 nonce, bytes32 inputHash, bytes32 outputHash, int outputIndex) {
+    // Height will be incremented on each spend
+    bytes4 height = HEIGHT;
+
+    // Remaining state is constant, but separated from the code script so code script hash is consistent for all contracts
+    bytes36 contractRef = pushInputRefSingleton(CONTRACT_REF);
+    bytes36 tokenRef = pushInputRef(TOKEN_REF);
+    int maxHeight = MAX_HEIGHT;
+    int reward = REWARD;
+    int target = TARGET;
+    stateSeparator;
+
+    // PoW
+    bytes hash = hash256(
+        sha256(tx.inputs[this.activeInputIndex].outpointTransactionHash + contractRef) +
+        sha256(inputHash + outputHash) +
+        nonce
+    ).reverse();
+
+    bytes next8Bytes, bytes firstFourBytes = hash.split(20)[1].split(8);
+
+    // Minimum difficulty requires first four bytes to be zero
+    require(firstFourBytes == 0x00000000);
+
+    // Numbers are signed so make sure it's a positive value less than the target
+    int value = int(next8Bytes);
+    require(value >= 0);
+    require(value <= target);
+
+    // Check input and output script hashes exist
+    require(tx.inputs.codeScriptCount(inputHash) > 0);
+    require(tx.outputs.codeScriptCount(outputHash) > 0);
+
+    // Check reward outputs
+    bytes32 rewardCSH = hash256(0xd0 + tokenRef + 0xdec0e9aa76e378e4a269e69d); // FT script
+    require(tx.outputs.codeScriptValueSum(rewardCSH) == reward);
+
+    // Restrict token ref usage
+    int newHeight = int(height) + 1;
+    bool finalMint = newHeight == maxHeight;
+    require(tx.outputs.refOutputCount(tokenRef) == int(!finalMint) + tx.outputs.codeScriptCount(rewardCSH));
+
+    if (finalMint) {
+        // Contract must be burned to unspendable output on final mint
+        require(tx.outputs[outputIndex].lockingBytecode == 0xd8 + contractRef + 0x6a);
+    } else {
+        // Create new state script
+        bytes newState = 0x04 + bytes4(newHeight) + tx.inputs[this.activeInputIndex].stateScript.split(5)[1];
+        require(tx.outputs[outputIndex].stateScript == newState);
+        // Contract can't be changed
+        require(tx.outputs[outputIndex].codeScript == tx.inputs[this.activeInputIndex].codeScript);
+        require(tx.outputs[outputIndex].value == 1);
+
+        // Restrict contract ref usage
+        require(tx.outputs.refOutputCount(contractRef) == 1);
+    }
+}

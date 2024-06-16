@@ -1,0 +1,31 @@
+contract MutableToken(bytes36 REF, bytes STATE)
+function (string gly, bytes payload, string operation, int contractOutputIndex, int hashIndex, int refIndex, int tokenOutputIndex) {
+    pushData(STATE);
+    stateSeparator;
+
+    bytes36 mutableRef = pushInputRefSingleton(REF);
+    bytes32 txId, bytes4 vout = mutableRef.split(32);
+    int nvout = int(vout);
+    bytes36 expectedRef = txId + bytes4(nvout - 1);
+    bytes36 outputRef = bytes36(tx.outputs[tokenOutputIndex].refDataSummary.split(refIndex * 36)[1].split(36)[0]);
+    require(outputRef == expectedRef);
+
+    require(
+        tx.outputs[tokenOutputIndex].stateScript.split(hashIndex)[1].split(69)[0] ==
+        mutableRef + 0x20 + sha256(tx.inputs[this.activeInputIndex].unlockingBytecode)
+    );
+
+    if (operation == "mod") {
+        require(tx.outputs[contractOutputIndex].codeScript == tx.inputs[this.activeInputIndex].codeScript);
+        require(tx.outputs[contractOutputIndex].stateScript == 0x20 + hash256(payload) + 0x75);
+    } else {
+        require(operation == "sl");
+        // Allow seal by op return or omitting ref
+        require(
+            (tx.outputs[contractOutputIndex].lockingBytecode == 0xd8 + mutableRef + 0x6a) ||
+            (tx.outputs.refType(mutableRef) == 0)
+        );
+    }
+
+    require(gly == "gly");
+}

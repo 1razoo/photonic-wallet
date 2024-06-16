@@ -1,0 +1,8 @@
+pragma radiantscript ^0.1.0;
+
+contract NonFungibleToken(bytes36 REF, bytes20 PKH)
+function (sig s, pubkey pk) {
+    pushInputRefSingleton(REF);
+    require(hash160(pk) == PKH);
+    require(checkSig(s, pk));
+}

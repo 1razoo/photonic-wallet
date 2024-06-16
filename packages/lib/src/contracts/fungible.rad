@@ -1,0 +1,18 @@
+pragma radiantscript ^0.1.0;
+
+contract FungibleToken(bytes36 REF, bytes20 PKH)
+function (sig s, pubkey pk) {
+    require(hash160(pk) == PKH);
+    bool validp2pkh = checkSig(s, pk);
+    stateSeparator;
+
+    bytes36 ref = pushInputRef(REF);
+    // Order of operations produces optimal script size
+    int outputCount = tx.outputs.refOutputCount(ref);
+    bytes32 csh = hash256(tx.inputs[this.activeInputIndex].codeScript);
+    require(tx.inputs.codeScriptValueSum(csh) >= tx.outputs.codeScriptValueSum(csh));
+    require(tx.outputs.codeScriptCount(csh) == outputCount);
+
+    // Leave this on the stack so p2pkh script uses standard OP_CHECKSIG
+    require(validp2pkh);
+}
