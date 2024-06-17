@@ -30,7 +30,7 @@
   "defaultConfig": {
     "servers": {
       "testnet": ["wss://electrumx-testnet.radiant4people.com:53002"],
-      "mainnet": ["wss://electrumx.radiant4people.com:50012"]
+      "mainnet": ["wss://electrumx.radiant4people.com:50022"]
     },
     "feeRate": 5000,
     "ipfsMethod": "gateway",
