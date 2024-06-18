@@ -388,8 +388,8 @@ export class NFTWorker implements Subscription {
     if (author) related.push(author);
 
     const ticker =
-      typeof payload.ticker === "string" ? payload.ticker : undefined;
-    const name = toString(payload.name);
+      typeof payload.ticker === "string" ? payload.ticker.substring(0, 20) : undefined;
+    const name = toString(payload.name).substring(0, 80);
     const record: SmartToken = {
       p: protocols,
       ref,

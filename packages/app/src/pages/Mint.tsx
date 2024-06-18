@@ -675,7 +675,8 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   const totalDmintSupply =
     parseInt(formData.numContracts, 10) *
     parseInt(formData.maxHeight, 10) *
-    parseInt(formData.reward, 10);
+    parseInt(formData.reward, 10) +
+    parseInt(formData.premine, 10);
 
   return (
     <>

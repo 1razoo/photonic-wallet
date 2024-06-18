@@ -9,7 +9,7 @@
         "prevTime": 1605445400
       },
       "explorer": {
-        "tx": "https://explorer.radiantblockchain.org/tx/{txid}"
+        "tx": "https://radiantexplorer.com/tx/{txid}"
       },
       "enabled": true
     },
@@ -22,7 +22,7 @@
         "prevTime": 1657404650
       },
       "explorer": {
-        "tx": "https://explorer-testnet.radiantblockchain.org/tx/{txid}"
+        "tx": "https://testnet.radiantexplorer.com/tx/{txid}"
       },
       "enabled": true
     }
