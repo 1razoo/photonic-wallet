@@ -1,5 +1,5 @@
 const map: { [key: string]: string } = {
-  object: "Object",
+  object: "Non-Fungible Token",
   container: "Container",
   user: "User",
   fungible: "Fungible",

@@ -21,6 +21,7 @@ export type RevealDmintParams = {
   numContracts: number;
   maxHeight: number;
   reward: number;
+  premine: number;
 };
 
 export type RevealPsbtParams = {

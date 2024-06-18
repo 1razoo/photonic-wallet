@@ -8,8 +8,8 @@ import {
   AlertIcon,
   Box,
   Button,
-  Divider as CUIDivider,
   Container,
+  Divider as CUIDivider,
   Flex,
   FormControl,
   FormHelperText,
@@ -252,6 +252,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
       numContracts: "1",
       maxHeight: "100",
       reward: "10",
+      premine: "0",
       immutable: ["user", "container"].includes(tokenType) ? "0" : "1",
     })
   );
@@ -481,16 +482,18 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
         const address = wallet.value.address;
         if (tokenType === "fungible") {
           if (deployMethod === "dmint") {
-            const { difficulty, maxHeight, reward } = fields;
+            const { difficulty, maxHeight, reward, premine, numContracts } =
+              fields;
             // Value 1 is for the dmint contracts
             return {
               value: 1,
               method: "dmint" as const,
               params: {
                 difficulty: parseInt(difficulty, 10),
-                numContracts: 1, //parseInt(numContracts, 10),
+                numContracts: parseInt(numContracts, 10),
                 maxHeight: parseInt(maxHeight, 10),
                 reward: parseInt(reward, 10),
+                premine: parseInt(premine, 10),
                 address,
               } as RevealDmintParams,
             };
@@ -670,7 +673,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
   const diff = parseInt(formData.difficulty, 10);
   const timeToMine = diff > 0 ? calcTimeToMine(diff) : "";
   const totalDmintSupply =
-    //parseInt(formData.numContracts, 10) *
+    parseInt(formData.numContracts, 10) *
     parseInt(formData.maxHeight, 10) *
     parseInt(formData.reward, 10);
 
@@ -861,7 +864,9 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                           onChange={(value) => setEnableHashstamp(!!value)}
                         >
                           <Stack spacing={5} direction="row">
-                            <Radio value="1">{t`Store HashStamp on-chain`}</Radio>
+                            <Radio value="1">
+                              {t`Store HashStamp on-chain`}
+                            </Radio>
                             <Radio value="">{t`No HashStamp`}</Radio>
                           </Stack>
                         </RadioGroup>
@@ -1068,7 +1073,6 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                           </FormHelperText>
                         )}
                       </FormControl>
-                      {/*
                       <FormControl>
                         <FormLabel>{t`Number of contracts`}</FormLabel>
                         <Input
@@ -1078,13 +1082,12 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                           type="number"
                           onChange={onFormChange}
                           min={1}
-                          max={100}
+                          max={10}
                         />
                         <FormHelperText>
                           {t`Multiple contracts allows parallel mining, reducing congestion for low difficulty contracts`}
                         </FormHelperText>
                       </FormControl>
-                      */}
                       <FormControl>
                         <FormLabel>{t`Number of mints`}</FormLabel>
                         <Input
@@ -1111,6 +1114,20 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                         />
                         <FormHelperText>
                           {t`Number of tokens created on each mint`}
+                        </FormHelperText>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>{t`Premine`}</FormLabel>
+                        <Input
+                          placeholder=""
+                          name="premine"
+                          type="number"
+                          onChange={onFormChange}
+                          required
+                          min={0}
+                        />
+                        <FormHelperText>
+                          {t`Token supply sent directly to your wallet. Requires an equal amount of RXD photons.`}
                         </FormHelperText>
                       </FormControl>
                     </>
@@ -1162,6 +1179,17 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                           <Box>{t`FT supply funding`}</Box>
                           <Box>
                             {photonsToRXD(parseInt(formData.supply, 10))}{" "}
+                            {network.value.ticker}
+                          </Box>
+                        </>
+                      )}
+                    {tokenType === "fungible" &&
+                      formData.deployMethod === "dmint" &&
+                      parseInt(formData.premine, 10) > 0 && (
+                        <>
+                          <Box>{t`Premine supply funding`}</Box>
+                          <Box>
+                            {photonsToRXD(parseInt(formData.premine, 10))}{" "}
                             {network.value.ticker}
                           </Box>
                         </>
