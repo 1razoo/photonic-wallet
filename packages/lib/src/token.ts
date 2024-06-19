@@ -190,7 +190,7 @@ export function extractRevealPayload(
   inputs: rjs.Transaction.Input[]
 ) {
   const refTxId = ref.substring(0, 64);
-  const refVout = parseInt(ref.substring(64), 10);
+  const refVout = parseInt(ref.substring(64), 16);
 
   // Find token script in the reveal tx
   const revealIndex = inputs.findIndex((input) => {

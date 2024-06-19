@@ -165,7 +165,7 @@ export class NFTWorker implements Subscription {
           txMap[txo.txid]?.tx.inputs.some(
             (input) =>
               bytesToHex(input.prevTxId) === ref.substring(0, 64) &&
-              input.outputIndex === parseInt(ref.substring(65), 10)
+              input.outputIndex === parseInt(ref.substring(64), 16)
           )
           ? ref
           : undefined;
@@ -325,7 +325,10 @@ export class NFTWorker implements Subscription {
     }
 
     let location = undefined;
-    if (glyph.payload.loc !== undefined && Number.isInteger(glyph.payload.loc)) {
+    if (
+      glyph.payload.loc !== undefined &&
+      Number.isInteger(glyph.payload.loc)
+    ) {
       // Location is set to a ref vout. Get the payload and merge.
       const vout = glyph.payload.loc as number;
       const op = Outpoint.fromString(ref);
@@ -388,7 +391,9 @@ export class NFTWorker implements Subscription {
     if (author) related.push(author);
 
     const ticker =
-      typeof payload.ticker === "string" ? payload.ticker.substring(0, 20) : undefined;
+      typeof payload.ticker === "string"
+        ? payload.ticker.substring(0, 20)
+        : undefined;
     const name = toString(payload.name).substring(0, 80);
     const record: SmartToken = {
       p: protocols,
