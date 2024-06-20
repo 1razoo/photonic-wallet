@@ -1084,7 +1084,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                           type="number"
                           onChange={onFormChange}
                           min={1}
-                          max={20}
+                          max={32}
                         />
                         <FormHelperText>
                           {t`Multiple contracts allows parallel mining, reducing congestion for low difficulty contracts`}
