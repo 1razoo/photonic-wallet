@@ -657,7 +657,8 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
 
   const calcTimeToMine = (diff: number) => {
     // 33 bits (4 bytes + 1 bit to make the next 64 bit number unsigned)
-    const seconds = Math.round((diff * Math.pow(2, 33)) / 3000000000);
+    // Estimate is for RTX 4090, approx 5 GH/s
+    const seconds = Math.round((diff * Math.pow(2, 33)) / 5000000000);
     if (seconds > 86400) {
       return `${Math.round(seconds / 864) / 100} days`;
     }
@@ -1083,7 +1084,7 @@ export default function Mint({ tokenType }: { tokenType: TokenType }) {
                           type="number"
                           onChange={onFormChange}
                           min={1}
-                          max={10}
+                          max={20}
                         />
                         <FormHelperText>
                           {t`Multiple contracts allows parallel mining, reducing congestion for low difficulty contracts`}
