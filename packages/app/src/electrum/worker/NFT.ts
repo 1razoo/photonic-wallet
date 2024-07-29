@@ -18,7 +18,6 @@ import { ElectrumTxMap, buildUpdateTXOs } from "./updateTxos";
 import db from "@app/db";
 import Outpoint, { reverseRef } from "@lib/Outpoint";
 import {
-  decodeGlyph,
   extractRevealPayload,
   filterAttrs,
   isImmutableToken,
