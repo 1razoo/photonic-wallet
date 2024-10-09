@@ -6,14 +6,15 @@ import { ftScript, ftScriptHash, parseFtScript } from "@lib/script";
 import db from "@app/db";
 import Outpoint, { reverseRef } from "@lib/Outpoint";
 import setSubscriptionStatus from "./setSubscriptionStatus";
+import { Worker } from "./electrumWorker";
 
 export class FTWorker extends NFTWorker {
   protected ready = true;
   protected receivedStatuses: string[] = [];
   protected address = "";
 
-  constructor(electrum: ElectrumManager) {
-    super(electrum);
+  constructor(worker: Worker, electrum: ElectrumManager) {
+    super(worker, electrum);
     this.updateTXOs = buildUpdateTXOs(
       this.electrum,
       ContractType.FT,
@@ -33,7 +34,12 @@ export class FTWorker extends NFTWorker {
       console.debug("Duplicate subscription received", status);
       return;
     }
-    if (!this.ready) {
+
+    if (
+      !this.ready ||
+      !this.worker.active ||
+      (await db.kvp.get("consolidationRequired"))
+    ) {
       this.receivedStatuses.push(status);
       return;
     }
@@ -41,7 +47,10 @@ export class FTWorker extends NFTWorker {
     this.ready = false;
     this.lastReceivedStatus = status;
 
-    const { added, spent } = await this.updateTXOs(scriptHash, status);
+    const { added, spent, utxoCount } = await this.updateTXOs(
+      scriptHash,
+      status
+    );
 
     // TODO there is some duplication in NFT and FT classes
 
@@ -105,6 +114,7 @@ export class FTWorker extends NFTWorker {
         unconfirmed,
       });
     }
+
     setSubscriptionStatus(scriptHash, status, ContractType.FT);
     this.ready = true;
     if (this.receivedStatuses.length > 0) {
@@ -114,16 +124,42 @@ export class FTWorker extends NFTWorker {
         this.onSubscriptionReceived(scriptHash, lastStatus);
       }
     }
+
+    // Check if consolidation is required
+    let consolidationRequired = false;
+    if (utxoCount && utxoCount > 20) {
+      (
+        await db.txo
+          .where({
+            contractType: ContractType.FT,
+            spent: 0,
+          })
+          .toArray()
+      ).reduce((acc, cur) => {
+        if (!acc[cur.script]) {
+          acc[cur.script] = 0;
+        }
+        acc[cur.script] += 1;
+        if (acc[cur.script] > 10) {
+          consolidationRequired = true;
+        }
+        return acc;
+      }, {} as { [key: string]: number });
+    }
+
+    if (consolidationRequired) {
+      db.kvp.put(true, "consolidationRequired");
+    }
   }
 
   async register(address: string) {
-    const scriptHash = ftScriptHash(address as string);
+    this.scriptHash = ftScriptHash(address as string);
     this.address = address;
 
     this.electrum.client?.subscribe(
       "blockchain.scripthash",
       this.onSubscriptionReceived.bind(this) as ElectrumCallback,
-      scriptHash
+      this.scriptHash
     );
   }
 }
