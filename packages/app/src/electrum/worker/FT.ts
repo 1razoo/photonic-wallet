@@ -7,6 +7,8 @@ import db from "@app/db";
 import Outpoint, { reverseRef } from "@lib/Outpoint";
 import setSubscriptionStatus from "./setSubscriptionStatus";
 import { Worker } from "./electrumWorker";
+import { consolidationCheck } from "./consolidationCheck";
+import { updateFtBalances } from "@app/utxos";
 
 export class FTWorker extends NFTWorker {
   protected ready = true;
@@ -47,10 +49,7 @@ export class FTWorker extends NFTWorker {
     this.ready = false;
     this.lastReceivedStatus = status;
 
-    const { added, spent, utxoCount } = await this.updateTXOs(
-      scriptHash,
-      status
-    );
+    const { added, spent } = await this.updateTXOs(scriptHash, status);
 
     // TODO there is some duplication in NFT and FT classes
 
@@ -96,24 +95,7 @@ export class FTWorker extends NFTWorker {
       ...spent.map(({ script }) => script),
     ]);
 
-    // Update balances
-    for (const script of touched) {
-      let confirmed = 0;
-      let unconfirmed = 0;
-      await db.txo.where({ script, spent: 0 }).each(({ height, value }) => {
-        if (height === Infinity) {
-          unconfirmed += value;
-        } else {
-          confirmed += value;
-        }
-      });
-      const { ref } = parseFtScript(script);
-      db.balance.put({
-        id: reverseRef(ref as string),
-        confirmed,
-        unconfirmed,
-      });
-    }
+    updateFtBalances(touched);
 
     setSubscriptionStatus(scriptHash, status, ContractType.FT);
     this.ready = true;
@@ -125,31 +107,7 @@ export class FTWorker extends NFTWorker {
       }
     }
 
-    // Check if consolidation is required
-    let consolidationRequired = false;
-    if (utxoCount && utxoCount > 20) {
-      (
-        await db.txo
-          .where({
-            contractType: ContractType.FT,
-            spent: 0,
-          })
-          .toArray()
-      ).reduce((acc, cur) => {
-        if (!acc[cur.script]) {
-          acc[cur.script] = 0;
-        }
-        acc[cur.script] += 1;
-        if (acc[cur.script] > 10) {
-          consolidationRequired = true;
-        }
-        return acc;
-      }, {} as { [key: string]: number });
-    }
-
-    if (consolidationRequired) {
-      db.kvp.put(true, "consolidationRequired");
-    }
+    consolidationCheck();
   }
 
   async register(address: string) {

@@ -174,8 +174,6 @@ const OutputCounts = () => {
       (
         await db.subscriptionStatus.toArray()
       ).map(async (sub) => {
-        db.txo.where({ ContractType });
-
         const count = await db.txo
           .where({ contractType: sub.contractType, spent: 0 })
           .count();
@@ -188,7 +186,8 @@ const OutputCounts = () => {
     ([contractType, count]) =>
       contractType !== ContractType.NFT && (
         <div key={contractType}>
-          <ContractName contractType={contractType} /> - {count}
+          <ContractName contractType={contractType} />: {count}{" "}
+          {count === 1 ? "UTXO" : "UTXOs"}
         </div>
       )
   );
@@ -218,6 +217,7 @@ export default function ConsolidationModal() {
           status: "success",
         });
       } catch (error) {
+        setWaiting(false);
         if (error instanceof Error) {
           toast({
             title: error.message,

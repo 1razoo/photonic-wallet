@@ -10,6 +10,8 @@ import db from "@app/db";
 import ElectrumManager from "@app/electrum/ElectrumManager";
 import setSubscriptionStatus from "./setSubscriptionStatus";
 import { Worker } from "./electrumWorker";
+import { consolidationCheck } from "./consolidationCheck";
+import { updateRxdBalances } from "@app/utxos";
 
 export class RXDWorker implements Subscription {
   protected worker: Worker;
@@ -58,25 +60,13 @@ export class RXDWorker implements Subscription {
     this.ready = false;
     this.lastReceivedStatus = status;
 
-    const { added, utxoCount } = await this.updateTXOs(scriptHash, status);
+    const { added } = await this.updateTXOs(scriptHash, status);
 
     added.map((txo) => db.txo.put(txo).catch());
 
-    // Update balances
-    let confirmed = 0;
-    let unconfirmed = 0;
-    await db.txo
-      .where({ contractType: ContractType.RXD, spent: 0 })
-      .each(({ height, value }) => {
-        if (height === Infinity) {
-          unconfirmed += value;
-        } else {
-          confirmed += value;
-        }
-      });
+    updateRxdBalances(this.address);
 
     setSubscriptionStatus(scriptHash, status, ContractType.RXD);
-    db.balance.put({ id: this.address, confirmed, unconfirmed });
     this.ready = true;
     if (this.receivedStatuses.length > 0) {
       const lastStatus = this.receivedStatuses.pop();
@@ -86,9 +76,7 @@ export class RXDWorker implements Subscription {
       }
     }
 
-    if (utxoCount && utxoCount > 20) {
-      db.kvp.put(true, "consolidationRequired");
-    }
+    consolidationCheck();
   }
 
   async register(address: string) {

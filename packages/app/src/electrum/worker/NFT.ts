@@ -34,6 +34,7 @@ import setSubscriptionStatus from "./setSubscriptionStatus";
 import { batchRequests } from "@lib/util";
 import { GLYPH_FT, GLYPH_NFT } from "@lib/protocols";
 import { Worker } from "./electrumWorker";
+import { consolidationCheck } from "./consolidationCheck";
 
 // 500KB size limit
 const fileSizeLimit = 500_000;
@@ -96,7 +97,11 @@ export class NFTWorker implements Subscription {
       console.debug("Duplicate subscription received", status);
       return;
     }
-    if (!this.ready || !this.worker.active) {
+    if (
+      !this.ready ||
+      !this.worker.active ||
+      (await db.kvp.get("consolidationRequired"))
+    ) {
       this.receivedStatuses.push(status);
       return;
     }
@@ -168,6 +173,8 @@ export class NFTWorker implements Subscription {
         this.onSubscriptionReceived(scriptHash, lastStatus);
       }
     }
+
+    consolidationCheck();
   }
 
   async register(address: string) {
