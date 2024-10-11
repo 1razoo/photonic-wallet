@@ -21,7 +21,7 @@ import ContractName from "./ContractName";
 import { p2pkhScript, p2pkhScriptSigSize, txSize } from "@lib/script";
 import { feeRate, openModal, wallet } from "@app/signals";
 import { buildTx } from "@lib/tx";
-import { UnfinalizedInput, Utxo } from "@lib/types";
+import { UnfinalizedInput } from "@lib/types";
 import { electrumWorker } from "@app/electrum/Electrum";
 import { fundTx } from "@lib/coinSelect";
 import {
@@ -118,7 +118,7 @@ async function consolidateUtxos(
   const p2pkh = p2pkhScript(wallet.value.address);
 
   for (let i = 0; i < totalUtxos; i += maxInputs) {
-    const inputs: Utxo[] = utxos.slice(i, i + maxInputs);
+    const inputs: UnfinalizedInput[] = utxos.slice(i, i + maxInputs);
 
     if (consolidated) {
       inputs.push(consolidated);

@@ -19,8 +19,10 @@ export async function updateWalletUtxos(
   await db.transaction("rw", db.txo, async () => {
     // Spend inputs
     await Promise.all(
-      inputs.map(async ({ utxo }) => {
-        const { id } = utxo as TxO;
+      inputs.map(async (input) => {
+        const { utxo } = input;
+        // FIXME this is a bit messy
+        const { id } = (utxo as TxO) || input;
         if (id) {
           await db.txo.update(id, {
             spent: 1,
@@ -29,29 +31,25 @@ export async function updateWalletUtxos(
       })
     );
     // Add outputs
-    await Promise.all(
-      outputs.map(async (output, vout) => {
-        // Check for FT change, FT sent to self or RXD funding change
-        const sentToSelf = output.script === ownScript;
-        if (sentToSelf || output.script === changeScript) {
-          const outputContractType = sentToSelf
-            ? contractType
-            : ContractType.RXD;
-          const txo: TxO = {
-            contractType: outputContractType,
-            script: output.script,
-            spent: 0,
-            txid,
-            vout,
-            value: output.value,
-            change: 1,
-            date: new Date().getTime(),
-          };
-          const id = (await db.txo.put(txo)) as number;
-          newTxos.push({ ...txo, id });
-        }
-      })
-    );
+    for (const [vout, output] of outputs.entries()) {
+      // Check for FT change, FT sent to self or RXD funding change
+      const sentToSelf = output.script === ownScript;
+      if (sentToSelf || output.script === changeScript) {
+        const outputContractType = sentToSelf ? contractType : ContractType.RXD;
+        const txo: TxO = {
+          contractType: outputContractType,
+          script: output.script,
+          spent: 0,
+          txid,
+          vout,
+          value: output.value,
+          change: 1,
+          date: new Date().getTime(),
+        };
+        const id = (await db.txo.put(txo)) as number;
+        newTxos.push({ ...txo, id });
+      }
+    }
   });
   return newTxos;
 }

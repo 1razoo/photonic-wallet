@@ -52,7 +52,7 @@ export class RXDWorker implements Subscription {
   async onSubscriptionReceived(
     scriptHash: string,
     status: string,
-    manual?: boolean
+    manual = false
   ) {
     // Same subscription can be returned twice
     if (!manual && status === this.lastReceivedStatus) {
@@ -71,7 +71,7 @@ export class RXDWorker implements Subscription {
     this.ready = false;
     this.lastReceivedStatus = status;
 
-    const { added } = await this.updateTXOs(scriptHash, status);
+    const { added } = await this.updateTXOs(scriptHash, status, manual);
 
     added.map((txo) => db.txo.put(txo).catch());
 

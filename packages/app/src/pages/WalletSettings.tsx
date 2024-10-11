@@ -106,17 +106,16 @@ export default function WalletSettings() {
         />
       </FormSection>
 
-      {consolidationRequired === true && (
-        <FormSection>
-          <Heading size="md">{t`Manual Sync`}</Heading>
-          {t`If your wallet fails to consolidate UTXOs, a resync may be required`}
-          <Center mt={8} mb={16}>
-            <Button onClick={() => electrumWorker.value.manualSync()}>
-              {t`Resync Wallet`}
-            </Button>
-          </Center>
-        </FormSection>
-      )}
+      <FormSection>
+        <Heading size="md">{t`Manual Sync`}</Heading>
+        {consolidationRequired === true &&
+          t`If your wallet fails to consolidate UTXOs, a resync may be required`}
+        <Center mt={8} mb={16}>
+          <Button onClick={() => electrumWorker.value.manualSync()}>
+            {t`Resync Wallet`}
+          </Button>
+        </Center>
+      </FormSection>
 
       <FormSection>
         <FormControl>

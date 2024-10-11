@@ -33,7 +33,7 @@ export class FTWorker extends NFTWorker {
   async onSubscriptionReceived(
     scriptHash: string,
     status: string,
-    manual?: boolean
+    manual = false
   ) {
     // Same subscription can be returned twice
     if (!manual && status === this.lastReceivedStatus) {
@@ -53,7 +53,7 @@ export class FTWorker extends NFTWorker {
     this.ready = false;
     this.lastReceivedStatus = status;
 
-    const { added, spent } = await this.updateTXOs(scriptHash, status);
+    const { added, spent } = await this.updateTXOs(scriptHash, status, manual);
 
     // TODO there is some duplication in NFT and FT classes
 

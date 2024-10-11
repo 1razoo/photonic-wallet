@@ -60,8 +60,8 @@ msgid "Address"
 msgstr ""
 
 #: src/components/SendDigitalObject.tsx:189
-#: src/components/SendFungible.tsx:209
-#: src/components/SendRXD.tsx:192
+#: src/components/SendFungible.tsx:210
+#: src/components/SendRXD.tsx:193
 msgid "Amount"
 msgstr ""
 
@@ -90,8 +90,8 @@ msgstr ""
 msgid "Back to wallet"
 msgstr ""
 
-#: src/components/SendFungible.tsx:189
-#: src/components/SendRXD.tsx:172
+#: src/components/SendFungible.tsx:190
+#: src/components/SendRXD.tsx:173
 msgid "Balance"
 msgstr ""
 
@@ -106,8 +106,8 @@ msgstr ""
 #: src/components/MeltDigitalObject.tsx:136
 #: src/components/MeltFungible.tsx:152
 #: src/components/SendDigitalObject.tsx:199
-#: src/components/SendFungible.tsx:221
-#: src/components/SendRXD.tsx:212
+#: src/components/SendFungible.tsx:222
+#: src/components/SendRXD.tsx:213
 msgid "Cancel"
 msgstr ""
 
@@ -196,8 +196,8 @@ msgstr ""
 msgid "Copy URL"
 msgstr ""
 
-#: src/components/SendFungible.tsx:158
-#: src/components/SendRXD.tsx:148
+#: src/components/SendFungible.tsx:159
+#: src/components/SendRXD.tsx:149
 msgid "Could not send transaction"
 msgstr ""
 
@@ -317,7 +317,7 @@ msgstr ""
 msgid "Fee"
 msgstr ""
 
-#: src/pages/WalletSettings.tsx:133
+#: src/pages/WalletSettings.tsx:132
 msgid "Fee Rate"
 msgstr ""
 
@@ -439,7 +439,7 @@ msgstr ""
 msgid "IPFS Gateway URL"
 msgstr ""
 
-#: src/pages/WalletSettings.tsx:123
+#: src/pages/WalletSettings.tsx:122
 msgid "Language"
 msgstr ""
 
@@ -471,7 +471,7 @@ msgstr ""
 msgid "Logging out will remove your wallet and all saved data from your browser."
 msgstr ""
 
-#: src/pages/WalletSettings.tsx:111
+#: src/pages/WalletSettings.tsx:110
 msgid "Manual Sync"
 msgstr ""
 
@@ -713,7 +713,7 @@ msgid "Reward"
 msgstr ""
 
 #: src/pages/IpfsSettings.tsx:102
-#: src/pages/WalletSettings.tsx:145
+#: src/pages/WalletSettings.tsx:144
 msgid "Save"
 msgstr ""
 
@@ -729,16 +729,16 @@ msgstr ""
 
 #: src/components/AccountBar.tsx:28
 #: src/components/SendDigitalObject.tsx:197
-#: src/components/SendFungible.tsx:219
-#: src/components/SendRXD.tsx:210
+#: src/components/SendFungible.tsx:220
+#: src/components/SendRXD.tsx:211
 #: src/components/ViewDigitalObject.tsx:272
 #: src/components/ViewFungible.tsx:249
 #: src/pages/MobileHome.tsx:45
 msgid "Send"
 msgstr ""
 
-#: src/components/SendFungible.tsx:178
-#: src/components/SendRXD.tsx:168
+#: src/components/SendFungible.tsx:179
+#: src/components/SendRXD.tsx:169
 msgid "Send {0}"
 msgstr ""
 

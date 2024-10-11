@@ -103,10 +103,12 @@ export type ElectrumCallback = (...payload: unknown[]) => unknown;
 
 export type ElectrumStatusUpdate = (
   scriptHash: string,
-  newStatus: string
+  newStatus: string,
+  manual: boolean
 ) => Promise<{
   added: TxO[];
   confs: Map<number, ElectrumUtxo>;
+  conflict: Map<number, string>;
   spent: { id: number; value: number; script: string }[];
   utxoCount?: number;
 }>;

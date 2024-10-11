@@ -126,22 +126,22 @@ export default function SendDigitalObject({
         status: "success",
       });
 
-      updateWalletUtxos(
+      const newTxos = await updateWalletUtxos(
         ContractType.NFT,
         txo.script, // NFT script, if sent to self
         changeScript, // RXD change
         txid,
         selected.inputs,
         selected.outputs
-      ).then((newTxos) => {
-        // If sent to self, update lastTxoId of glyph
-        if (newTxos.length && glyph.id) {
-          // There should only ever be one new txo when sending an NFT
-          db.glyph.update(glyph.id, { lastTxoId: newTxos.pop()?.id });
-        }
-        // Update RXD change
-        updateRxdBalances(wallet.value.address);
-      });
+      );
+
+      // If sent to self, update lastTxoId of glyph
+      if (newTxos.length && glyph.id) {
+        // There should only ever be one new txo when sending an NFT
+        await db.glyph.update(glyph.id, { lastTxoId: newTxos.pop()?.id });
+      }
+      // Update RXD change
+      updateRxdBalances(wallet.value.address);
 
       onSuccess && onSuccess(txid);
     } catch (error) {

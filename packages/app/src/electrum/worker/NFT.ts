@@ -101,7 +101,7 @@ export class NFTWorker implements Subscription {
   async onSubscriptionReceived(
     scriptHash: string,
     status: string,
-    manual?: boolean
+    manual = false
   ) {
     // Same subscription can be returned twice
     if (!manual && status === this.lastReceivedStatus) {
@@ -121,7 +121,11 @@ export class NFTWorker implements Subscription {
     this.ready = false;
     this.lastReceivedStatus = status;
 
-    const { added, confs, spent } = await this.updateTXOs(scriptHash, status);
+    const { added, confs, spent } = await this.updateTXOs(
+      scriptHash,
+      status,
+      manual
+    );
 
     const existingRefs: { [key: string]: SmartToken } = {};
     const newRefs: { [key: string]: TxO } = {};
