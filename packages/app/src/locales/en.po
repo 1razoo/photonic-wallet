@@ -18,7 +18,7 @@ msgstr ""
 msgid "{0} {1} received"
 msgstr ""
 
-#: src/components/SendDigitalObject.tsx:181
+#: src/components/SendDigitalObject.tsx:189
 msgid "{0} address"
 msgstr ""
 
@@ -59,7 +59,7 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: src/components/SendDigitalObject.tsx:189
+#: src/components/SendDigitalObject.tsx:197
 #: src/components/SendFungible.tsx:210
 #: src/components/SendRXD.tsx:193
 msgid "Amount"
@@ -105,7 +105,7 @@ msgstr ""
 
 #: src/components/MeltDigitalObject.tsx:136
 #: src/components/MeltFungible.tsx:152
-#: src/components/SendDigitalObject.tsx:199
+#: src/components/SendDigitalObject.tsx:207
 #: src/components/SendFungible.tsx:222
 #: src/components/SendRXD.tsx:213
 msgid "Cancel"
@@ -396,7 +396,7 @@ msgstr ""
 
 #: src/components/MeltDigitalObject.tsx:78
 #: src/components/MeltFungible.tsx:96
-#: src/components/SendDigitalObject.tsx:103
+#: src/components/SendDigitalObject.tsx:104
 #: src/components/SendFungible.tsx:126
 #: src/components/SendRXD.tsx:112
 msgid "Insufficient funds"
@@ -597,7 +597,7 @@ msgid "No, allow token owner to modify"
 msgstr ""
 
 #: src/components/MintMenu.tsx:36
-#: src/components/SendDigitalObject.tsx:185
+#: src/components/SendDigitalObject.tsx:193
 msgid "Non-Fungible Token"
 msgstr ""
 
@@ -728,7 +728,7 @@ msgid "Select a valid network"
 msgstr ""
 
 #: src/components/AccountBar.tsx:28
-#: src/components/SendDigitalObject.tsx:197
+#: src/components/SendDigitalObject.tsx:205
 #: src/components/SendFungible.tsx:220
 #: src/components/SendRXD.tsx:211
 #: src/components/ViewDigitalObject.tsx:272
@@ -746,7 +746,7 @@ msgstr ""
 msgid "Send {0} coins and tokens to this address"
 msgstr ""
 
-#: src/components/SendDigitalObject.tsx:167
+#: src/components/SendDigitalObject.tsx:175
 msgid "Send Non-Fungible Token"
 msgstr ""
 
@@ -758,7 +758,7 @@ msgstr ""
 msgid "Sent {value} {ticker}"
 msgstr ""
 
-#: src/components/SendDigitalObject.tsx:125
+#: src/components/SendDigitalObject.tsx:126
 msgid "Sent NFT"
 msgstr ""
 
@@ -851,7 +851,7 @@ msgstr ""
 
 #: src/components/MeltDigitalObject.tsx:101
 #: src/components/MeltFungible.tsx:117
-#: src/components/SendDigitalObject.tsx:148
+#: src/components/SendDigitalObject.tsx:156
 msgid "Transaction rejected"
 msgstr ""
 
