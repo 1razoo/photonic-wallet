@@ -133,10 +133,11 @@ export default function SendDigitalObject({
         txid,
         selected.inputs,
         selected.outputs
-      ).then((newTxoIds) => {
+      ).then((newTxos) => {
         // If sent to self, update lastTxoId of glyph
-        if (newTxoIds.length && glyph.id) {
-          db.glyph.update(glyph.id, { lastTxoId: newTxoIds.pop() });
+        if (newTxos.length && glyph.id) {
+          // There should only ever be one new txo when sending an NFT
+          db.glyph.update(glyph.id, { lastTxoId: newTxos.pop()?.id });
         }
         // Update RXD change
         updateRxdBalances(wallet.value.address);

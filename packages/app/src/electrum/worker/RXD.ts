@@ -42,16 +42,27 @@ export class RXDWorker implements Subscription {
     }
   }
 
-  async onSubscriptionReceived(scriptHash: string, status: string) {
+  async manualSync() {
+    if (this.ready) {
+      this.receivedStatuses = [];
+      await this.onSubscriptionReceived(this.scriptHash, "", true);
+    }
+  }
+
+  async onSubscriptionReceived(
+    scriptHash: string,
+    status: string,
+    manual?: boolean
+  ) {
     // Same subscription can be returned twice
-    if (status === this.lastReceivedStatus) {
+    if (!manual && status === this.lastReceivedStatus) {
       return;
     }
 
     if (
       !this.ready ||
-      !this.worker.active ||
-      (await db.kvp.get("consolidationRequired"))
+      (!manual &&
+        (!this.worker.active || (await db.kvp.get("consolidationRequired"))))
     ) {
       this.receivedStatuses.push(status);
       return;

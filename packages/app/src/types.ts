@@ -96,6 +96,7 @@ export interface Subscription {
   // Provide toast to subscription so user can be notified
   register(address: string, toast: CreateToastFnReturn): void;
   syncPending(): void;
+  manualSync(): void;
 }
 
 export type ElectrumCallback = (...payload: unknown[]) => unknown;

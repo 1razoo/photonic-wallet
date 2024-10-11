@@ -5,7 +5,7 @@ import { ContractType, TxO } from "./types";
 import { parseFtScript } from "@lib/script";
 import { reverseRef } from "@lib/Outpoint";
 
-// Update txo table after a transaction
+// Update txo table after a transaction. This will keep the db in sync before an ElectrumX subscription is received.
 // ownScript and changeScript will be the same for RXD UTXOs
 export async function updateWalletUtxos(
   contractType: ContractType,
@@ -15,7 +15,7 @@ export async function updateWalletUtxos(
   inputs: SelectableInput[],
   outputs: UnfinalizedInput[]
 ) {
-  const newTxoIds: number[] = [];
+  const newTxos: TxO[] = [];
   await db.transaction("rw", db.txo, async () => {
     // Spend inputs
     await Promise.all(
@@ -47,14 +47,13 @@ export async function updateWalletUtxos(
             change: 1,
             date: new Date().getTime(),
           };
-          if (sentToSelf) {
-            newTxoIds.push((await db.txo.put(txo)) as number);
-          }
+          const id = (await db.txo.put(txo)) as number;
+          newTxos.push({ ...txo, id });
         }
       })
     );
   });
-  return newTxoIds;
+  return newTxos;
 }
 
 // Update RXD balances

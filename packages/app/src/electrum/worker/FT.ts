@@ -30,17 +30,21 @@ export class FTWorker extends NFTWorker {
     );
   }
 
-  async onSubscriptionReceived(scriptHash: string, status: string) {
+  async onSubscriptionReceived(
+    scriptHash: string,
+    status: string,
+    manual?: boolean
+  ) {
     // Same subscription can be returned twice
-    if (status === this.lastReceivedStatus) {
+    if (!manual && status === this.lastReceivedStatus) {
       console.debug("Duplicate subscription received", status);
       return;
     }
 
     if (
       !this.ready ||
-      !this.worker.active ||
-      (await db.kvp.get("consolidationRequired"))
+      (!manual &&
+        (!this.worker.active || (await db.kvp.get("consolidationRequired"))))
     ) {
       this.receivedStatuses.push(status);
       return;
