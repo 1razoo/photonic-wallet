@@ -91,6 +91,7 @@ export default function SendDigitalObject({
       toAddress.current?.value as string,
       ref.toString()
     );
+    const sendToSelf = toAddress.current?.value === wallet.value.address;
 
     const selected = coinSelect(
       wallet.value.address,
@@ -135,10 +136,17 @@ export default function SendDigitalObject({
         selected.outputs
       );
 
-      // If sent to self, update lastTxoId of glyph
-      if (newTxos.length && glyph.id) {
-        // There should only ever be one new txo when sending an NFT
-        await db.glyph.update(glyph.id, { lastTxoId: newTxos.pop()?.id });
+      if (glyph.id) {
+        if (sendToSelf) {
+          // If sent to self, update lastTxoId of glyph
+          await db.glyph.update(glyph.id, {
+            lastTxoId: newTxos[0].id,
+            height: Infinity,
+          });
+        } else {
+          // Remove from UI
+          await db.glyph.update(glyph.id, { spent: 1 });
+        }
       }
       // Update RXD change
       updateRxdBalances(wallet.value.address);

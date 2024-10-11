@@ -40,6 +40,7 @@ export async function updateWalletUtxos(
           contractType: outputContractType,
           script: output.script,
           spent: 0,
+          height: Infinity,
           txid,
           vout,
           value: output.value,
