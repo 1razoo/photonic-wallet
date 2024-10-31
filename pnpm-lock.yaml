@@ -9,7 +9,7 @@ patchedDependencies:
     hash: varlpfijnui3jgpszthhiy72l4
     path: patches/@radiantblockchain__radiantjs@1.9.4.patch
   bsv-coinselect@4.2.5:
-    hash: ptxf4vh4yz76zpgebjpycangwy
+    hash: zeqzk4ubaliouugtfkcwspw47i
     path: patches/bsv-coinselect@4.2.5.patch
   ws-electrumx-client@1.0.5:
     hash: ls5z5iyjs5tr4pb7sgc7cgiev4
@@ -365,7 +365,7 @@ importers:
         version: 6.2.2
       bsv-coinselect:
         specifier: ^4.2.5
-        version: 4.2.5(patch_hash=ptxf4vh4yz76zpgebjpycangwy)
+        version: 4.2.5(patch_hash=zeqzk4ubaliouugtfkcwspw47i)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -4595,7 +4595,7 @@ packages:
       base-x: 3.0.10
     dev: false
 
-  /bsv-coinselect@4.2.5(patch_hash=ptxf4vh4yz76zpgebjpycangwy):
+  /bsv-coinselect@4.2.5(patch_hash=zeqzk4ubaliouugtfkcwspw47i):
     resolution: {integrity: sha512-WGfliK+a3yvIGLwL1/krMptrOBQqrJy1cyMwtalc4qB38+eRmoMhenwKL/bQ2Z2XwE367srB5ePHAVSxsscFiA==}
     dev: false
     patched: true
