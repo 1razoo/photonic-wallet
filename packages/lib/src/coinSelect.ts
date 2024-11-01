@@ -29,7 +29,12 @@ export function coinSelect(
   }[],
   changeScript: string,
   feeRate: number
-): { inputs: SelectableInput[]; outputs: UnfinalizedInput[]; fee: number } {
+): {
+  inputs: SelectableInput[];
+  outputs: UnfinalizedInput[];
+  fee: number;
+  remaining: SelectableInput[];
+} {
   const inputs = utxos.map((u) => ({
     address,
     txid: u.txid,
@@ -55,6 +60,14 @@ export function coinSelect(
       script: scriptPubKey,
     })
   );
+  // Remove spent UTXOs
+  const remaining = utxos.filter(
+    ({ utxo }) =>
+      !(selected.inputs as SelectableInput[]).some(
+        (input) => input.utxo === utxo
+      )
+  );
+  selected.remaining = remaining;
   return selected;
 }
 
