@@ -71,6 +71,8 @@
     "tiny-secp256k1": "^2.2.3",
     "vite-plugin-pwa": "^0.17.5",
     "vite-plugin-top-level-await": "^1.4.4",
+    "vite-plugin-web-extension": "^4.2.0",
+    "webextension-polyfill": "^0.12.0",
     "ws-electrumx-client": "^1.0.5"
   },
   "devDependencies": {

@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react";
 import { lingui } from "@lingui/vite-plugin";
 import { VitePWA } from "vite-plugin-pwa";
 import topLevelAwait from "vite-plugin-top-level-await";
+import webExtension from "vite-plugin-web-extension";
 //import basicSsl from "@vitejs/plugin-basic-ssl";
 import path from "path";
 
@@ -60,6 +61,7 @@ export default defineConfig({
         ],
       },
     }),
+    webExtension(),
     //basicSsl(),
   ],
   define: {

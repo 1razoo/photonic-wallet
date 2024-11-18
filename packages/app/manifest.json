@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Photonic Wallet",
+  "version": "1.0.0",
+  "description": "Radiant token wallet",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": []
+}
