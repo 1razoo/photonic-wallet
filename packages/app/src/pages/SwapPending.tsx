@@ -9,8 +9,6 @@ import {
 import {
   Button,
   Container,
-  Flex,
-  IconButton,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -18,7 +16,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  useClipboard,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -98,7 +95,7 @@ export default function SwapPending() {
     db.swap.where({ status: SwapStatus.PENDING }).toArray()
   );
 
-  const openModal = async (swap: TokenSwap) => {
+  const openSwapModal = async (swap: TokenSwap) => {
     // TODO this is a bit messy
     const from =
       swap.from === ContractType.RXD
@@ -110,13 +107,13 @@ export default function SwapPending() {
             value: swap.fromValue,
           };
     const to =
-      swap.from === ContractType.RXD
-        ? swap.fromValue
+      swap.to === ContractType.RXD
+        ? swap.toValue
         : {
             glyph: (await db.glyph
-              .where({ ref: swap.fromGlyph })
+              .where({ ref: swap.toGlyph })
               .first()) as SmartToken,
-            value: swap.fromValue,
+            value: swap.toValue,
           };
     if (
       (typeof from === "object" && !from.glyph) ||
@@ -125,7 +122,7 @@ export default function SwapPending() {
       return;
     }
 
-    if (from && to) {
+    if (from && typeof to !== "undefined") {
       setOpenSwap({ from, to, hex: swap.tx });
       onOpen();
     }
@@ -134,7 +131,7 @@ export default function SwapPending() {
   if (!pending) return null;
 
   return (
-    <ModalContext.Provider value={openModal}>
+    <ModalContext.Provider value={openSwapModal}>
       <Container maxW="container.xl" px={4} gap={8}>
         {pending?.length ? (
           <SwapTable swaps={pending} actions={Actions} />
