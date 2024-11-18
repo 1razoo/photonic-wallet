@@ -141,8 +141,8 @@ msgstr ""
 msgid "Coins"
 msgstr ""
 
-#: src/layouts/SwapLayout.tsx:24
-#: src/layouts/SwapLayout.tsx:64
+#: src/layouts/SwapLayout.tsx:26
+#: src/layouts/SwapLayout.tsx:86
 msgid "Completed"
 msgstr ""
 
@@ -156,7 +156,7 @@ msgid "Confirm password"
 msgstr ""
 
 #: src/components/StatusBar.tsx:67
-#: src/electrum/Electrum.tsx:59
+#: src/electrum/Electrum.tsx:60
 msgid "Connected"
 msgstr ""
 
@@ -280,7 +280,7 @@ msgstr ""
 
 #: src/components/StatusBar.tsx:69
 #: src/components/StatusBar.tsx:70
-#: src/electrum/Electrum.tsx:64
+#: src/electrum/Electrum.tsx:65
 msgid "Disconnected"
 msgstr ""
 
@@ -459,9 +459,13 @@ msgstr ""
 msgid "Link"
 msgstr ""
 
-#: src/layouts/SwapLayout.tsx:26
-#: src/layouts/SwapLayout.tsx:80
+#: src/layouts/SwapLayout.tsx:28
+#: src/layouts/SwapLayout.tsx:70
 msgid "Load"
+msgstr ""
+
+#: src/layouts/SwapLayout.tsx:43
+msgid "Load Swap"
 msgstr ""
 
 #: src/components/ViewDigitalObject.tsx:315
@@ -531,8 +535,8 @@ msgstr ""
 msgid "Minted. Fee {0} {1}"
 msgstr ""
 
-#: src/layouts/SwapLayout.tsx:25
-#: src/layouts/SwapLayout.tsx:72
+#: src/layouts/SwapLayout.tsx:27
+#: src/layouts/SwapLayout.tsx:94
 msgid "Missing"
 msgstr ""
 
@@ -567,7 +571,7 @@ msgstr ""
 msgid "Network"
 msgstr ""
 
-#: src/layouts/SwapLayout.tsx:48
+#: src/layouts/SwapLayout.tsx:62
 #: src/pages/Servers.tsx:34
 msgid "New"
 msgstr ""
@@ -588,7 +592,7 @@ msgstr ""
 msgid "NFT.Storage API Key"
 msgstr ""
 
-#: src/pages/Fungible.tsx:66
+#: src/pages/Fungible.tsx:70
 #: src/pages/Wallet.tsx:134
 msgid "No assets"
 msgstr ""
@@ -670,8 +674,8 @@ msgstr ""
 msgid "Passwords do not match"
 msgstr ""
 
-#: src/layouts/SwapLayout.tsx:23
-#: src/layouts/SwapLayout.tsx:56
+#: src/layouts/SwapLayout.tsx:25
+#: src/layouts/SwapLayout.tsx:78
 msgid "Pending"
 msgstr ""
 
@@ -821,9 +825,9 @@ msgstr ""
 
 #: src/components/SideBar.tsx:105
 #: src/components/SwapTable.tsx:68
-#: src/layouts/SwapLayout.tsx:33
+#: src/layouts/SwapLayout.tsx:47
 #: src/pages/SwapMissing.tsx:166
-#: src/pages/SwapPending.tsx:148
+#: src/pages/SwapPending.tsx:157
 msgid "Swap"
 msgstr ""
 

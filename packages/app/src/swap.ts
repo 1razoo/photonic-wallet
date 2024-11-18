@@ -1,12 +1,13 @@
+import { signal } from "@preact/signals-react";
 import { fundTx, SelectableInput } from "@lib/coinSelect";
-import { ContractType, SwapError } from "./types";
+import { ContractType, ElectrumStatus, SwapError, SwapStatus } from "./types";
 import db from "./db";
 import { ftScript, nftScript, p2pkhScript } from "@lib/script";
 import { reverseRef } from "@lib/Outpoint";
 import { buildTx } from "@lib/tx";
 import { UnfinalizedInput } from "@lib/types";
 import { electrumWorker } from "./electrum/Electrum";
-import { wallet, feeRate } from "./signals";
+import { wallet, feeRate, electrumStatus } from "./signals";
 
 export const cancelSwap = async (
   contractType: ContractType,
@@ -107,7 +108,38 @@ export const cancelSwap = async (
       swapPending: false,
     });
   }
+};
 
-  ////// db.swap.update(swap.id as number, { status: SwapStatus.CANCEL });
-  ////// toast
+export const loading = signal(false);
+
+export const syncSwaps = async () => {
+  if (loading.value === true) {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    if (electrumStatus.value !== ElectrumStatus.CONNECTED) return;
+    const activeSwaps = new Map(
+      (await electrumWorker.value.findSwaps(wallet.value.swapAddress)).map(
+        (swap) => [swap.utxo.tx_hash, swap]
+      )
+    );
+
+    // This could be improved. Currently there's no simple way to get the tx spending the output from ElectrumX so we
+    // can't tell if it's really completed or cancelled. This is only a problem if the user cancelled from another wallet
+    // because the status will be updated immediately when cancelling.
+    const dbSwaps = await db.swap
+      .where({ status: SwapStatus.PENDING })
+      .toArray();
+    for (const swap of dbSwaps) {
+      if (!activeSwaps.has(swap.txid) && swap.id) {
+        db.swap.update(swap.id, { status: SwapStatus.COMPLETE });
+      }
+    }
+  } catch {
+    // TODO show error
+  } finally {
+    loading.value = false;
+  }
 };

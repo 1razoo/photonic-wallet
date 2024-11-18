@@ -1,6 +1,7 @@
 import db from "@app/db";
 import {
   ContractType,
+  ElectrumStatus,
   SmartToken,
   SwapError,
   SwapStatus,
@@ -20,14 +21,21 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { openModal, wallet } from "@app/signals";
+import { electrumStatus, openModal, wallet } from "@app/signals";
 import SwapTable from "@app/components/SwapTable";
 import Card from "@app/components/Card";
-import { cancelSwap } from "@app/swap";
+import { cancelSwap, syncSwaps } from "@app/swap";
 import { TbZoom } from "react-icons/tb";
 import { t } from "@lingui/macro";
-import { createContext, PropsWithChildren, useContext, useState } from "react";
+import {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import ViewSwap from "@app/components/ViewSwap";
+import { electrumWorker } from "@app/electrum/Electrum";
 
 const ModalContext = createContext<((swap: TokenSwap) => void) | null>(null);
 
@@ -94,6 +102,10 @@ export default function SwapPending() {
   const pending = useLiveQuery(() =>
     db.swap.where({ status: SwapStatus.PENDING }).toArray()
   );
+
+  useEffect(() => {
+    syncSwaps();
+  }, [electrumStatus.value]);
 
   const openSwapModal = async (swap: TokenSwap) => {
     // TODO this is a bit messy

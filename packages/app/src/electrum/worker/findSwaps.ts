@@ -3,7 +3,7 @@ import ElectrumManager from "../ElectrumManager";
 import { ElectrumUtxo } from "@lib/types";
 import { ContractType } from "@app/types";
 
-export async function findMissingSwaps(
+export async function findSwaps(
   electrum: ElectrumManager,
   address: string
 ) {

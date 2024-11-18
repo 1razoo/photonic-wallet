@@ -35,9 +35,10 @@ const wrapped = wrap<{
   setActive: (active: boolean) => void;
   isActive: () => boolean;
   fetchGlyph: (refBE: string) => SmartToken | undefined;
-  findMissingSwaps(
+  findSwaps(
     address: string
   ): { contractType: ContractType; utxo: ElectrumUtxo }[];
+  isUtxoUnspent: (txid: string, vout: number, scriptHash: string) => boolean;
 }>(worker);
 export const electrumWorker = signal<typeof wrapped>(wrapped);
 

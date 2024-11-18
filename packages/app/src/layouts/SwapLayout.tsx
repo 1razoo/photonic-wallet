@@ -1,4 +1,4 @@
-import { Button, HStack } from "@chakra-ui/react";
+import { Button, HStack, Icon } from "@chakra-ui/react";
 import { t } from "@lingui/macro";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import ContentContainer from "@app/components/ContentContainer";
@@ -10,9 +10,11 @@ import {
   TbClockHour7,
   TbFileUpload,
   TbQuestionMark,
+  TbRefresh,
 } from "react-icons/tb";
 import { LuFilePlus } from "react-icons/lu";
 import ActionIcon from "@app/components/ActionIcon";
+import { loading, syncSwaps } from "@app/swap";
 
 export default function SwapLayout() {
   // Trigger rerender when language changes
@@ -29,7 +31,19 @@ export default function SwapLayout() {
 
   return (
     <ContentContainer>
-      <PageHeader>
+      <PageHeader
+        toolbar={
+          <Button
+            variant="primary"
+            as={Link}
+            to="/swap/load"
+            leftIcon={<Icon as={TbFileUpload} />}
+            shadow="dark-md"
+          >
+            {t`Load Swap`}
+          </Button>
+        }
+      >
         {t`Swap`}
         {heading && (
           <>
@@ -46,6 +60,14 @@ export default function SwapLayout() {
           leftIcon={<ActionIcon as={LuFilePlus} />}
         >
           {t`New`}
+        </Button>
+        <Button
+          size="sm"
+          as={Link}
+          to="/swap/load"
+          leftIcon={<ActionIcon as={TbFileUpload} />}
+        >
+          {t`Load`}
         </Button>
         <Button
           size="sm"
@@ -73,11 +95,12 @@ export default function SwapLayout() {
         </Button>
         <Button
           size="sm"
-          as={Link}
-          to="/swap/load"
-          leftIcon={<ActionIcon as={TbFileUpload} />}
+          onClick={() => syncSwaps()}
+          isLoading={loading.value}
+          loadingText="Refresh"
+          leftIcon={<ActionIcon as={TbRefresh} />}
         >
-          {t`Load`}
+          Refresh
         </Button>
       </HStack>
       <Outlet />

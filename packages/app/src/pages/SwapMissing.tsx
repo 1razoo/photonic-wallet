@@ -90,7 +90,7 @@ export default function SwapMissing() {
   useEffect(() => {
     (async () => {
       if (electrumStatus.value !== ElectrumStatus.CONNECTED) return;
-      const result = await electrumWorker.value.findMissingSwaps(
+      const result = await electrumWorker.value.findSwaps(
         wallet.value.swapAddress
       );
       const counts = await Promise.all(

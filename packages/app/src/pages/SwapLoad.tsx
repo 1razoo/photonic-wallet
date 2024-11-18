@@ -11,8 +11,10 @@ import {
   Container,
   Flex,
   Heading,
+  HStack,
   Icon,
   Image,
+  Spinner,
   Text,
   Textarea,
   useClipboard,
@@ -26,6 +28,7 @@ import {
   parseFtScript,
   parseNftScript,
   parseP2pkhScript,
+  scriptHash,
 } from "@lib/script";
 import { bytesToHex } from "@noble/hashes/utils";
 // @ts-ignore
@@ -104,6 +107,11 @@ function TokenIcon({ glyph }: { glyph: SmartToken }) {
 }
 
 async function loadSwap(psrt: Transaction): Promise<SwapParams | null> {
+  // Must have 1 input and 1 output
+  if (psrt.inputs.length !== 1 || psrt.outputs.length !== 1) {
+    return null;
+  }
+
   const txid = psrt ? bytesToHex(psrt.inputs[0].prevTxId) : undefined;
   const vout = psrt?.inputs[0].outputIndex;
   const script = psrt?.outputs[0].script.toHex();
@@ -117,7 +125,17 @@ async function loadSwap(psrt: Transaction): Promise<SwapParams | null> {
   let toGlyph = null;
   const hex = await electrumWorker.value.getTransaction(txid);
   const tx = new Transaction(hex);
-  // TODO error checking
+  // Check if the output has been spent
+  const isUnspent = await electrumWorker.value.isUtxoUnspent(
+    tx.id,
+    vout,
+    scriptHash(tx.outputs[vout].script.toHex())
+  );
+
+  if (!isUnspent) {
+    throw new SwapError("Swap has already been completed");
+  }
+
   const [from, fromParams] = parseScript(tx.outputs[vout].script.toHex());
   if (from === undefined) {
     return null;
@@ -255,6 +273,7 @@ function ViewSwap({ swapParams }: { swapParams: SwapParams }) {
   const toast = useToast();
   const [signed, setSigned] = useState("");
   const { onCopy, hasCopied } = useClipboard(signed);
+  const [complete, setComplete] = useState(false);
 
   const signTransaction = async () => {
     setSigned("");
@@ -371,7 +390,7 @@ function ViewSwap({ swapParams }: { swapParams: SwapParams }) {
         description: "rxd_swap_cancel",
       });
 
-      toast({ status: "success", title: "Swap complete" });
+      setComplete(true);
     } catch (error) {
       console.debug(error);
       toast({ status: "error", title: "Transaction failed" });
@@ -396,49 +415,58 @@ function ViewSwap({ swapParams }: { swapParams: SwapParams }) {
         </Heading>
         <SwapItem item={swapParams.to} />
       </Card>
-      {signed && (
-        <Alert mt={8}>
+      {complete ? (
+        <Alert mt={8} status="success">
           <AlertIcon />
-          Transaction is funded and signed. Broadcast to complete swap.
+          Swap complete!
         </Alert>
-      )}
-      <Flex
-        justifyContent="center"
-        py={8}
-        gap={4}
-        flexDir={{ base: "column", md: "row" }}
-        w="full"
-      >
-        {signed ? (
-          <>
-            <Button
-              leftIcon={
-                hasCopied ? <CheckIcon color="green.400" /> : <CopyIcon />
-              }
-              onClick={onCopy}
-              shadow="dark-md"
-            >
-              Copy Signed Transaction
-            </Button>
-            <Button
-              leftIcon={<TbSend />}
-              variant="primary"
-              shadow="dark-md"
-              onClick={() => broadcast()}
-            >
-              Broadcast Transaction
-            </Button>
-          </>
-        ) : (
-          <Button
-            shadow="dark-md"
-            leftIcon={<AiOutlineSignature />}
-            onClick={() => signTransaction()}
+      ) : (
+        <>
+          {signed && (
+            <Alert mt={8}>
+              <AlertIcon />
+              Transaction is funded and signed. Broadcast to complete swap.
+            </Alert>
+          )}
+          <Flex
+            justifyContent="center"
+            py={8}
+            gap={4}
+            flexDir={{ base: "column", md: "row" }}
+            w="full"
           >
-            Sign Transaction
-          </Button>
-        )}
-      </Flex>
+            {signed ? (
+              <>
+                <Button
+                  leftIcon={
+                    hasCopied ? <CheckIcon color="green.400" /> : <CopyIcon />
+                  }
+                  onClick={onCopy}
+                  shadow="dark-md"
+                >
+                  Copy Signed Transaction
+                </Button>
+                <Button
+                  leftIcon={<TbSend />}
+                  variant="primary"
+                  shadow="dark-md"
+                  onClick={() => broadcast()}
+                >
+                  Broadcast Transaction
+                </Button>
+              </>
+            ) : (
+              <Button
+                shadow="dark-md"
+                leftIcon={<AiOutlineSignature />}
+                onClick={() => signTransaction()}
+              >
+                Sign Transaction
+              </Button>
+            )}
+          </Flex>
+        </>
+      )}
     </>
   );
 }
@@ -450,6 +478,7 @@ export default function SwapLoadPage() {
 }
 
 function SwapLoad() {
+  const [loading, setLoading] = useState(false);
   const [glow, setGlow] = useState(false);
   const [error, setError] = useState("");
   const [swapParams, setSwapParams] = useState<SwapParams | null>(null);
@@ -458,13 +487,19 @@ function SwapLoad() {
   ) => {
     const text = event.target.value;
     try {
+      setError("");
+      setLoading(true);
       const decoded = new Transaction(text);
-      // TODO check PSRT hasn't been broadcast already
       setSwapParams(await loadSwap(decoded));
-      //setTx(decoded);
     } catch (error) {
-      console.log(error);
-      setError("Invalid transaction");
+      if (error instanceof SwapError) {
+        setError("Swap already completed");
+      } else {
+        console.log(error);
+        setError("Invalid transaction");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -505,6 +540,12 @@ function SwapLoad() {
               <AlertIcon />
               {error}
             </Alert>
+          )}
+          {loading && (
+            <HStack>
+              <Spinner size="md" />
+              <div>Loading</div>
+            </HStack>
           )}
         </>
       )}

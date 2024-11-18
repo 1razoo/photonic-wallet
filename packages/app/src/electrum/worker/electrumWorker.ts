@@ -5,7 +5,8 @@ import { FTWorker, NFTWorker, RXDWorker } from "./index";
 import db from "@app/db";
 import { ElectrumStatus } from "@app/types";
 import { ElectrumRefResponse } from "@lib/types";
-import { findMissingSwaps } from "./findMissingSwaps";
+import { findSwaps } from "./findSwaps";
+import { isUtxoUnspent } from "./isUtxoUnspent";
 
 type Timer = ReturnType<typeof setTimeout> | null;
 
@@ -85,8 +86,11 @@ const worker = {
   async fetchGlyph(ref: string) {
     return nft.fetchGlyph(ref);
   },
-  async findMissingSwaps(address: string) {
-    return findMissingSwaps(electrum, address);
+  async findSwaps(address: string) {
+    return findSwaps(electrum, address);
+  },
+  async isUtxoUnspent(txid: string, vout: number, scriptHash: string) {
+    return isUtxoUnspent(electrum, txid, vout, scriptHash);
   },
 };
 
