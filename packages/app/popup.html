@@ -11,11 +11,15 @@
     <meta name="theme-color" content="#202024" />
     <title>Photonic Wallet</title>
   </head>
-  <body style="width:400px;height:600px;">
+  <body style="width:500px;height:600px;font-size:16px;"></body>
     <div id="root"></div>
     <script type="module">
       import { Buffer } from "buffer";
       window.Buffer = Buffer;
+      // Remove popup dimensions when opening in tab
+      if (document.location.href.includes("?tab")) {
+        document.body.style = "font-size:16px";
+      }
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

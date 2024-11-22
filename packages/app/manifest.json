@@ -1,10 +1,16 @@
 {
-  "manifest_version": 3,
+  "{{chrome}}.manifest_version": 3,
+  "{{firefox}}.manifest_version": 2,
   "name": "Photonic Wallet",
   "version": "1.0.0",
   "description": "Radiant token wallet",
-  "action": {
+  "{{chrome}}.action": {
     "default_popup": "popup.html"
   },
-  "permissions": []
+  "{{firefox}}.browser_action": {
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "64": "pwa-64x64.png"
+  }
 }
